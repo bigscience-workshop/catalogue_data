@@ -61,6 +61,8 @@ def main(lang=None, repo=None):
                 git_user=os.environ["GIT_USER"],
                 git_email=os.environ["GIT_EMAIL"],
             )
+            if os.path.exists(local_dir + "/dataset_infos.json"):
+                continue
             metadata_args = {
                 "dataset": local_dir,
                 "name": None,
