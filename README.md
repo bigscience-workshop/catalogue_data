@@ -9,7 +9,7 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
-TODO:
+
 Create User Access Token (with write access) at Hugging Face Hub: https://huggingface.co/settings/token
 and set environment variables in the `.env` file at the root directory:
 ```
