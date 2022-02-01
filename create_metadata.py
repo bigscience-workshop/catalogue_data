@@ -21,6 +21,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--lang", help="language code, as 'ca' or 'indic' or 'nigercongo'")
     parser.add_argument("--repo", action="append", help="repo ID")
+    parser.add_argument("--force", action="store_true", help="force re-creation of metadata file")
     args = parser.parse_args()
     return args
 
@@ -43,7 +44,7 @@ def list_repos(lang=None, api=None):
     return repos
 
 
-def main(lang=None, repo=None):
+def main(lang=None, repo=None, force=False):
     api = init()
     if lang:
         repos = list_repos(lang=lang, api=api)
@@ -62,7 +63,7 @@ def main(lang=None, repo=None):
                 git_user=os.environ["GIT_USER"],
                 git_email=os.environ["GIT_EMAIL"],
             )
-            if os.path.exists(local_dir + "/dataset_infos.json"):
+            if os.path.exists(local_dir + "/dataset_infos.json") and not force:
                 continue
             # First, load dataset to fix auth problems generating metadata
             _ = load_dataset(local_dir, use_auth_token=os.environ["HF_USER_ACCESS_TOKEN"])
