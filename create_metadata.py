@@ -63,6 +63,7 @@ def main(lang=None, repo=None, force=False):
                 git_user=os.environ["GIT_USER"],
                 git_email=os.environ["GIT_EMAIL"],
             )
+            repo.git_pull()
             if os.path.exists(local_dir + "/dataset_infos.json") and not force:
                 continue
             # First, load dataset to fix auth problems generating metadata
