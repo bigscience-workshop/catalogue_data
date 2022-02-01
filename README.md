@@ -28,7 +28,7 @@ Create User Access Token (with write access) at Hugging Face Hub: https://huggin
 and set environment variables in the `.env` file at the root directory:
 ```
 HF_USERNAME=<Replace with your Hugging Face username>
-HF_TOKEN=<Replace with your Hugging Face API token>
+HF_USER_ACCESS_TOKEN=<Replace with your Hugging Face API token>
 GIT_USER=<Replace with your Git user>
 GIT_EMAIL=<Replace with your Git email>
 ```
