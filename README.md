@@ -2,6 +2,13 @@
 Scripts to prepare catalogue data.
 
 ## Setup
+Clone this repo.
+
+Install git-lfs: https://github.com/git-lfs/git-lfs/wiki/Installation
+```shell
+sudo apt-get install git-lfs
+git lfs install
+```
 
 Create virtual environment, activate it and install dependencies:
 ```shell
