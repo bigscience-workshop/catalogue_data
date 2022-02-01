@@ -67,7 +67,7 @@ def main(lang=None, repo=None, force=False):
             if os.path.exists(local_dir + "/dataset_infos.json") and not force:
                 continue
             # First, load dataset to fix auth problems generating metadata
-            _ = load_dataset(local_dir, use_auth_token=os.environ["HF_USER_ACCESS_TOKEN"])
+            _ = load_dataset(local_dir, use_auth_token=os.environ["HF_USER_ACCESS_TOKEN"], ignore_verifications=True)
             # Then, generate metadata
             metadata_args = {
                 "dataset": local_dir,
