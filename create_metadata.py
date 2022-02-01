@@ -5,6 +5,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from datasets import load_dataset
 from datasets.commands.test import TestCommand
 from huggingface_hub import HfApi, Repository
 
@@ -63,6 +64,9 @@ def main(lang=None, repo=None):
             )
             if os.path.exists(local_dir + "/dataset_infos.json"):
                 continue
+            # First, load dataset to fix auth problems generating metadata
+            _ = load_dataset(local_dir, use_auth_token=os.environ["HF_USER_ACCESS_TOKEN"])
+            # Then, generate metadata
             metadata_args = {
                 "dataset": local_dir,
                 "name": None,
