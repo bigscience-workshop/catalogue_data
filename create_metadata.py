@@ -84,8 +84,9 @@ def main(lang=None, repo=None, force=False):
             }
             metadata_command = TestCommand(*metadata_args.values())
             metadata_command.run()
-            with repo.commit(commit_message="Add metadata"):
-                pass
+            # Commit
+            repo.git_add()
+            repo.git_commit(commit_message="Add metadata")
             logger.info(f"End: {repo_id}")
 
 
