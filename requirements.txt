@@ -1,3 +1,4 @@
 datasets
 python-dotenv
+py7zr
 rarfile
