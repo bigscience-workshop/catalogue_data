@@ -12,6 +12,8 @@ git lfs install
 
 Install dependencies:
 ```shell
+sudo apt-add-repository non-free
+sudo apt-get update
 sudo apt-get install unrar
 ```
 
