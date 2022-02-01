@@ -10,6 +10,11 @@ sudo apt-get install git-lfs
 git lfs install
 ```
 
+Install dependencies:
+```shell
+sudo apt-get install unrar
+```
+
 Create virtual environment, activate it and install dependencies:
 ```shell
 python -m venv .venv
