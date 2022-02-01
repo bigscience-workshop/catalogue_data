@@ -87,6 +87,7 @@ def main(lang=None, repo=None, force=False):
             # Commit
             repo.git_add()
             repo.git_commit(commit_message="Add metadata")
+            repo.git_push()
             logger.info(f"End: {repo_id}")
 
 
