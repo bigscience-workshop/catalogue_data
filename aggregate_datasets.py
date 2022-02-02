@@ -2,6 +2,7 @@ import argparse
 import json
 import logging
 import os
+import multiprocessing
 from math import ceil
 from pathlib import Path
 
@@ -9,7 +10,7 @@ from dotenv import load_dotenv
 from numpy import log10
 from numpy.random import default_rng
 
-from datasets import concatenate_datasets, load_dataset, Features, Value
+from datasets import concatenate_datasets, load_dataset, utils, Features, Value
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -17,11 +18,14 @@ logger.setLevel(logging.INFO)
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    # Datasets
+    # Load
     parser.add_argument(
         "--dataset_ratios_path", type=str, required=True, help="path to JSON file containing input dataset ratios"
     )
     parser.add_argument("--split", type=str, default="train", help="split name, default 'train'")
+    parser.add_argument(
+        "--load_num_proc", type=int, default=1, help="number of procs to use for loading datasets, default 1"
+    )
     # Shard
     parser.add_argument("--shard_max_size", type=int, default=10_000_000_000, help="max shard size, default 10GB")
     # Save
@@ -34,6 +38,29 @@ def parse_args():
     args.dataset_ratios_path = Path(args.dataset_ratios_path)
     args.save_path = Path(args.save_path)
     return args
+
+
+def load_datasets(args):
+    ds_name, ratio, split, seed = args
+    ds = load_dataset(ds_name, use_auth_token=os.environ["HF_USER_ACCESS_TOKEN"], ignore_verifications=True)
+    if split not in ds:
+        logger.info(f"No split named {split} in dataset {ds_name}")
+        return
+    ds = ds[split]
+    # Cast meta dict to str
+    if "meta" in ds.features and not isinstance(ds.features["meta"], Value):
+
+        def convert_meta_to_str(item):
+            item["meta"] = json.dumps(item["meta"])
+            return item
+
+        ds = ds.map(convert_meta_to_str)
+    # Sample dataset
+    if ratio != 1:
+        rng = default_rng(seed=seed)
+        indices = rng.integers(low=0, high=len(ds), size=int(len(ds) * ratio))
+        ds = ds.select(indices)
+    return ds
 
 
 def compute_number_of_shards(ds, max_size=10_000_000_000):
@@ -86,6 +113,7 @@ def main(
     dataset_ratios_path=None,
     split="train",
     seed=0,
+    load_num_proc=1,
     shard_max_size=10_000_000_000,
     save_path=Path("."),
     save_num_proc=1,
@@ -101,26 +129,21 @@ def main(
     with dataset_ratios_path.open() as f:
         dset_ratios = json.load(f)
     # Load datasets
-    dsets = []
-    for ds_name, ratio in dset_ratios.items():
-        ds = load_dataset(ds_name, use_auth_token=os.environ["HF_USER_ACCESS_TOKEN"], ignore_verifications=True)
-        if split not in ds:
-            logger.info(f"No split named {split} in dataset {ds_name}")
-            continue
-        ds = ds[split]
-        # Cast meta dict to str
-        if "meta" in ds.features and not isinstance(ds.features["meta"], Value):
-
-            def convert_meta_to_str(item):
-                item["meta"] = json.dumps(item["meta"])
-                return item
-
-            ds = ds.map(convert_meta_to_str)  # TODO: num_proc
-        # Sample dataset
-        if ratio != 1:
-            indices = rng.integers(low=0, high=len(ds), size=int(len(ds) * ratio))
-            ds = ds.select(indices)
-        dsets.append(ds)
+    with multiprocessing.Pool(load_num_proc) as pool:
+        dsets = [
+            ds
+            for ds in utils.tqdm(
+                pool.imap(
+                    load_datasets,
+                    [(ds_name, ratio, split, seed + i) for i, (ds_name, ratio) in enumerate(dset_ratios.items())],
+                ),
+                total=len(dset_ratios),
+                unit="ba",
+                disable=bool(utils.logging.get_verbosity() == utils.logging.NOTSET),
+                desc="Loading dataset",
+            )
+            if ds is not None
+        ]
     if not dsets:
         logger.info(f"No datasets to be aggregated")
         return
