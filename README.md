@@ -39,3 +39,14 @@ To create dataset metadata (in file `dataset_infos.json`) run:
 python create_metadata.py --repo <repo_id>
 ```
 where you should replace `<repo_id>`, e.g. `bigscience-catalogue-lm-data/lm_ca_viquiquad`
+
+
+## Aggregate datasets
+To create an aggregated dataset from multiple datasets, and save it as sharded JSON Lines GZIP files, run:
+```shell
+python aggregate_datasets.py --dataset_ratios_path <path_to_file_with_dataset_ratios> --save_path <dir_path_to_save_aggregated_dataset>
+```
+where you should replace:
+- `path_to_file_with_dataset_ratios`: path to JSON file containing a dict with dataset names (keys) and their ratio
+  (values) between 0 and 1.
+- `<dir_path_to_save_aggregated_dataset>`: directory path to save the aggregated dataset
