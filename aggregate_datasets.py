@@ -8,7 +8,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from numpy import log10
-from numpy.random import default_rng
+from numpy.random import default_rng, SeedSequence
 
 from datasets import concatenate_datasets, load_dataset, utils, Features, Value
 
@@ -57,7 +57,7 @@ def load_datasets(args):
         ds = ds.map(convert_meta_to_str)
     # Sample dataset
     if ratio != 1:
-        rng = default_rng(seed=seed)
+        rng = default_rng(seed)
         indices = rng.choice(len(ds), size=int(len(ds) * ratio), replace=False, shuffle=False)
         ds = ds.select(indices)
     return ds
@@ -124,7 +124,7 @@ def main(
     if Path(".env").exists:
         load_dotenv()
     # Random generator
-    rng = default_rng(seed=seed)
+    seed = SeedSequence(seed)
     # Read dataset ratios
     with dataset_ratios_path.open() as f:
         dset_ratios = json.load(f)
@@ -135,7 +135,10 @@ def main(
             for ds in utils.tqdm(
                 pool.imap(
                     load_datasets,
-                    [(ds_name, ratio, split, seed + i) for i, (ds_name, ratio) in enumerate(dset_ratios.items())],
+                    [
+                        (ds_name, ratio, split, child_seed)
+                        for (ds_name, ratio), child_seed in zip(dset_ratios.items(), seed.spawn(len(dset_ratios)))
+                    ],
                 ),
                 total=len(dset_ratios),
                 unit="ba",
@@ -150,7 +153,7 @@ def main(
     # Concatenate datasets
     dset = concatenate_datasets(dsets, split=split)
     # Shuffle
-    dset = dset.shuffle(generator=rng)
+    dset = dset.shuffle(seed=seed)
     # Shard
     shards = shard_dataset(dset, max_size=shard_max_size)
     # Save
