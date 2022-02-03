@@ -282,4 +282,4 @@ DATASET_NAME=${DATASETS_NAMES[$SLURM_ARRAY_TASK_ID]}
 
 echo "Downloading ${DATASET_NAME}"
 
-python -c "from datasets import load_dataset; load_dataset('$DATASET_NAME', use_auth=True)"
+python -c "from datasets import load_dataset; load_dataset('$DATASET_NAME', use_auth_token=True)"
