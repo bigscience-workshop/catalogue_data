@@ -4,6 +4,7 @@ import logging
 import os
 import multiprocessing
 from contextlib import contextmanager
+from functools import partial
 from math import ceil
 from pathlib import Path
 
@@ -48,14 +49,18 @@ def load_datasets(args):
         logger.info(f"No split named {split} in dataset {ds_name}")
         return
     ds = ds[split]
-    # Cast meta dict to str
-    if "meta" in ds.features and not isinstance(ds.features["meta"], Value):
+    # Process meta: add source_dataset and cast dict to str
 
-        def convert_meta_to_str(item):
-            item["meta"] = json.dumps(item["meta"])
-            return item
+    def process_meta(item, source_dataset=None):
+        if "meta" not in item:
+            item["meta"] = {}
+        elif isinstance(item["meta"], str):
+            item["meta"] = eval(item["meta"])
+        item["meta"]["source_dataset"] = source_dataset
+        item["meta"] = json.dumps(item["meta"])
+        return item
 
-        ds = ds.map(convert_meta_to_str)
+    ds = ds.map(partial(process_meta, source_dataset=ds_name.split("/")[-1]))
     # Sample dataset
     if ratio != 1:
         rng = default_rng(seed)
