@@ -283,4 +283,5 @@ DATASET_NAME=${DATASETS_NAMES[$SLURM_ARRAY_TASK_ID]}
 echo "Downloading ${DATASET_NAME}"
 
 module load git-lfs
+module load unrar
 python -c "from datasets import load_dataset; load_dataset('$DATASET_NAME', use_auth_token=True)"
