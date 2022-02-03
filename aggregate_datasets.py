@@ -100,9 +100,9 @@ def save_dataset(shard, path=Path("."), shard_id=0, num_shards=1, num_proc=1, ba
     if save_path.exists():
         logger.info("Shard was already saved")
         return
-    with tmp_path(save_path):
+    with tmp_path(save_path) as tmp_save_path:
         shard.to_json(
-            save_path,
+            tmp_save_path,
             num_proc=num_proc,
             batch_size=batch_size,
             compression="gzip",
@@ -112,9 +112,12 @@ def save_dataset(shard, path=Path("."), shard_id=0, num_shards=1, num_proc=1, ba
 @contextmanager
 def tmp_path(path):
     try:
-        yield
+        tmp_path = path.with_name(f"tmp-{path.name}")
+        yield tmp_path
     except:
-        path.unlink(missing_ok=True)
+        tmp_path.unlink(missing_ok=True)
+    else:
+        tmp_path.rename(path)
 
 
 def main(
