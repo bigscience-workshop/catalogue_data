@@ -266,7 +266,7 @@ def collapse_meta(ds: Dataset, num_proc: int):
 
 def load_datasets(args):
     ds_ratio, split, seed = args
-    ds_name = ds_ratio["dataset_name"]
+    ds_name = ds_ratio["dataset_path"]
     ratio = ds_ratio["ratio"]
     if ds_ratio["is_catalogue"]:
         ds = load_dataset(ds_name, use_auth_token=os.environ["HF_USER_ACCESS_TOKEN"], ignore_verifications=True)
