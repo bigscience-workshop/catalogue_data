@@ -76,7 +76,8 @@ def compute_number_of_shards(ds, max_size=10_000_000_000):
         ds_nbytes = ds.data.nbytes
     logger.info(f"Estimated dataset size: {ds_nbytes} bytes")
     logger.info(f"Max shard size: {max_size} bytes")
-    return ceil(ds_nbytes / max_size)
+    number_shards = ceil(ds_nbytes / max_size)
+    return number_shards if number_shards < len(ds) else len(ds)
 
 
 def shard_dataset(ds, max_size=10_000_000_000):
