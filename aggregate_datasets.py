@@ -249,12 +249,18 @@ def collapse_meta_(batch):
     columns_not_in_meta = ["text", "html_str"]
     columns_to_collapse = [name for name in batch.keys() if name not in columns_not_in_meta]
 
+    number_of_rows = len(batch["text"])
+    metas = [
+        {
+            **{name: batch[name][i] for name in columns_to_collapse},
+            "source_dataset": f"pseudo-crawl--{batch['seed_id'][i]}"
+        }
+        for i in range(number_of_rows)
+    ]
+
     new_batch = {
         "text": batch["text"],
-        "meta": [
-            str({key: value for key, value in zip(columns_to_collapse, row)})
-            for row in zip(*[batch[name] for name in columns_to_collapse])
-        ]
+        "meta": [str(meta) for meta in metas]
     }
     return new_batch
 
@@ -268,7 +274,8 @@ def load_datasets(args):
     ds_ratio, split, seed = args
     ds_name = ds_ratio["dataset_path"]
     ratio = ds_ratio["ratio"]
-    if ds_ratio["is_catalogue"]:
+    is_catalogue = ds_ratio["is_catalogue"]
+    if is_catalogue:
         ds = load_dataset(ds_name, use_auth_token=os.environ["HF_USER_ACCESS_TOKEN"], ignore_verifications=True)
     else:
         # We assume it comes from pseudo crawl.
@@ -276,8 +283,6 @@ def load_datasets(args):
         features = get_features()
         dataset_path = Path(ds_name)
         ds = load_dataset(str((dataset_path / "text__html").absolute()), data_files="**.jsonl.gz", features=features)
-        # collapse all meta data in "meta" column
-        ds = collapse_meta(ds, num_proc=1)
 
     if split not in ds:
         logger.info(f"No split named {split} in dataset {ds_name}")
@@ -285,17 +290,20 @@ def load_datasets(args):
 
     ds = ds[split]
     # Process meta: add source_dataset and cast dict to str
+    if is_catalogue:
+        def process_meta(item, source_dataset=None):
+            if "meta" not in item:
+                item["meta"] = {}
+            elif isinstance(item["meta"], str):
+                item["meta"] = eval(item["meta"])
+            item["meta"]["source_dataset"] = source_dataset
+            item["meta"] = json.dumps(item["meta"])
+            return item
+        ds = ds.map(partial(process_meta, source_dataset=ds_name.split("/")[-1]))
+    else:
+        # collapse all meta data in "meta" column
+        ds = collapse_meta(ds, num_proc=1)
 
-    def process_meta(item, source_dataset=None):
-        if "meta" not in item:
-            item["meta"] = {}
-        elif isinstance(item["meta"], str):
-            item["meta"] = eval(item["meta"])
-        item["meta"]["source_dataset"] = source_dataset
-        item["meta"] = json.dumps(item["meta"])
-        return item
-
-    ds = ds.map(partial(process_meta, source_dataset=ds_name.split("/")[-1]))
     # Sample dataset
     if ratio != 1:
         rng = default_rng(seed)
