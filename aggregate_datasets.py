@@ -58,7 +58,7 @@ def load_datasets(args):
     # Sample dataset
     if ratio != 1:
         rng = default_rng(seed=seed)
-        indices = rng.integers(low=0, high=len(ds), size=int(len(ds) * ratio))
+        indices = rng.choice(len(ds), size=int(len(ds) * ratio), replace=False, shuffle=False)
         ds = ds.select(indices)
     return ds
 
