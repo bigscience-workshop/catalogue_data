@@ -6,7 +6,7 @@
 #SBATCH --hint=nomultithread         # we get physical cores not logical
 #SBATCH --partition=prepost
 #SBATCH --time 20:00:00              # maximum execution time (HH:MM:SS)
-#SBATCH --output=logs/%x-%j.out           # output file name
+#SBATCH --output=logs/download_all_catalogue/%x-%j.out           # output file name
 #SBATCH --array=0-254   # TODO: modify according to the number of models you want to evaluated
 #SBATCH --account=six@cpu
 
