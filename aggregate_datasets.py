@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import multiprocessing
+from contextlib import contextmanager
 from math import ceil
 from pathlib import Path
 
@@ -99,14 +100,21 @@ def save_dataset(shard, path=Path("."), shard_id=0, num_shards=1, num_proc=1, ba
     if save_path.exists():
         logger.info("Shard was already saved")
         return
-    tmp_save_path = save_path.with_name(f"{save_path.name}.tmp")
-    shard.to_json(
-        tmp_save_path,
-        num_proc=num_proc,
-        batch_size=batch_size,
-        compression="gzip",
-    )
-    tmp_save_path.rename(save_path)
+    with tmp_path(save_path):
+        shard.to_json(
+            save_path,
+            num_proc=num_proc,
+            batch_size=batch_size,
+            compression="gzip",
+        )
+
+
+@contextmanager
+def tmp_path(path):
+    try:
+        yield
+    except:
+        path.unlink(missing_ok=True)
 
 
 def main(
