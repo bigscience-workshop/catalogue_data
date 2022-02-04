@@ -7,7 +7,7 @@
 #SBATCH --partition=prepost
 #SBATCH --time 20:00:00              # maximum execution time (HH:MM:SS)
 #SBATCH --output=logs/download_all_catalogue/%x-%j.out           # output file name
-#SBATCH --array=0-254   # TODO: modify according to the number of models you want to evaluated
+#SBATCH --array=0-255   # TODO: modify according to the number of models you want to evaluated
 #SBATCH --account=six@cpu
 
 set -x -e
@@ -62,7 +62,7 @@ DATASETS_NAMES=(
 "'bigscience-catalogue-lm-data/lm_en_multilingual_knowledge_questions_answers'"
 "'bigscience-catalogue-lm-data/lm_en_odiencorp'"
 "'bigscience-catalogue-lm-data/lm_en_open_subtitles'"
-"'bigscience-catalogue-lm-data/lm_en_pmc'"
+"'bigscience-catalogue-lm-data/lm_en_pmc', ignore_verifications=True"
 "'bigscience-catalogue-lm-data/lm_en_project_gutenberg'"
 "'bigscience-catalogue-lm-data/lm_en_qedcorpus'"
 "'bigscience-catalogue-lm-data/lm_en_royal_society_corpus'"
@@ -274,6 +274,7 @@ DATASETS_NAMES=(
 "'bigscience-catalogue-lm-data/lm_indic-te_bloom'"
 "'bigscience-catalogue-lm-data/lm_indic-ta_bloom'"
 "'bigscience-catalogue-lm-data/lm_indic-ur_bloom'"
+"'bigscience-catalogue-lm-data/lm_eu_bsbasque'"
 )
 DATASET_NAME=${DATASETS_NAMES[$SLURM_ARRAY_TASK_ID]}
 
