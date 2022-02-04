@@ -15,7 +15,11 @@ from numpy.random import default_rng, SeedSequence
 
 from datasets import concatenate_datasets, load_dataset, utils, Features, Value, Dataset
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(name)-15s - %(levelname)-8s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
 
@@ -42,6 +46,7 @@ def parse_args():
     args.save_path = Path(args.save_path)
     return args
 
+
 def convert_types(features):
     if isinstance(features, dict) and "_type" in features:
         return getattr(datasets, features["_type"])(features["dtype"])
@@ -49,6 +54,7 @@ def convert_types(features):
         return {key: convert_types(value) for key, value in features.items()}
     elif isinstance(features, list):
         return [convert_types(value) for value in features]
+
 
 def get_features():
     features =  {
@@ -243,6 +249,7 @@ def get_features():
   }
     return Features(convert_types(features))
 
+
 def collapse_meta_(batch):
     """{"text": str, "meta": str}"""
     # TODO: check that
@@ -264,52 +271,58 @@ def collapse_meta_(batch):
     }
     return new_batch
 
+
 def collapse_meta(ds: Dataset, num_proc: int):
     """{"text": str, "meta": str}"""
     columns_to_keep = ["text"]
     column_names_to_remove = [name for name in ds.column_names if name not in columns_to_keep]
     return ds.map(collapse_meta_, batched=True, num_proc=num_proc, remove_columns=column_names_to_remove)
 
+
 def load_datasets(args):
-    ds_ratio, split, seed = args
-    ds_name = ds_ratio["dataset_path"]
-    ratio = ds_ratio["ratio"]
-    is_catalogue = ds_ratio["is_catalogue"]
-    if is_catalogue:
-        ds = load_dataset(ds_name, use_auth_token=os.environ["HF_USER_ACCESS_TOKEN"], ignore_verifications=True)
-    else:
-        # We assume it comes from pseudo crawl.
-        # Pseudo crawl needs to be downloaded locally beforehand.
-        features = get_features()
-        dataset_path = Path(ds_name)
-        ds = load_dataset(str((dataset_path / "text__html").absolute()), data_files="**.jsonl.gz", features=features)
+    try:
+        ds_ratio, split, seed = args
+        ds_name = ds_ratio["dataset_path"]
+        ratio = ds_ratio["ratio"]
+        is_catalogue = ds_ratio["is_catalogue"]
+        # Load
+        if is_catalogue:
+            ds = load_dataset(ds_name, use_auth_token=os.environ["HF_USER_ACCESS_TOKEN"], ignore_verifications=True)
+        else:
+            # We assume it comes from pseudo crawl.
+            # Pseudo crawl needs to be downloaded locally beforehand.
+            features = get_features()
+            dataset_path = Path(ds_name)
+            ds = load_dataset(str((dataset_path / "text__html").absolute()), data_files="**.jsonl.gz", features=features)
+        # Split
+        if split not in ds:
+            logger.info(f"No split named {split} in dataset {ds_name}")
+            return
+        ds = ds[split]
+        # Process meta: add source_dataset and cast dict to str
+        if is_catalogue:
+            def process_meta(item, source_dataset=None):
+                if "meta" not in item:
+                    item["meta"] = {}
+                elif isinstance(item["meta"], str):
+                    item["meta"] = eval(item["meta"])
+                item["meta"]["source_dataset"] = source_dataset
+                item["meta"] = json.dumps(item["meta"])
+                return item
+            ds = ds.map(partial(process_meta, source_dataset=ds_name.split("/")[-1]))
+        else:
+            # collapse all meta data in "meta" column
+            ds = collapse_meta(ds, num_proc=1)
 
-    if split not in ds:
-        logger.info(f"No split named {split} in dataset {ds_name}")
-        return
-
-    ds = ds[split]
-    # Process meta: add source_dataset and cast dict to str
-    if is_catalogue:
-        def process_meta(item, source_dataset=None):
-            if "meta" not in item:
-                item["meta"] = {}
-            elif isinstance(item["meta"], str):
-                item["meta"] = eval(item["meta"])
-            item["meta"]["source_dataset"] = source_dataset
-            item["meta"] = json.dumps(item["meta"])
-            return item
-        ds = ds.map(partial(process_meta, source_dataset=ds_name.split("/")[-1]))
-    else:
-        # collapse all meta data in "meta" column
-        ds = collapse_meta(ds, num_proc=1)
-
-    # Sample dataset
-    if ratio != 1:
-        rng = default_rng(seed)
-        indices = rng.choice(len(ds), size=int(len(ds) * ratio), replace=False, shuffle=False)
-        ds = ds.select(indices)
-    return ds
+        # Sample dataset
+        if ratio != 1:
+            rng = default_rng(seed)
+            indices = rng.choice(len(ds), size=int(len(ds) * ratio), replace=False, shuffle=False)
+            ds = ds.select(indices)
+        return ds
+    except:
+        logger.error(f"Error while loading dataset {ds_name}")
+        raise
 
 
 def compute_number_of_shards(ds, max_size=10_000_000_000):
@@ -347,7 +360,7 @@ def save_dataset(shard, path=Path("."), shard_id=0, num_shards=1, num_proc=1, ba
     width = int(log10(num_shards)) + 1
     save_path = path / f"shard-{shard_id:0>{width}}-of-{num_shards:0>{width}}.jsonl.gz"
     if save_path.exists():
-        logger.info("Shard was already saved")
+        logger.info(f"Shard was already saved: {save_path}")
         return
     with tmp_path(save_path) as tmp_save_path:
         shard.to_json(
@@ -389,6 +402,7 @@ def main(
     with dataset_ratios_path.open() as f:
         dset_ratios = json.load(f)
     # Load datasets
+    logger.info("Start load_datasets")
     with multiprocessing.Pool(load_num_proc) as pool:
         dsets = [
             ds
@@ -411,12 +425,16 @@ def main(
         logger.info(f"No datasets to be aggregated")
         return
     # Concatenate datasets
+    logger.info("Start concatenate_datasets")
     dset = concatenate_datasets(dsets, split=split)
     # Shuffle
+    logger.info("Start shuffle dataset")
     dset = dset.shuffle(seed=seed)
     # Shard
+    logger.info("Start shard_dataset")
     shards = shard_dataset(dset, max_size=shard_max_size)
     # Save
+    logger.info("Start: save dataset")
     save_shards(shards, path=save_path, num_proc=save_num_proc, batch_size=save_batch_size)
 
 
