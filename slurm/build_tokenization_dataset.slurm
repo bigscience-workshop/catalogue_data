@@ -20,6 +20,7 @@ DATASET_RATIOS_FILE=$CATALOGUE_DATA_REPO/tokenizer_dataset_ratios.json
 SAVE_DATASET_PATH=$six_ALL_CCFRSCRATCH/tokenizer/dataset/tokenization_dataset
 mkdir -p $SAVE_DATASET_PATH
 
+export HF_DATASETS_OFFLINE=1
 pushd $CATALOGUE_DATA_REPO
 
 python aggregate_datasets.py \
