@@ -139,7 +139,7 @@ def load_datasets(args):
         is_catalogue = ds_ratio["is_catalogue"]
         # Load
         if is_catalogue:
-            ds = load_dataset(ds_name, use_auth_token=os.environ["HF_USER_ACCESS_TOKEN"], ignore_verifications=True)
+            ds = load_dataset(ds_name, use_auth_token=True, ignore_verifications=True)
         else:
             # We assume it comes from pseudo crawl.
             # Pseudo crawl needs to be downloaded locally beforehand.
