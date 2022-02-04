@@ -153,6 +153,13 @@ def load_datasets(args):
             logger.info(f"No split named {split} in dataset {ds_name}")
             return
         ds = ds[split]
+
+        # Sample dataset
+        if ratio < 1:
+            rng = default_rng(seed)
+            indices = rng.choice(len(ds), size=int(len(ds) * ratio), replace=False, shuffle=False)
+            ds = ds.select(indices)
+
         # Process meta: add source_dataset and cast dict to str
         if is_catalogue:
 
@@ -173,11 +180,6 @@ def load_datasets(args):
             # collapse all meta data in "meta" column
             ds = collapse_meta(ds, num_proc=1)
 
-        # Sample dataset
-        if ratio != 1:
-            rng = default_rng(seed)
-            indices = rng.choice(len(ds), size=int(len(ds) * ratio), replace=False, shuffle=False)
-            ds = ds.select(indices)
         return ds
     except BaseException as err:
         logger.error(f"Error while loading dataset {ds_name}")
