@@ -161,7 +161,10 @@ def load_datasets(args):
                     item["meta"] = {}
                 elif isinstance(item["meta"], str):
                     item["meta"] = eval(item["meta"])
-                item["meta"]["source_dataset"] = source_dataset
+                try:
+                    item["meta"]["source_dataset"] = source_dataset
+                except:
+                    raise ValueError(f"Got {item['meta']} of type {type(item['meta'])}. Expected an dictionary. This is from {source_dataset}")
                 item["meta"] = str(item["meta"])
                 return item
 
