@@ -108,7 +108,7 @@ def get_features():
 def collapse_meta_(batch):
     """{"text": str, "meta": str}"""
     # TODO: check that
-    columns_not_in_meta = ["text", "html_str"]
+    columns_not_in_meta = ["text", "html_error", "html_footer", "html_head", "html_str", "html_title", "metadata_html"]
     columns_to_collapse = [name for name in batch.keys() if name not in columns_not_in_meta]
 
     number_of_rows = len(batch["text"])
