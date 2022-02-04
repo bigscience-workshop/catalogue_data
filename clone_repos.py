@@ -4,7 +4,7 @@ from huggingface_hub import Repository
 
 """Script used to clone repos, as it's needed in order to load data stored in the hub in OFFLINE mode. Thanks leandro"""
 
-DATASETS_DIR=Path("/gpfswork/rech/six/uty16tp/dataset/tokenization")
+DATASETS_DIR=Path("/gpfswork/rech/six/commun/train_tokenizer/datasets")
 
 repos = [
     "bigscience-catalogue-lm-data/lm_id_indonesian_news_articles_2017",
