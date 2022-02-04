@@ -322,7 +322,7 @@ DATASETS_NAMES=(
 "'bigscience-catalogue-lm-data/lm_zh-cn_wikipedia', ignore_verifications=True"
 "'bigscience-catalogue-lm-data/lm_zh-tw_wikipedia', ignore_verifications=True"
 "'bigscience-catalogue-lm-data/tokenization_nigercongo'"
-"'bigscience-catalogue-lm-data/lm-code-github'"
+"'bigscience-catalogue-lm-data/lm_code_github'"
 )
 DATASET_NAME=${DATASETS_NAMES[$SLURM_ARRAY_TASK_ID]}
 
