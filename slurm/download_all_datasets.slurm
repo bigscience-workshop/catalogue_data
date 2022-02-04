@@ -15,11 +15,8 @@ set -x -e
 source $six_ALL_CCFRWORK/start-prod
 conda activate thomas_data_tooling # Debug deepspeed temporarily
 
-CC_INDEX_FOLDER=$six_ALL_CCFRSCRATCH/pseudo_crawl/seeds_batch_1/cc
 CATALOGUE_DATA_REPO=$WORK/code/big_science/catalogue_data
-
 pushd $CATALOGUE_DATA_REPO
-
 
 DATASETS_NAMES=(
 "'bigscience-catalogue-lm-data/lm_ar_arabench'"

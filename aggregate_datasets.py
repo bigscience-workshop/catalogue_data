@@ -212,7 +212,7 @@ def save_shards(shards, path=Path("."), num_proc=1, batch_size=None):
         save_dataset(shard, path=path, shard_id=i, num_shards=num_shards, num_proc=num_proc, batch_size=batch_size)
 
 
-def save_dataset(shard, path=Path("."), shard_id=0, num_shards=1, num_proc=1, batch_size=None):
+def save_dataset(shard: Dataset, path=Path("."), shard_id=0, num_shards=1, num_proc=1, batch_size=None):
     width = int(log10(num_shards)) + 1
     save_path = path / f"shard-{shard_id:0>{width}}-of-{num_shards:0>{width}}.jsonl.gz"
     if save_path.exists():
