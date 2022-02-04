@@ -256,7 +256,7 @@ def main(
     seed = SeedSequence(seed)
     # Read dataset ratios
     with dataset_ratios_path.open() as f:
-        dset_ratios = json.load(f)
+        dset_ratios = [json.loads(line) for line in f]
     # Load datasets
     logger.info("Start load_datasets")
     with multiprocessing.Pool(load_num_proc) as pool:
@@ -267,7 +267,7 @@ def main(
                     load_datasets,
                     [
                         (dset_ratio, split, child_seed)
-                        for dset_ratio, child_seed in zip(dset_ratios.items(), seed.spawn(len(dset_ratios)))
+                        for dset_ratio, child_seed in zip(dset_ratios, seed.spawn(len(dset_ratios)))
                     ],
                 ),
                 total=len(dset_ratios),
