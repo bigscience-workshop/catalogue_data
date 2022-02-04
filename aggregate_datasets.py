@@ -8,11 +8,12 @@ from functools import partial
 from math import ceil
 from pathlib import Path
 
+import datasets
 from dotenv import load_dotenv
 from numpy import log10
 from numpy.random import default_rng, SeedSequence
 
-from datasets import concatenate_datasets, load_dataset, utils, Features, Value
+from datasets import concatenate_datasets, load_dataset, utils, Features, Value, Dataset
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -22,7 +23,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     # Load
     parser.add_argument(
-        "--dataset_ratios_path", type=str, required=True, help="path to JSON file containing input dataset ratios"
+        "--dataset_ratios_path", type=str, required=True, help="path to JSON file containing input dataset ratios. Values ares dictionary: {'dataset_path': str, 'is_catalogue': bool, 'ratio': float}"
     )
     parser.add_argument("--split", type=str, default="train", help="split name, default 'train'")
     parser.add_argument(
@@ -41,26 +42,268 @@ def parse_args():
     args.save_path = Path(args.save_path)
     return args
 
+def convert_types(features):
+    if isinstance(features, dict) and "_type" in features:
+        return getattr(datasets, features["_type"])(features["dtype"])
+    elif isinstance(features, dict):
+        return {key: convert_types(value) for key, value in features.items()}
+    elif isinstance(features, list):
+        return [convert_types(value) for value in features]
+
+def get_features():
+    features =  {
+    "HtmlPreprocessor_error": {
+      "dtype": "int64",
+      "id": None,
+      "_type": "Value"
+    },
+    "HtmlPreprocessor_error_comment": {
+      "dtype": "string",
+      "id": None,
+      "_type": "Value"
+    },
+    "content_languages": {
+      "dtype": "string",
+      "id": None,
+      "_type": "Value"
+    },
+    "content_mime_detected": {
+      "dtype": "string",
+      "id": None,
+      "_type": "Value"
+    },
+    "depth": {
+      "dtype": "int16",
+      "id": None,
+      "_type": "Value"
+    },
+    "download_exception": {
+      "dtype": "string",
+      "id": None,
+      "_type": "Value"
+    },
+    "external_urls": [
+      {
+        "dtype": "string",
+        "id": None,
+        "_type": "Value"
+      }
+    ],
+    "fetch_redirect": {
+      "dtype": "string",
+      "id": None,
+      "_type": "Value"
+    },
+    "fetch_status": {
+      "dtype": "int32",
+      "id": None,
+      "_type": "Value"
+    },
+    "fetch_time": {
+      "dtype": "timestamp[ns]",
+      "id": None,
+      "_type": "Value"
+    },
+    "html_error": {
+      "dtype": "string",
+      "id": None,
+      "_type": "Value"
+    },
+    "html_footer": [
+      {
+        "dtype": "string",
+        "id": None,
+        "_type": "Value"
+      }
+    ],
+    "html_head": [
+      {
+        "dtype": "string",
+        "id": None,
+        "_type": "Value"
+      }
+    ],
+    "html_str": {
+      "dtype": "string",
+      "id": None,
+      "_type": "Value"
+    },
+    "html_title": [
+      {
+        "dtype": "string",
+        "id": None,
+        "_type": "Value"
+      }
+    ],
+    "metadata_html": [
+      {
+        "char_end_idx": {
+          "dtype": "int64",
+          "id": None,
+          "_type": "Value"
+        },
+        "char_start_idx": {
+          "dtype": "int64",
+          "id": None,
+          "_type": "Value"
+        },
+        "html_attrs": {
+          "attrs": [
+            {
+              "dtype": "string",
+              "id": None,
+              "_type": "Value"
+            }
+          ],
+          "values": [
+            {
+              "dtype": "string",
+              "id": None,
+              "_type": "Value"
+            }
+          ]
+        },
+        "key": {
+          "dtype": "string",
+          "id": None,
+          "_type": "Value"
+        },
+        "relative_end_pos": {
+          "dtype": "int64",
+          "id": None,
+          "_type": "Value"
+        },
+        "relative_start_pos": {
+          "dtype": "int64",
+          "id": None,
+          "_type": "Value"
+        },
+        "type": {
+          "dtype": "string",
+          "id": None,
+          "_type": "Value"
+        },
+        "value": {
+          "dtype": "string",
+          "id": None,
+          "_type": "Value"
+        }
+      }
+    ],
+    "seed_id": {
+      "dtype": "int32",
+      "id": None,
+      "_type": "Value"
+    },
+    "text": {
+      "dtype": "string",
+      "id": None,
+      "_type": "Value"
+    },
+    "url": {
+      "dtype": "string",
+      "id": None,
+      "_type": "Value"
+    },
+    "url_host_name": {
+      "dtype": "string",
+      "id": None,
+      "_type": "Value"
+    },
+    "url_host_registered_domain": {
+      "dtype": "string",
+      "id": None,
+      "_type": "Value"
+    },
+    "url_host_tld": {
+      "dtype": "string",
+      "id": None,
+      "_type": "Value"
+    },
+    "url_surtkey": {
+      "dtype": "string",
+      "id": None,
+      "_type": "Value"
+    },
+    "warc_filename": {
+      "dtype": "string",
+      "id": None,
+      "_type": "Value"
+    },
+    "warc_record_length": {
+      "dtype": "int32",
+      "id": None,
+      "_type": "Value"
+    },
+    "warc_record_offset": {
+      "dtype": "int32",
+      "id": None,
+      "_type": "Value"
+    }
+  }
+    return Features(convert_types(features))
+
+def collapse_meta_(batch):
+    """{"text": str, "meta": str}"""
+    # TODO: check that
+    columns_not_in_meta = ["text", "html_str"]
+    columns_to_collapse = [name for name in batch.keys() if name not in columns_not_in_meta]
+
+    number_of_rows = len(batch["text"])
+    metas = [
+        {
+            **{name: batch[name][i] for name in columns_to_collapse},
+            "source_dataset": f"pseudo-crawl--{batch['seed_id'][i]}"
+        }
+        for i in range(number_of_rows)
+    ]
+
+    new_batch = {
+        "text": batch["text"],
+        "meta": [str(meta) for meta in metas]
+    }
+    return new_batch
+
+def collapse_meta(ds: Dataset, num_proc: int):
+    """{"text": str, "meta": str}"""
+    columns_to_keep = ["text"]
+    column_names_to_remove = [name for name in ds.column_names if name not in columns_to_keep]
+    return ds.map(collapse_meta_, batched=True, num_proc=num_proc, remove_columns=column_names_to_remove)
 
 def load_datasets(args):
-    ds_name, ratio, split, seed = args
-    ds = load_dataset(ds_name, use_auth_token=os.environ["HF_USER_ACCESS_TOKEN"], ignore_verifications=True)
+    ds_ratio, split, seed = args
+    ds_name = ds_ratio["dataset_path"]
+    ratio = ds_ratio["ratio"]
+    is_catalogue = ds_ratio["is_catalogue"]
+    if is_catalogue:
+        ds = load_dataset(ds_name, use_auth_token=os.environ["HF_USER_ACCESS_TOKEN"], ignore_verifications=True)
+    else:
+        # We assume it comes from pseudo crawl.
+        # Pseudo crawl needs to be downloaded locally beforehand.
+        features = get_features()
+        dataset_path = Path(ds_name)
+        ds = load_dataset(str((dataset_path / "text__html").absolute()), data_files="**.jsonl.gz", features=features)
+
     if split not in ds:
         logger.info(f"No split named {split} in dataset {ds_name}")
         return
+
     ds = ds[split]
     # Process meta: add source_dataset and cast dict to str
+    if is_catalogue:
+        def process_meta(item, source_dataset=None):
+            if "meta" not in item:
+                item["meta"] = {}
+            elif isinstance(item["meta"], str):
+                item["meta"] = eval(item["meta"])
+            item["meta"]["source_dataset"] = source_dataset
+            item["meta"] = json.dumps(item["meta"])
+            return item
+        ds = ds.map(partial(process_meta, source_dataset=ds_name.split("/")[-1]))
+    else:
+        # collapse all meta data in "meta" column
+        ds = collapse_meta(ds, num_proc=1)
 
-    def process_meta(item, source_dataset=None):
-        if "meta" not in item:
-            item["meta"] = {}
-        elif isinstance(item["meta"], str):
-            item["meta"] = eval(item["meta"])
-        item["meta"]["source_dataset"] = source_dataset
-        item["meta"] = json.dumps(item["meta"])
-        return item
-
-    ds = ds.map(partial(process_meta, source_dataset=ds_name.split("/")[-1]))
     # Sample dataset
     if ratio != 1:
         rng = default_rng(seed)
@@ -153,8 +396,8 @@ def main(
                 pool.imap(
                     load_datasets,
                     [
-                        (ds_name, ratio, split, child_seed)
-                        for (ds_name, ratio), child_seed in zip(dset_ratios.items(), seed.spawn(len(dset_ratios)))
+                        (dset_ratio, split, child_seed)
+                        for dset_ratio, child_seed in zip(dset_ratios.items(), seed.spawn(len(dset_ratios)))
                     ],
                 ),
                 total=len(dset_ratios),
