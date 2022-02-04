@@ -187,10 +187,7 @@ def load_datasets(args):
 
 
 def compute_number_of_shards(ds, max_size=10_000_000_000):
-    if ds._indices is not None:
-        ds_nbytes = ds.data.nbytes * len(ds._indices) / len(ds.data)
-    else:
-        ds_nbytes = ds.data.nbytes
+    ds_nbytes = get_size(ds)
     logger.info(f"Estimated dataset size: {ds_nbytes} bytes")
     logger.info(f"Max shard size: {max_size} bytes")
     number_shards = ceil(ds_nbytes / max_size)
@@ -242,6 +239,12 @@ def tmp_path(path):
     else:
         tmp_path.rename(path)
 
+def get_size(ds: Dataset) -> int:
+    if ds._indices is not None:
+        return ds.data.nbytes * len(ds._indices) / len(ds.data)
+    else:
+        return ds.data.nbytes
+
 
 def main(
     dataset_ratios_path=None,
@@ -288,6 +291,8 @@ def main(
     # Concatenate datasets
     logger.info("Start concatenate_datasets")
     dset = concatenate_datasets(dsets, split=split)
+    del dsets
+    logger.info(f"Estimated size: {get_size(dset)} bytes")
     # Shuffle
     logger.info("Start shuffle dataset")
     dset = dset.shuffle(seed=seed)
