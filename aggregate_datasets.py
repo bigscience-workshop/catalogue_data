@@ -179,9 +179,9 @@ def load_datasets(args):
             indices = rng.choice(len(ds), size=int(len(ds) * ratio), replace=False, shuffle=False)
             ds = ds.select(indices)
         return ds
-    except:
+    except BaseException as err:
         logger.error(f"Error while loading dataset {ds_name}")
-        raise
+        raise err
 
 
 def compute_number_of_shards(ds, max_size=10_000_000_000):

@@ -278,6 +278,9 @@ DATASETS_NAMES=(
 "'bigscience-catalogue-lm-data/lm_indic-ur_urdu-monolingual-corpus'"
 "'bigscience-catalogue-lm-data/lm_indic-ur_leipzig_wortschatz_urdu_newscrawl_2016_sentences'"
 "'bigscience-catalogue-lm-data/lm_indic-ur_leipzig_wortschatz_urdu-pk_web_2019_sentences'"
+"'bigscience-catalogue-lm-data/lm_indic-as_wikipedia'"
+"'bigscience-catalogue-lm-data/lm_indic-ur_wikipedia'"
+"'bigscience-catalogue-lm-data/lm_indic-or_wikipedia'"
 )
 DATASET_NAME=${DATASETS_NAMES[$SLURM_ARRAY_TASK_ID]}
 

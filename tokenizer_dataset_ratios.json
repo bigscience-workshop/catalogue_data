@@ -1115,12 +1115,12 @@
     "ratio": 1.0
   },
   {
-    "dataset_path": "bigscience-catalogue-lm-data/m_indic-or_wikipedia",
+    "dataset_path": "bigscience-catalogue-lm-data/lm_indic-or_wikipedia",
     "is_catalogue": true,
     "ratio": 0.0016367769125170478
   },
   {
-    "dataset_path": "bigscience-catalogue-lm-data/m_indic-ur_wikipedia",
+    "dataset_path": "bigscience-catalogue-lm-data/lm_indic-ur_wikipedia",
     "is_catalogue": true,
     "ratio": 0.0016367769125170478
   },
