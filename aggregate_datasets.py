@@ -162,7 +162,7 @@ def load_datasets(args):
                 elif isinstance(item["meta"], str):
                     item["meta"] = eval(item["meta"])
                 item["meta"]["source_dataset"] = source_dataset
-                item["meta"] = json.dumps(item["meta"])
+                item["meta"] = str(item["meta"])
                 return item
 
             ds = ds.map(partial(process_meta, source_dataset=ds_name.split("/")[-1]))
