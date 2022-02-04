@@ -256,7 +256,7 @@ def main(
     seed = SeedSequence(seed)
     # Read dataset ratios
     with dataset_ratios_path.open() as f:
-        dset_ratios = [json.loads(line) for line in f]
+        dset_ratios = json.load(f)
     # Load datasets
     logger.info("Start load_datasets")
     with multiprocessing.Pool(load_num_proc) as pool:
