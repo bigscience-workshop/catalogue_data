@@ -17,7 +17,7 @@ from datasets import concatenate_datasets, load_dataset, utils, Features, Value,
 
 logger = logging.getLogger()
 handler = logging.StreamHandler()
-formatter = logging.Formatter('%(asctime)s - %(name)-15s - %(levelname)-8s - %(message)s')
+formatter = logging.Formatter("%(asctime)s - %(name)-15s - %(levelname)-8s - %(message)s")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
@@ -27,7 +27,10 @@ def parse_args():
     parser = argparse.ArgumentParser()
     # Load
     parser.add_argument(
-        "--dataset_ratios_path", type=str, required=True, help="path to JSON file containing input dataset ratios. Values ares dictionary: {'dataset_path': str, 'is_catalogue': bool, 'ratio': float}"
+        "--dataset_ratios_path",
+        type=str,
+        required=True,
+        help="path to JSON file containing input dataset ratios. Values ares dictionary: {'dataset_path': str, 'is_catalogue': bool, 'ratio': float}",
     )
     parser.add_argument("--split", type=str, default="train", help="split name, default 'train'")
     parser.add_argument(
@@ -57,196 +60,48 @@ def convert_types(features):
 
 
 def get_features():
-    features =  {
-    "HtmlPreprocessor_error": {
-      "dtype": "int64",
-      "id": None,
-      "_type": "Value"
-    },
-    "HtmlPreprocessor_error_comment": {
-      "dtype": "string",
-      "id": None,
-      "_type": "Value"
-    },
-    "content_languages": {
-      "dtype": "string",
-      "id": None,
-      "_type": "Value"
-    },
-    "content_mime_detected": {
-      "dtype": "string",
-      "id": None,
-      "_type": "Value"
-    },
-    "depth": {
-      "dtype": "int16",
-      "id": None,
-      "_type": "Value"
-    },
-    "download_exception": {
-      "dtype": "string",
-      "id": None,
-      "_type": "Value"
-    },
-    "external_urls": [
-      {
-        "dtype": "string",
-        "id": None,
-        "_type": "Value"
-      }
-    ],
-    "fetch_redirect": {
-      "dtype": "string",
-      "id": None,
-      "_type": "Value"
-    },
-    "fetch_status": {
-      "dtype": "int32",
-      "id": None,
-      "_type": "Value"
-    },
-    "fetch_time": {
-      "dtype": "timestamp[ns]",
-      "id": None,
-      "_type": "Value"
-    },
-    "html_error": {
-      "dtype": "string",
-      "id": None,
-      "_type": "Value"
-    },
-    "html_footer": [
-      {
-        "dtype": "string",
-        "id": None,
-        "_type": "Value"
-      }
-    ],
-    "html_head": [
-      {
-        "dtype": "string",
-        "id": None,
-        "_type": "Value"
-      }
-    ],
-    "html_str": {
-      "dtype": "string",
-      "id": None,
-      "_type": "Value"
-    },
-    "html_title": [
-      {
-        "dtype": "string",
-        "id": None,
-        "_type": "Value"
-      }
-    ],
-    "metadata_html": [
-      {
-        "char_end_idx": {
-          "dtype": "int64",
-          "id": None,
-          "_type": "Value"
-        },
-        "char_start_idx": {
-          "dtype": "int64",
-          "id": None,
-          "_type": "Value"
-        },
-        "html_attrs": {
-          "attrs": [
+    features = {
+        "HtmlPreprocessor_error": {"dtype": "int64", "id": None, "_type": "Value"},
+        "HtmlPreprocessor_error_comment": {"dtype": "string", "id": None, "_type": "Value"},
+        "content_languages": {"dtype": "string", "id": None, "_type": "Value"},
+        "content_mime_detected": {"dtype": "string", "id": None, "_type": "Value"},
+        "depth": {"dtype": "int16", "id": None, "_type": "Value"},
+        "download_exception": {"dtype": "string", "id": None, "_type": "Value"},
+        "external_urls": [{"dtype": "string", "id": None, "_type": "Value"}],
+        "fetch_redirect": {"dtype": "string", "id": None, "_type": "Value"},
+        "fetch_status": {"dtype": "int32", "id": None, "_type": "Value"},
+        "fetch_time": {"dtype": "timestamp[ns]", "id": None, "_type": "Value"},
+        "html_error": {"dtype": "string", "id": None, "_type": "Value"},
+        "html_footer": [{"dtype": "string", "id": None, "_type": "Value"}],
+        "html_head": [{"dtype": "string", "id": None, "_type": "Value"}],
+        "html_str": {"dtype": "string", "id": None, "_type": "Value"},
+        "html_title": [{"dtype": "string", "id": None, "_type": "Value"}],
+        "metadata_html": [
             {
-              "dtype": "string",
-              "id": None,
-              "_type": "Value"
+                "char_end_idx": {"dtype": "int64", "id": None, "_type": "Value"},
+                "char_start_idx": {"dtype": "int64", "id": None, "_type": "Value"},
+                "html_attrs": {
+                    "attrs": [{"dtype": "string", "id": None, "_type": "Value"}],
+                    "values": [{"dtype": "string", "id": None, "_type": "Value"}],
+                },
+                "key": {"dtype": "string", "id": None, "_type": "Value"},
+                "relative_end_pos": {"dtype": "int64", "id": None, "_type": "Value"},
+                "relative_start_pos": {"dtype": "int64", "id": None, "_type": "Value"},
+                "type": {"dtype": "string", "id": None, "_type": "Value"},
+                "value": {"dtype": "string", "id": None, "_type": "Value"},
             }
-          ],
-          "values": [
-            {
-              "dtype": "string",
-              "id": None,
-              "_type": "Value"
-            }
-          ]
-        },
-        "key": {
-          "dtype": "string",
-          "id": None,
-          "_type": "Value"
-        },
-        "relative_end_pos": {
-          "dtype": "int64",
-          "id": None,
-          "_type": "Value"
-        },
-        "relative_start_pos": {
-          "dtype": "int64",
-          "id": None,
-          "_type": "Value"
-        },
-        "type": {
-          "dtype": "string",
-          "id": None,
-          "_type": "Value"
-        },
-        "value": {
-          "dtype": "string",
-          "id": None,
-          "_type": "Value"
-        }
-      }
-    ],
-    "seed_id": {
-      "dtype": "int32",
-      "id": None,
-      "_type": "Value"
-    },
-    "text": {
-      "dtype": "string",
-      "id": None,
-      "_type": "Value"
-    },
-    "url": {
-      "dtype": "string",
-      "id": None,
-      "_type": "Value"
-    },
-    "url_host_name": {
-      "dtype": "string",
-      "id": None,
-      "_type": "Value"
-    },
-    "url_host_registered_domain": {
-      "dtype": "string",
-      "id": None,
-      "_type": "Value"
-    },
-    "url_host_tld": {
-      "dtype": "string",
-      "id": None,
-      "_type": "Value"
-    },
-    "url_surtkey": {
-      "dtype": "string",
-      "id": None,
-      "_type": "Value"
-    },
-    "warc_filename": {
-      "dtype": "string",
-      "id": None,
-      "_type": "Value"
-    },
-    "warc_record_length": {
-      "dtype": "int32",
-      "id": None,
-      "_type": "Value"
-    },
-    "warc_record_offset": {
-      "dtype": "int32",
-      "id": None,
-      "_type": "Value"
+        ],
+        "seed_id": {"dtype": "int32", "id": None, "_type": "Value"},
+        "text": {"dtype": "string", "id": None, "_type": "Value"},
+        "url": {"dtype": "string", "id": None, "_type": "Value"},
+        "url_host_name": {"dtype": "string", "id": None, "_type": "Value"},
+        "url_host_registered_domain": {"dtype": "string", "id": None, "_type": "Value"},
+        "url_host_tld": {"dtype": "string", "id": None, "_type": "Value"},
+        "url_surtkey": {"dtype": "string", "id": None, "_type": "Value"},
+        "warc_filename": {"dtype": "string", "id": None, "_type": "Value"},
+        "warc_record_length": {"dtype": "int32", "id": None, "_type": "Value"},
+        "warc_record_offset": {"dtype": "int32", "id": None, "_type": "Value"},
     }
-  }
     return Features(convert_types(features))
 
 
@@ -260,15 +115,12 @@ def collapse_meta_(batch):
     metas = [
         {
             **{name: batch[name][i] for name in columns_to_collapse},
-            "source_dataset": f"pseudo-crawl--{batch['seed_id'][i]}"
+            "source_dataset": f"pseudo-crawl--{batch['seed_id'][i]}",
         }
         for i in range(number_of_rows)
     ]
 
-    new_batch = {
-        "text": batch["text"],
-        "meta": [str(meta) for meta in metas]
-    }
+    new_batch = {"text": batch["text"], "meta": [str(meta) for meta in metas]}
     return new_batch
 
 
@@ -293,7 +145,9 @@ def load_datasets(args):
             # Pseudo crawl needs to be downloaded locally beforehand.
             features = get_features()
             dataset_path = Path(ds_name)
-            ds = load_dataset(str((dataset_path / "text__html").absolute()), data_files="**.jsonl.gz", features=features)
+            ds = load_dataset(
+                str((dataset_path / "text__html").absolute()), data_files="**.jsonl.gz", features=features
+            )
         # Split
         if split not in ds:
             logger.info(f"No split named {split} in dataset {ds_name}")
@@ -301,6 +155,7 @@ def load_datasets(args):
         ds = ds[split]
         # Process meta: add source_dataset and cast dict to str
         if is_catalogue:
+
             def process_meta(item, source_dataset=None):
                 if "meta" not in item:
                     item["meta"] = {}
@@ -309,6 +164,7 @@ def load_datasets(args):
                 item["meta"]["source_dataset"] = source_dataset
                 item["meta"] = json.dumps(item["meta"])
                 return item
+
             ds = ds.map(partial(process_meta, source_dataset=ds_name.split("/")[-1]))
         else:
             # collapse all meta data in "meta" column
