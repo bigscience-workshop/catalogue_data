@@ -35,59 +35,69 @@
     "ratio": 1.0
   },
   {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_ar_kalimat",
+    "is_catalogue": true,
+    "ratio": 1.0
+  },
+  {
     "dataset_path": "bigscience-catalogue-lm-data/lm_ar_osac",
     "is_catalogue": true,
-    "ratio": 0.6591984622572392
+    "ratio": 0.5711009553103383
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_ar_brad_2",
     "is_catalogue": true,
-    "ratio": 0.3955468242734332
+    "ratio": 0.34268461191339417
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_ar_ksucca",
     "is_catalogue": true,
-    "ratio": 0.3410661771171937
+    "ratio": 0.29548494228687094
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_ar_sanad",
     "is_catalogue": true,
-    "ratio": 0.2696125358645677
+    "ratio": 0.23358060677000086
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_ar_tashkeela",
     "is_catalogue": true,
-    "ratio": 0.14513180120779856
+    "ratio": 0.12573589755028838
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_ar_multi_un_2",
     "is_catalogue": true,
-    "ratio": 0.05876149272279828
+    "ratio": 0.05090840854594705
+  },
+  {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_ar_wikipedia",
+    "is_catalogue": true,
+    "ratio": 0.04647925415459282
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_ar_open_subtitles",
     "is_catalogue": true,
-    "ratio": 0.04249939149343344
+    "ratio": 0.036819629400980686
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_ar_uncorpus",
     "is_catalogue": true,
-    "ratio": 0.03032822533818026
+    "ratio": 0.026275058962050457
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_ar_openiti_proc",
     "is_catalogue": true,
-    "ratio": 0.011038658451762252
+    "ratio": 0.009563414886556392
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_ar_arabic_billion_words",
     "is_catalogue": true,
-    "ratio": 0.009300603815533616
+    "ratio": 0.008057639736940837
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_ar_openiti",
     "is_catalogue": true,
-    "ratio": 0.009016610875022505
+    "ratio": 0.007811600571327621
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_ca_xquad_ca",
@@ -160,14 +170,19 @@
     "ratio": 1.0
   },
   {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_ca_wikipedia",
+    "is_catalogue": true,
+    "ratio": 0.2138355335822617
+  },
+  {
     "dataset_path": "bigscience-catalogue-lm-data/lm_ca_catalan_general_crawling",
     "is_catalogue": true,
-    "ratio": 0.21736832890636615
+    "ratio": 0.1449122193948535
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_ca_catalan_textual_corpus",
     "is_catalogue": true,
-    "ratio": 0.05367800121478402
+    "ratio": 0.035785334173796375
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_en_book_dash_books",
@@ -207,72 +222,77 @@
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_en_qedcorpus",
     "is_catalogue": true,
-    "ratio": 0.9438242209494307
+    "ratio": 0.8809026091062973
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_en_india_news_headlines_dataset",
     "is_catalogue": true,
-    "ratio": 0.773419542447654
+    "ratio": 0.7218582419834306
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_en_the_pile_europarl",
     "is_catalogue": true,
-    "ratio": 0.39084826276488926
+    "ratio": 0.3647917131093649
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_en_royal_society_corpus",
     "is_catalogue": true,
-    "ratio": 0.3239235952340359
+    "ratio": 0.3023286898758693
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_en_the_pile_enron_emails",
     "is_catalogue": true,
-    "ratio": 0.13344310650844193
+    "ratio": 0.12454689981603498
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_en_multi_un_2",
     "is_catalogue": true,
-    "ratio": 0.05098815223646721
+    "ratio": 0.04758894224332434
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_en_uncorpus",
     "is_catalogue": true,
-    "ratio": 0.028686853921749307
+    "ratio": 0.026774397081375752
+  },
+  {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_en_wikipedia",
+    "is_catalogue": true,
+    "ratio": 0.012219997381089167
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_en_open_subtitles",
     "is_catalogue": true,
-    "ratio": 0.009627741514767783
+    "ratio": 0.00898589210989783
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_en_project_gutenberg",
     "is_catalogue": true,
-    "ratio": 0.006960657489368565
+    "ratio": 0.006496613678034214
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_en_the_pile_uspto",
     "is_catalogue": true,
-    "ratio": 0.005233194699166581
+    "ratio": 0.00488431506856199
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_en_the_pile_stack_exchange",
     "is_catalogue": true,
-    "ratio": 0.0037034109269195735
+    "ratio": 0.0034565168764523757
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_en_pmc",
     "is_catalogue": true,
-    "ratio": 0.0011004567033538859
+    "ratio": 0.0010270929264962062
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_en_s2orc",
     "is_catalogue": true,
-    "ratio": 0.0009673497854189157
+    "ratio": 0.0009028598026831065
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_en_arxiv",
     "is_catalogue": true,
-    "ratio": 0.0006840393571038364
+    "ratio": 0.0006384367353891515
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_es_multilingual_knowledge_questions_answers",
@@ -312,22 +332,27 @@
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_es_the_pile_europarl",
     "is_catalogue": true,
-    "ratio": 1.0
+    "ratio": 0.8528706704059289
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_es_multi_un_2",
     "is_catalogue": true,
-    "ratio": 0.1685870980516516
+    "ratio": 0.13213918010065828
+  },
+  {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_es_wikipedia",
+    "is_catalogue": true,
+    "ratio": 0.11177591199964516
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_es_uncorpus",
     "is_catalogue": true,
-    "ratio": 0.08337578585975496
+    "ratio": 0.06535024394559917
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_es_open_subtitles",
     "is_catalogue": true,
-    "ratio": 0.05482727459075726
+    "ratio": 0.04297381706728621
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_eu_ted_talks_iwslt",
@@ -341,6 +366,16 @@
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_eu_opus100",
+    "is_catalogue": true,
+    "ratio": 1.0
+  },
+  {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_eu_wikipedia",
+    "is_catalogue": true,
+    "ratio": 1.0
+  },
+  {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_eu_bsbasque",
     "is_catalogue": true,
     "ratio": 1.0
   },
@@ -382,32 +417,37 @@
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_fr_the_pile_europarl",
     "is_catalogue": true,
-    "ratio": 0.7859335829966579
+    "ratio": 0.6736573560965136
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_fr_bnl_historical_newspapers",
     "is_catalogue": true,
-    "ratio": 0.3452467721465367
+    "ratio": 0.2959258043641588
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_fr_project_gutenberg",
     "is_catalogue": true,
-    "ratio": 0.2249281803566087
+    "ratio": 0.192795582945941
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_fr_multi_un_2",
     "is_catalogue": true,
-    "ratio": 0.11119497181331853
+    "ratio": 0.09530997573277772
+  },
+  {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_fr_wikipedia",
+    "is_catalogue": true,
+    "ratio": 0.07553824554282113
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_fr_open_subtitles",
     "is_catalogue": true,
-    "ratio": 0.08211982604906452
+    "ratio": 0.07038842224859305
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_fr_uncorpus",
     "is_catalogue": true,
-    "ratio": 0.055566290204487195
+    "ratio": 0.04762824869312859
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_id_indonesian_frog_storytelling_corpus",
@@ -455,19 +495,24 @@
     "ratio": 1.0
   },
   {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_id_wikipedia",
+    "is_catalogue": true,
+    "ratio": 1.0
+  },
+  {
     "dataset_path": "bigscience-catalogue-lm-data/lm_id_open_subtitles",
     "is_catalogue": true,
-    "ratio": 0.6749399493483159
+    "ratio": 0.5262452162346918
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_id_indonesian_news_articles_2017",
     "is_catalogue": true,
-    "ratio": 0.5892827252280907
+    "ratio": 0.45945897180993234
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_id_indo4b",
     "is_catalogue": true,
-    "ratio": 0.010159438523340588
+    "ratio": 0.007921231996565867
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-as_ted_talks_iwslt",
@@ -481,6 +526,11 @@
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-as_opus100",
+    "is_catalogue": true,
+    "ratio": 1.0
+  },
+  {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_indic-as_wikipedia",
     "is_catalogue": true,
     "ratio": 1.0
   },
@@ -525,19 +575,24 @@
     "ratio": 1.0
   },
   {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_indic-bn_wikipedia",
+    "is_catalogue": true,
+    "ratio": 0.5526880151457253
+  },
+  {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-bn_samanantar",
     "is_catalogue": true,
-    "ratio": 0.6581260188395374
+    "ratio": 0.49359451441939267
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-bn_indic_nlp_corpus",
     "is_catalogue": true,
-    "ratio": 0.3633586330424826
+    "ratio": 0.27251897494183036
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-bn_bangla_lm",
     "is_catalogue": true,
-    "ratio": 0.039679084906320224
+    "ratio": 0.029759313697208863
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-gu_bloom",
@@ -565,6 +620,11 @@
     "ratio": 1.0
   },
   {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_indic-gu_wikipedia",
+    "is_catalogue": true,
+    "ratio": 1.0
+  },
+  {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-gu_samanantar",
     "is_catalogue": true,
     "ratio": 1.0
@@ -572,7 +632,7 @@
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-gu_indic_nlp_corpus",
     "is_catalogue": true,
-    "ratio": 0.8668274340606029
+    "ratio": 0.8022074689451625
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-hi_bloom",
@@ -610,24 +670,29 @@
     "ratio": 1.0
   },
   {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_indic-hi_wikipedia",
+    "is_catalogue": true,
+    "ratio": 0.5741074128966848
+  },
+  {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-hi_samanantar",
     "is_catalogue": true,
-    "ratio": 0.22404476954080793
+    "ratio": 0.17923581583556764
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-hi_lot_of_indic_tweets",
     "is_catalogue": true,
-    "ratio": 0.11338602491254138
+    "ratio": 0.09070882003272883
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-hi_iitb_english_hindi_corpus",
     "is_catalogue": true,
-    "ratio": 0.04547919393115102
+    "ratio": 0.036383355186112125
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-hi_indic_nlp_corpus",
     "is_catalogue": true,
-    "ratio": 0.031171924414152057
+    "ratio": 0.02493753955955461
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-kn_bloom",
@@ -645,6 +710,11 @@
     "ratio": 1.0
   },
   {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_indic-kn_wikipedia",
+    "is_catalogue": true,
+    "ratio": 1.0
+  },
+  {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-kn_samanantar",
     "is_catalogue": true,
     "ratio": 1.0
@@ -652,7 +722,7 @@
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-kn_indic_nlp_corpus",
     "is_catalogue": true,
-    "ratio": 0.42565210760579186
+    "ratio": 0.3156253464141807
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-ml_bloom",
@@ -685,14 +755,19 @@
     "ratio": 1.0
   },
   {
-    "dataset_path": "bigscience-catalogue-lm-data/lm_indic-ml_samanantar",
+    "dataset_path": "bigscience-catalogue-lm-data/lm_indic-ml_wikipedia",
     "is_catalogue": true,
     "ratio": 1.0
   },
   {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_indic-ml_samanantar",
+    "is_catalogue": true,
+    "ratio": 0.7541642484306987
+  },
+  {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-ml_indic_nlp_corpus",
     "is_catalogue": true,
-    "ratio": 0.22315756080543134
+    "ratio": 0.16751919240399366
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-mr_bloom",
@@ -720,6 +795,11 @@
     "ratio": 1.0
   },
   {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_indic-mr_wikipedia",
+    "is_catalogue": true,
+    "ratio": 1.0
+  },
+  {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-mr_samanantar",
     "is_catalogue": true,
     "ratio": 1.0
@@ -727,7 +807,7 @@
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-mr_indic_nlp_corpus",
     "is_catalogue": true,
-    "ratio": 0.6009987801951164
+    "ratio": 0.505816980844509
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-ne_unsupervised_cross_lingual_representation_learning_at_scale",
@@ -756,6 +836,11 @@
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-or_pib",
+    "is_catalogue": true,
+    "ratio": 1.0
+  },
+  {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_indic-or_wikipedia",
     "is_catalogue": true,
     "ratio": 1.0
   },
@@ -790,6 +875,11 @@
     "ratio": 1.0
   },
   {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_indic-pa_wikipedia",
+    "is_catalogue": true,
+    "ratio": 1.0
+  },
+  {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-pa_samanantar",
     "is_catalogue": true,
     "ratio": 1.0
@@ -797,7 +887,7 @@
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-pa_indic_nlp_corpus",
     "is_catalogue": true,
-    "ratio": 0.6803163571005495
+    "ratio": 0.6094292981051241
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-ta_bloom",
@@ -830,14 +920,19 @@
     "ratio": 1.0
   },
   {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_indic-ta_wikipedia",
+    "is_catalogue": true,
+    "ratio": 0.8446167273048568
+  },
+  {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-ta_samanantar",
     "is_catalogue": true,
-    "ratio": 1.0
+    "ratio": 0.7736946059018348
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-ta_indic_nlp_corpus",
     "is_catalogue": true,
-    "ratio": 0.13937736485061286
+    "ratio": 0.08162655096275981
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-te_bloom",
@@ -870,19 +965,24 @@
     "ratio": 1.0
   },
   {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_indic-te_wikipedia",
+    "is_catalogue": true,
+    "ratio": 0.7491554036742677
+  },
+  {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-te_samanantar",
     "is_catalogue": true,
-    "ratio": 0.9143297796469484
+    "ratio": 0.6857473347352112
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-te_lot_of_indic_tweets",
     "is_catalogue": true,
-    "ratio": 0.2862436489529288
+    "ratio": 0.21468273671469662
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-te_indic_nlp_corpus",
     "is_catalogue": true,
-    "ratio": 0.18067634800353488
+    "ratio": 0.13550726100265117
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-ur_bloom",
@@ -913,6 +1013,26 @@
     "dataset_path": "bigscience-catalogue-lm-data/lm_indic-ur_opus100",
     "is_catalogue": true,
     "ratio": 1.0
+  },
+  {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_indic-ur_wikipedia",
+    "is_catalogue": true,
+    "ratio": 1.0
+  },
+  {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_indic-ur_leipzig_wortschatz_urdu_newscrawl_2016_sentences",
+    "is_catalogue": true,
+    "ratio": 0.7415564277069956
+  },
+  {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_indic-ur_urdu-monolingual-corpus",
+    "is_catalogue": true,
+    "ratio": 0.600543239579367
+  },
+  {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_indic-ur_leipzig_wortschatz_urdu-pk_web_2019_sentences",
+    "is_catalogue": true,
+    "ratio": 0.26840740669633134
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_pt_bloom",
@@ -947,22 +1067,27 @@
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_pt_the_pile_europarl",
     "is_catalogue": true,
-    "ratio": 1.0
+    "ratio": 0.9452236196540407
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_pt_scielo",
     "is_catalogue": true,
-    "ratio": 0.9115967381613954
+    "ratio": 0.6937483571935495
+  },
+  {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_pt_wikipedia",
+    "is_catalogue": true,
+    "ratio": 0.3135145082094859
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_pt_open_subtitles",
     "is_catalogue": true,
-    "ratio": 0.11657726046300525
+    "ratio": 0.08871826713142067
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_pt_brwac",
     "is_catalogue": true,
-    "ratio": 0.024987274066033724
+    "ratio": 0.019015952568038688
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_vi_bloom",
@@ -1017,27 +1142,32 @@
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_vi_vntq_corpus_big",
     "is_catalogue": true,
-    "ratio": 1.0
+    "ratio": 0.9670096014771583
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_vi_vinbigdata_mt_vlsp_2020",
     "is_catalogue": true,
-    "ratio": 0.8784726727861725
+    "ratio": 0.7076062624918626
+  },
+  {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_vi_wikipedia",
+    "is_catalogue": true,
+    "ratio": 0.5011990946315965
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_vi_vietai_sat",
     "is_catalogue": true,
-    "ratio": 0.41981888379825477
+    "ratio": 0.3381624500006469
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_vi_vinbigdata_monolingual_vlsp_2020",
     "is_catalogue": true,
-    "ratio": 0.08252069979253938
+    "ratio": 0.06647009721226121
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_vi_binhvq_news_corpus",
     "is_catalogue": true,
-    "ratio": 0.010268121976569122
+    "ratio": 0.008270931629103945
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_zh_bloom",
@@ -1045,27 +1175,27 @@
     "ratio": 1.0
   },
   {
-    "dataset_path": "bigscience-catalogue-lm-data/lm_zh_multilingual_knowledge_questions_answers",
+    "dataset_path": "bigscience-catalogue-lm-data/lm_zh-CN_multilingual_knowledge_questions_answers",
     "is_catalogue": true,
     "ratio": 1.0
   },
   {
-    "dataset_path": "bigscience-catalogue-lm-data/lm_zh_multilingual_knowledge_questions_answers",
+    "dataset_path": "bigscience-catalogue-lm-data/lm_zh-HK_multilingual_knowledge_questions_answers",
     "is_catalogue": true,
     "ratio": 1.0
   },
   {
-    "dataset_path": "bigscience-catalogue-lm-data/lm_zh_multilingual_knowledge_questions_answers",
+    "dataset_path": "bigscience-catalogue-lm-data/lm_zh-TW_multilingual_knowledge_questions_answers",
     "is_catalogue": true,
     "ratio": 1.0
   },
   {
-    "dataset_path": "bigscience-catalogue-lm-data/lm_zh_qedcorpus",
+    "dataset_path": "bigscience-catalogue-lm-data/lm_zhs_qedcorpus",
     "is_catalogue": true,
     "ratio": 1.0
   },
   {
-    "dataset_path": "bigscience-catalogue-lm-data/lm_zh_qedcorpus",
+    "dataset_path": "bigscience-catalogue-lm-data/lm_zht_qedcorpus",
     "is_catalogue": true,
     "ratio": 1.0
   },
@@ -1087,50 +1217,40 @@
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_zh_open_subtitles",
     "is_catalogue": true,
-    "ratio": 0.3737104001992545
+    "ratio": 0.26693600094192993
+  },
+  {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_zh-cn_wikipedia",
+    "is_catalogue": true,
+    "ratio": 0.25339048911940526
+  },
+  {
+    "dataset_path": "bigscience-catalogue-lm-data/lm_zh-tw_wikipedia",
+    "is_catalogue": true,
+    "ratio": 0.25339048911940526
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_zh_multi_un_2",
     "is_catalogue": true,
-    "ratio": 0.24308880901954646
+    "ratio": 0.1736348641055126
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_zh_uncorpus",
     "is_catalogue": true,
-    "ratio": 0.14541983169653414
+    "ratio": 0.10387130866581316
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_zh_du_reader",
     "is_catalogue": true,
-    "ratio": 0.09803329543922991
+    "ratio": 0.07002378266634865
   },
   {
     "dataset_path": "bigscience-catalogue-lm-data/lm_zh_wudaocorpora",
     "is_catalogue": true,
-    "ratio": 0.0016367769125170478
+    "ratio": 0.0011691263695857172
   },
   {
-    "dataset_path": "bigscience-catalogue-lm-data/lm_indic-as_wikipedia",
-    "is_catalogue": true,
-    "ratio": 1.0
-  },
-  {
-    "dataset_path": "bigscience-catalogue-lm-data/lm_indic-or_wikipedia",
-    "is_catalogue": true,
-    "ratio": 0.0016367769125170478
-  },
-  {
-    "dataset_path": "bigscience-catalogue-lm-data/lm_indic-ur_wikipedia",
-    "is_catalogue": true,
-    "ratio": 0.0016367769125170478
-  },
-  {
-    "dataset_path": "bigscience-catalogue-lm-data/lm_eu_bsbasque",
-    "is_catalogue": true,
-    "ratio": 0.0016367769125170478
-  },
-  {
-    "dataset_path": "/gpfsscratch/rech/six/commun/tokenizer/dataset/tokenization_nigercongo/tokenization_nigercongo_fixed.jsonl",
+    "dataset_path": "bigscience-catalogue-lm-data/tokenization_nigercongo",
     "is_catalogue": true,
     "ratio": 1.0
   }
