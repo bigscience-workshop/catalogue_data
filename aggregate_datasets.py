@@ -260,40 +260,40 @@ def get_size(ds: Dataset) -> int:
 
 def load_datasets(dset_ratios: List, num_proc: int, split: str, seed: SeedSequence) -> List[Dataset]:
     logger.info("Start load_datasets")
-    dsets = [
-        ds
-        for ds in utils.tqdm(
-            [
-                load_single_dataset((dset_ratio, split, child_seed, num_proc))
-                for dset_ratio, child_seed in zip(dset_ratios, seed.spawn(len(dset_ratios)))
-            ],
-            total=len(dset_ratios),
-            unit="ba",
-            disable=bool(utils.logging.get_verbosity() == utils.logging.NOTSET),
-            desc="Loading dataset",
-        )
-        if ds is not None
-    ]
+    # dsets = [
+    #     ds
+    #     for ds in utils.tqdm(
+    #         [
+    #             load_single_dataset((dset_ratio, split, child_seed, num_proc))
+    #             for dset_ratio, child_seed in zip(dset_ratios, seed.spawn(len(dset_ratios)))
+    #         ],
+    #         total=len(dset_ratios),
+    #         unit="ba",
+    #         disable=bool(utils.logging.get_verbosity() == utils.logging.NOTSET),
+    #         desc="Loading dataset",
+    #     )
+    #     if ds is not None
+    # ]
 
-    # # Parallel version
-    # with multiprocessing.Pool(num_proc) as pool:
-    #     dsets = [
-    #         ds
-    #         for ds in utils.tqdm(
-    #             pool.imap(
-    #                 load_datasets,
-    #                 [
-    #                     (dset_ratio, split, child_seed, 1)
-    #                     for dset_ratio, child_seed in zip(dset_ratios, seed.spawn(len(dset_ratios)))
-    #                 ],
-    #             ),
-    #             total=len(dset_ratios),
-    #             unit="ba",
-    #             disable=bool(utils.logging.get_verbosity() == utils.logging.NOTSET),
-    #             desc="Loading dataset",
-    #         )
-    #         if ds is not None
-    #     ]
+    # Parallel version
+    with multiprocessing.Pool(num_proc) as pool:
+        dsets = [
+            ds
+            for ds in utils.tqdm(
+                pool.imap(
+                    load_datasets,
+                    [
+                        (dset_ratio, split, child_seed, 1)
+                        for dset_ratio, child_seed in zip(dset_ratios, seed.spawn(len(dset_ratios)))
+                    ],
+                ),
+                total=len(dset_ratios),
+                unit="ba",
+                disable=bool(utils.logging.get_verbosity() == utils.logging.NOTSET),
+                desc="Loading dataset",
+            )
+            if ds is not None
+        ]
     return dsets
 
 
