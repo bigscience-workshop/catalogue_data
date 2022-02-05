@@ -217,6 +217,7 @@ def shard_dataset(ds, max_size=10_000_000_000):
     for shard_id in range(number_shards):
         logger.info(f"Shard {shard_id}/{number_shards}")
         shard = ds.shard(num_shards=number_shards, index=shard_id)
+        shard = shard.flatten_indices()
         shards.append(shard)
     return shards
 
