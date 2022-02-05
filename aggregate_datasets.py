@@ -144,19 +144,18 @@ def process_single_catalogue_meta_(meta: Optional[Union[str, Dict]], source_data
     return str(meta)
 
 
-def process_catalogue_meta(batch, source_dataset=None):
+def process_catalogue_meta(batch, source_dataset=None, columns_not_in_meta_or_text=None):
     num_elts = len(batch[next(iter(batch.keys()))])
     default_meta = process_single_catalogue_meta_(None, source_dataset)
 
     # If other columns exist we put them into meta
-    columns_not_in_meta = [column_name for column_name in batch if column_name not in ["text", "meta"]]
-    if columns_not_in_meta:
+    if columns_not_in_meta_or_text:
         if "meta" not in batch:
             batch["meta"] = [{} for _ in range(num_elts)]
         batch["meta"] = [
             {
                 **(batch["meta"][index]),
-                **{column_name: batch[column_name][index] for column_name in columns_not_in_meta}
+                **{column_name: batch[column_name][index] for column_name in columns_not_in_meta_or_text}
             }
             for index in range(num_elts)
         ]
@@ -164,9 +163,8 @@ def process_catalogue_meta(batch, source_dataset=None):
     if "meta" in batch:
         batch["meta"] = [process_single_catalogue_meta_(meta, source_dataset) for meta in batch["meta"]]
     else:
-
         batch["meta"] = [default_meta for _ in range(num_elts)]
-    return batch
+    return {"text": batch["text"], "meta": batch["meta"]}
 
 def load_single_dataset(args):
     try:
@@ -199,11 +197,13 @@ def load_single_dataset(args):
 
         # Process meta: add source_dataset and cast dict to str
         if is_catalogue:
+            columns_not_in_meta_or_text = [column_name for column_name in ds.column_names if column_name not in ["text", "meta"]]
             ds = ds.map(
-                partial(process_catalogue_meta, source_dataset=ds_name.split("/")[-1]),
+                partial(process_catalogue_meta, source_dataset=ds_name.split("/")[-1], columns_not_in_meta_or_text=columns_not_in_meta_or_text),
                 batched=True,
                 num_proc=num_proc,
-                desc=f"Processing {ds_name}"
+                desc=f"Processing {ds_name}",
+                remove_columns=columns_not_in_meta_or_text
             )
         else:
             # collapse all meta data in "meta" column
