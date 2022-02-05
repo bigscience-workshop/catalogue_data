@@ -207,18 +207,38 @@ def compute_number_of_shards(ds, max_size=10_000_000_000):
     number_shards = ceil(ds_nbytes / max_size)
     return number_shards if number_shards < len(ds) else len(ds)
 
+def get_shard(ds, shard_id: int, number_shards: int) -> Dataset:
+    logger.info(f"Shard {shard_id}/{number_shards}")
+    shard = ds.shard(num_shards=number_shards, index=shard_id)
+    return shard.flatten_indices()
 
-def shard_dataset(ds, max_size=10_000_000_000):
+def shard_dataset(ds, num_proc, max_size=10_000_000_000):
     number_shards = compute_number_of_shards(ds, max_size=max_size)
     if number_shards <= 1:
         return [ds]
-    shards = []
     logger.info(f"Shard dataset in {number_shards} shards")
-    for shard_id in range(number_shards):
-        logger.info(f"Shard {shard_id}/{number_shards}")
-        shard = ds.shard(num_shards=number_shards, index=shard_id)
-        shard = shard.flatten_indices()
-        shards.append(shard)
+    # shards = []
+    # for shard_id in range(number_shards):
+    #     shard = get_shard(ds, shard_id=shard_id, number_shards=number_shards)
+    #     shards.append(shard)
+
+    # Parallel version
+    with multiprocessing.Pool(min(number_shards, num_proc)) as pool:
+        shards = [
+            ds
+            for ds in utils.tqdm(
+                pool.imap(
+                    partial(get_shard, ds=ds, number_shards=number_shards),
+                    range(number_shards),
+                ),
+                total=number_shards,
+                unit="ba",
+                disable=bool(utils.logging.get_verbosity() == utils.logging.NOTSET),
+                desc="Sharding dataset",
+            )
+            if ds is not None
+        ]
+
     return shards
 
 
@@ -327,7 +347,7 @@ def main():
     dset = dset.shuffle(seed=seed)
     # Shard
     logger.info("Start shard_dataset")
-    shards = shard_dataset(dset, max_size=args.shard_max_size)
+    shards = shard_dataset(dset, num_proc=args.load_num_proc, max_size=args.shard_max_size)
     # Save
     logger.info("Start: save dataset")
     save_shards(shards, path=args.save_path, num_proc=args.save_num_proc, batch_size=args.save_batch_size)
