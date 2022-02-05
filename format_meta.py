@@ -1,10 +1,18 @@
 import argparse
 import json
+import logging
 from pathlib import Path
 
 from numpy.random import SeedSequence
 
 from .aggregate_datasets import load_single_dataset
+
+logger = logging.getLogger()
+handler = logging.StreamHandler()
+formatter = logging.Formatter("%(asctime)s - %(name)-15s - %(levelname)-8s - %(message)s")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 def get_args():
     parser = argparse.ArgumentParser()
