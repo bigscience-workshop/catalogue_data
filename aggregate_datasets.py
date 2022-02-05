@@ -132,6 +132,27 @@ def collapse_meta(ds: Dataset, num_proc: int):
     return ds.map(collapse_meta_, batched=True, num_proc=num_proc, remove_columns=column_names_to_remove)
 
 
+def process_single_catalogue_meta_(meta: Optional[Union[str, Dict]], source_dataset) -> str:
+    if meta is None:
+        meta = {}
+    elif isinstance(meta, str):
+        meta = eval(meta)
+    try:
+        meta["source_dataset"] = source_dataset
+    except:
+        raise ValueError(f"Got {meta} of type {type(meta)}. Expected an dictionary. This is from {source_dataset}")
+    return str(meta)
+
+
+def process_catalogue_meta(batch, source_dataset=None):
+    if "meta" in batch:
+        batch["meta"] = [process_single_catalogue_meta_(meta, source_dataset) for meta in batch["meta"]]
+    else:
+        num_elts = len(batch[next(iter(batch.keys()))])
+        default_meta = process_single_catalogue_meta_(None, source_dataset)
+        batch["meta"] = [default_meta for _ in range(num_elts)]
+    return batch
+
 def load_single_dataset(args):
     try:
         ds_ratio, split, seed, num_proc = args
@@ -163,29 +184,8 @@ def load_single_dataset(args):
 
         # Process meta: add source_dataset and cast dict to str
         if is_catalogue:
-
-            def process_single_meta_(meta: Optional[Union[str, Dict]], source_dataset) -> str:
-                if meta is None:
-                    meta = {}
-                elif isinstance(meta, str):
-                    meta = eval(meta)
-                try:
-                    meta["source_dataset"] = source_dataset
-                except:
-                    raise ValueError(f"Got {meta} of type {type(meta)}. Expected an dictionary. This is from {source_dataset}")
-                return str(meta)
-
-            def process_meta(batch, source_dataset=None):
-                if "meta" in batch:
-                    batch["meta"] = [process_single_meta_(meta, source_dataset) for meta in batch["meta"]]
-                else:
-                    num_elts = len(batch[next(iter(batch.keys()))])
-                    default_meta = process_single_meta_(None, source_dataset)
-                    batch["meta"] = [default_meta for _ in range(num_elts)]
-                return batch
-
             ds = ds.map(
-                partial(process_meta, source_dataset=ds_name.split("/")[-1]),
+                partial(process_catalogue_meta, source_dataset=ds_name.split("/")[-1]),
                 batched=True,
             )
         else:
