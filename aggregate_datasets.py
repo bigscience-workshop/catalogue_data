@@ -145,11 +145,26 @@ def process_single_catalogue_meta_(meta: Optional[Union[str, Dict]], source_data
 
 
 def process_catalogue_meta(batch, source_dataset=None):
+    num_elts = len(batch[next(iter(batch.keys()))])
+    default_meta = process_single_catalogue_meta_(None, source_dataset)
+
+    # If other columns exist we put them into meta
+    columns_not_in_meta = [column_name for column_name in batch if column_name not in ["text", "meta"]]
+    if columns_not_in_meta:
+        if "meta" not in batch:
+            batch["meta"] = [{} for _ in range(num_elts)]
+        batch["meta"] = [
+            {
+                **(batch["meta"][index]),
+                **{column_name: batch[column_name][index] for column_name in columns_not_in_meta}
+            }
+            for index in range(num_elts)
+        ]
+
     if "meta" in batch:
         batch["meta"] = [process_single_catalogue_meta_(meta, source_dataset) for meta in batch["meta"]]
     else:
-        num_elts = len(batch[next(iter(batch.keys()))])
-        default_meta = process_single_catalogue_meta_(None, source_dataset)
+
         batch["meta"] = [default_meta for _ in range(num_elts)]
     return batch
 
