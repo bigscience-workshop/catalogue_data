@@ -11,7 +11,7 @@ def get_args():
     # Load
     parser.add_argument(
         "--dataset_ratios_path",
-        type=str,
+        type=Path,
         required=True,
         help="path to JSON file containing input dataset ratios. Values ares dictionary: {'dataset_path': str, 'is_catalogue': bool, 'ratio': float}",
     )
@@ -21,9 +21,6 @@ def get_args():
     )
     # Parse args
     args = parser.parse_args()
-    # Post-process args
-    args.dataset_ratios_path = Path(args.dataset_ratios_path)
-    args.save_path = Path(args.save_path)
     return args
 
 def main():
