@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from functools import partial
 from math import ceil
 from pathlib import Path
+from typing import Dict, Union, Optional
 
 import datasets
 from dotenv import load_dotenv
@@ -163,19 +164,30 @@ def load_datasets(args):
         # Process meta: add source_dataset and cast dict to str
         if is_catalogue:
 
-            def process_meta(item, source_dataset=None):
-                if "meta" not in item:
-                    item["meta"] = {}
-                elif isinstance(item["meta"], str):
-                    item["meta"] = eval(item["meta"])
+            def process_single_meta_(meta: Optional[Union[str, Dict]], source_dataset) -> str:
+                if meta is None:
+                    meta = {}
+                elif isinstance(meta, str):
+                    meta = eval(meta)
                 try:
-                    item["meta"]["source_dataset"] = source_dataset
+                    meta["source_dataset"] = source_dataset
                 except:
-                    raise ValueError(f"Got {item['meta']} of type {type(item['meta'])}. Expected an dictionary. This is from {source_dataset}")
-                item["meta"] = str(item["meta"])
-                return item
+                    raise ValueError(f"Got {meta} of type {type(meta)}. Expected an dictionary. This is from {source_dataset}")
+                return str(meta)
 
-            ds = ds.map(partial(process_meta, source_dataset=ds_name.split("/")[-1]))
+            def process_meta(batch, source_dataset=None):
+                if "meta" in batch:
+                    batch["meta"] = [process_single_meta_(meta, source_dataset) for meta in batch["meta"]]
+                else:
+                    num_elts = len(batch[next(iter(batch.keys()))])
+                    default_meta = process_single_meta_(None, source_dataset)
+                    batch["meta"] = [default_meta for _ in range(num_elts)]
+                return batch
+
+            ds = ds.map(
+                partial(process_meta, source_dataset=ds_name.split("/")[-1]),
+                batched=True,
+            )
         else:
             # collapse all meta data in "meta" column
             ds = collapse_meta(ds, num_proc=1)
