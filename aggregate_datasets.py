@@ -225,7 +225,8 @@ def compute_number_of_shards(ds, max_size=10_000_000_000):
 def get_shard(shard_id: int, number_shards: int, ds: Dataset) -> Dataset:
     logger.info(f"Shard {shard_id}/{number_shards}")
     shard = ds.shard(num_shards=number_shards, index=shard_id)
-    return shard.flatten_indices()
+    return shard
+    # return shard.flatten_indices()
 
 def shard_dataset(ds, num_proc, max_size=10_000_000_000):
     number_shards = compute_number_of_shards(ds, max_size=max_size)
