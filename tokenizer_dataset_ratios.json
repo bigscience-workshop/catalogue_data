@@ -1257,6 +1257,6 @@
   {
     "dataset_path": "/gpfswork/rech/six/commun/train_tokenizer/datasets/bigscience-catalogue-lm-data/lm_code_github/data",
     "is_catalogue": true,
-    "ratio": 1.0
+    "ratio": 0.2
   }
 ]
