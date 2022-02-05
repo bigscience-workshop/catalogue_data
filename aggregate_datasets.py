@@ -281,7 +281,7 @@ def load_datasets(dset_ratios: List, num_proc: int, split: str, seed: SeedSequen
             ds
             for ds in utils.tqdm(
                 pool.imap(
-                    load_datasets,
+                    load_single_dataset,
                     [
                         (dset_ratio, split, child_seed, 1)
                         for dset_ratio, child_seed in zip(dset_ratios, seed.spawn(len(dset_ratios)))

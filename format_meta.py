@@ -42,9 +42,10 @@ def main():
     with open(args.dataset_ratios_path, "r") as fi:
         ratios = json.load(fi)
     seed = SeedSequence(42)
-    seed = seed.spawn(len(ratios))
+    seeds = seed.spawn(len(ratios))
 
     ds_ratio = ratios[args.dataset_index]
+    seed = seeds[args.dataset_index]
     load_single_dataset((ds_ratio, args.split, seed, args.num_proc))
 
 if __name__ == "__main__":
