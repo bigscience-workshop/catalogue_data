@@ -29,4 +29,4 @@ python aggregate_datasets.py \
     --shard_max_size 10_000_000_000 \
     --save_path $SAVE_DATASET_PATH \
     --save_num_proc 80 \
-    --save_batch_size 1000
+    --save_batch_size 100

@@ -260,9 +260,22 @@ def shard_dataset(ds, num_proc, max_size=10_000_000_000):
 def save_shards(shards, path=Path("."), num_proc=1, batch_size=None):
     path.mkdir(parents=True, exist_ok=True)
     num_shards = len(shards)
-    for i, shard in enumerate(shards):
-        save_dataset(shard, path=path, shard_id=i, num_shards=num_shards, num_proc=num_proc, batch_size=batch_size)
+    # for i, shard in enumerate(shards):
+    #     save_dataset(shard, path=path, shard_id=i, num_shards=num_shards, num_proc=num_proc, batch_size=batch_size)
 
+    # Parallel version
+    with multiprocessing.Pool(min(num_shards, num_proc)) as pool:
+        pool.map(
+            lambda id_and_shard: save_dataset(
+                id_and_shard[2],
+                path=path,
+                shard_id=id_and_shard[0],
+                num_shards=num_shards,
+                num_proc=num_proc,
+                batch_size=batch_size
+            ),
+            enumerate(shards)
+        )
 
 def save_dataset(shard: Dataset, path=Path("."), shard_id=0, num_shards=1, num_proc=1, batch_size=None):
     width = int(log10(num_shards)) + 1
