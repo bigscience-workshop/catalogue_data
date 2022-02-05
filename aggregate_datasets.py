@@ -187,10 +187,11 @@ def load_single_dataset(args):
             ds = ds.map(
                 partial(process_catalogue_meta, source_dataset=ds_name.split("/")[-1]),
                 batched=True,
+                num_proc=num_proc
             )
         else:
             # collapse all meta data in "meta" column
-            ds = collapse_meta(ds, num_proc=1)
+            ds = collapse_meta(ds, num_proc=num_proc)
 
         return ds
     except BaseException as err:
