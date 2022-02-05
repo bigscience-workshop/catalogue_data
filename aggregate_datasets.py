@@ -296,34 +296,27 @@ def load_datasets(dset_ratios: List, num_proc: int, split: str, seed: SeedSequen
     return dsets
 
 
-def main(
-    dataset_ratios_path=None,
-    split="train",
-    seed=0,
-    load_num_proc=1,
-    shard_max_size=10_000_000_000,
-    save_path=Path("."),
-    save_num_proc=1,
-    save_batch_size=None,
-):
+def main():
+    args = parse_args()
+
     # Init
     # Env variables
     if Path(".env").exists:
         load_dotenv()
     # Random generator
-    seed = SeedSequence(seed)
+    seed = SeedSequence(42)
     # Read dataset ratios
-    with dataset_ratios_path.open() as f:
+    with args.dataset_ratios_path.open() as f:
         dset_ratios = json.load(f)
     # Load datasets
-    dsets = load_datasets(dset_ratios, load_num_proc, split, seed)
+    dsets = load_datasets(dset_ratios, args.load_num_proc, args.split, seed)
 
     if not dsets:
         logger.info(f"No datasets to be aggregated")
         return
     # Concatenate datasets
     logger.info("Start concatenate_datasets")
-    dset = concatenate_datasets(dsets, split=split)
+    dset = concatenate_datasets(dsets, split=args.split)
     del dsets
     logger.info(f"Estimated size: {get_size(dset)} bytes")
     # Shuffle
@@ -331,10 +324,10 @@ def main(
     dset = dset.shuffle(seed=seed)
     # Shard
     logger.info("Start shard_dataset")
-    shards = shard_dataset(dset, max_size=shard_max_size)
+    shards = shard_dataset(dset, max_size=args.shard_max_size)
     # Save
     logger.info("Start: save dataset")
-    save_shards(shards, path=save_path, num_proc=save_num_proc, batch_size=save_batch_size)
+    save_shards(shards, path=args.save_path, num_proc=args.save_num_proc, batch_size=args.save_batch_size)
 
 
 if __name__ == "__main__":
