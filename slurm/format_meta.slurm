@@ -19,6 +19,8 @@ CATALOGUE_DATA_REPO=$WORK/code/big_science/catalogue_data
 DATASET_RATIOS_FILE=$CATALOGUE_DATA_REPO/tokenizer_dataset_ratios.json
 pushd $CATALOGUE_DATA_REPO
 
+export HF_DATASETS_OFFLINE=1
+
 cd ..
 python -m catalogue_data.format_meta \
     --dataset_ratios_path $DATASET_RATIOS_FILE \
