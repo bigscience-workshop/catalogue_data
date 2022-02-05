@@ -26,7 +26,7 @@ def get_args():
 def main():
     args = get_args()
 
-    with open(args.dataset_ratios_path, "f") as fi:
+    with open(args.dataset_ratios_path, "r") as fi:
         ratios = json.load(fi)
     seed = SeedSequence(42)
     seed = seed.spawn(len(ratios))
