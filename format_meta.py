@@ -15,6 +15,11 @@ def get_args():
         required=True,
         help="path to JSON file containing input dataset ratios. Values ares dictionary: {'dataset_path': str, 'is_catalogue': bool, 'ratio': float}",
     )
+    parser.add_argument(
+        "--dataset_index",
+        type=int,
+        required=True,
+    )
     parser.add_argument("--split", type=str, default="train", help="split name, default 'train'")
     parser.add_argument(
         "--num_proc", type=int, default=1, help="number of procs to use for loading datasets, default 1"
