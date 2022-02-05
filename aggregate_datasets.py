@@ -187,7 +187,8 @@ def load_single_dataset(args):
             ds = ds.map(
                 partial(process_catalogue_meta, source_dataset=ds_name.split("/")[-1]),
                 batched=True,
-                num_proc=num_proc
+                num_proc=num_proc,
+                desc=f"Processing {ds_name}"
             )
         else:
             # collapse all meta data in "meta" column
