@@ -7,7 +7,7 @@ from contextlib import contextmanager
 from functools import partial
 from math import ceil
 from pathlib import Path
-from typing import Dict, Union, Optional
+from typing import Dict, Union, Optional, List
 
 import datasets
 from dotenv import load_dotenv
@@ -132,9 +132,9 @@ def collapse_meta(ds: Dataset, num_proc: int):
     return ds.map(collapse_meta_, batched=True, num_proc=num_proc, remove_columns=column_names_to_remove)
 
 
-def load_datasets(args):
+def load_single_dataset(args):
     try:
-        ds_ratio, split, seed = args
+        ds_ratio, split, seed, num_proc = args
         ds_name = ds_ratio["dataset_path"]
         ratio = ds_ratio["ratio"]
         is_catalogue = ds_ratio["is_catalogue"]
@@ -257,6 +257,44 @@ def get_size(ds: Dataset) -> int:
     else:
         return ds.data.nbytes
 
+def load_datasets(dset_ratios: List, num_proc: int, split: str, seed: SeedSequence) -> List[Dataset]:
+    logger.info("Start load_datasets")
+    dsets = [
+        ds
+        for ds in utils.tqdm(
+            [
+                load_single_dataset((dset_ratio, split, child_seed, num_proc))
+                for dset_ratio, child_seed in zip(dset_ratios, seed.spawn(len(dset_ratios)))
+            ],
+            total=len(dset_ratios),
+            unit="ba",
+            disable=bool(utils.logging.get_verbosity() == utils.logging.NOTSET),
+            desc="Loading dataset",
+        )
+        if ds is not None
+    ]
+
+    # # Parallel version
+    # with multiprocessing.Pool(num_proc) as pool:
+    #     dsets = [
+    #         ds
+    #         for ds in utils.tqdm(
+    #             pool.imap(
+    #                 load_datasets,
+    #                 [
+    #                     (dset_ratio, split, child_seed, 1)
+    #                     for dset_ratio, child_seed in zip(dset_ratios, seed.spawn(len(dset_ratios)))
+    #                 ],
+    #             ),
+    #             total=len(dset_ratios),
+    #             unit="ba",
+    #             disable=bool(utils.logging.get_verbosity() == utils.logging.NOTSET),
+    #             desc="Loading dataset",
+    #         )
+    #         if ds is not None
+    #     ]
+    return dsets
+
 
 def main(
     dataset_ratios_path=None,
@@ -278,25 +316,8 @@ def main(
     with dataset_ratios_path.open() as f:
         dset_ratios = json.load(f)
     # Load datasets
-    logger.info("Start load_datasets")
-    with multiprocessing.Pool(load_num_proc) as pool:
-        dsets = [
-            ds
-            for ds in utils.tqdm(
-                pool.imap(
-                    load_datasets,
-                    [
-                        (dset_ratio, split, child_seed)
-                        for dset_ratio, child_seed in zip(dset_ratios, seed.spawn(len(dset_ratios)))
-                    ],
-                ),
-                total=len(dset_ratios),
-                unit="ba",
-                disable=bool(utils.logging.get_verbosity() == utils.logging.NOTSET),
-                desc="Loading dataset",
-            )
-            if ds is not None
-        ]
+    dsets = load_datasets(dset_ratios, load_num_proc, split, seed)
+
     if not dsets:
         logger.info(f"No datasets to be aggregated")
         return

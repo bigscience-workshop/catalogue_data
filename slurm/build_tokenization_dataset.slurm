@@ -25,7 +25,7 @@ pushd $CATALOGUE_DATA_REPO
 
 python aggregate_datasets.py \
     --dataset_ratios_path $DATASET_RATIOS_FILE \
-    --load_num_proc 20 \
+    --load_num_proc 80 \
     --shard_max_size 10_000_000_000 \
     --save_path $SAVE_DATASET_PATH \
     --save_num_proc 80 \
