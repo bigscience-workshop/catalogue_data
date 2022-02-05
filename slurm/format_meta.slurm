@@ -56,7 +56,6 @@ DATASETS_NAMES=(
 "'bigscience-catalogue-lm-data/lm_ca_viquiquad'"
 "'bigscience-catalogue-lm-data/lm_ca_xquad_ca'"
 "'bigscience-catalogue-lm-data/lm_en_a_million_news_headlines_abc_australia'"
-"'bigscience-catalogue-lm-data/lm_en_arxiv'"
 "'bigscience-catalogue-lm-data/lm_en_book_dash_books'"
 "'bigscience-catalogue-lm-data/lm_en_india_news_headlines_dataset'"
 "'bigscience-catalogue-lm-data/lm_en_multi_un_2'"
