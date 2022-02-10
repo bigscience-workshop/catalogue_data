@@ -285,8 +285,7 @@ def save_dataset(shard: Dataset, path=Path("."), shard_id=0, num_shards=1, num_p
             tmp_save_path,
             num_proc=num_proc,
             batch_size=batch_size,
-            compression="gzip",
-        )
+        ) # compression="gzip",
 
 
 @contextmanager
