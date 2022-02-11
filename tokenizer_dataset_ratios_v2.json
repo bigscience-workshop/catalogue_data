@@ -1255,7 +1255,7 @@
     "ratio": 0.11987665985918121
 },
 {
-    "dataset_path": "/gpfswork/rech/six/commun/train_tokenizer/datasets/bigscience-catalogue-lm-data/tokenization_nigercongo/data",
+    "dataset_path": "/gpfswork/rech/six/commun/train_tokenizer/datasets/bigscience-catalogue-lm-data/tokenization_nigercongo",
     "is_catalogue": true,
     "ratio": 1.0
 }

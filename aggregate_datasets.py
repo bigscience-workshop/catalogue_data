@@ -222,7 +222,7 @@ def compute_number_of_shards(ds, max_size=10_000_000_000):
     number_shards = ceil(ds_nbytes / max_size)
     return number_shards if number_shards < len(ds) else len(ds)
 
-def get_shard(shard_id: int, number_shards: int, ds: Dataset) -> Dataset:
+def get_shard(ds: Dataset, shard_id: int, number_shards: int) -> Dataset:
     logger.info(f"Shard {shard_id}/{number_shards}")
     shard = ds.shard(num_shards=number_shards, index=shard_id)
     return shard
@@ -276,7 +276,7 @@ def save_shards(shards, path=Path("."), num_proc=1, batch_size=None):
 
 def save_dataset(shard: Dataset, path=Path("."), shard_id=0, num_shards=1, num_proc=1, batch_size=None):
     width = int(log10(num_shards)) + 1
-    save_path = path / f"shard-{shard_id:0>{width}}-of-{num_shards:0>{width}}.jsonl.gz"
+    save_path = path / f"shard-{shard_id:0>{width}}-of-{num_shards:0>{width}}.jsonl"
     if save_path.exists():
         logger.info(f"Shard was already saved: {save_path}")
         return
