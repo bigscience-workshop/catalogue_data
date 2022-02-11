@@ -234,7 +234,7 @@ def shard_dataset(ds, num_proc, max_size=10_000_000_000):
     logger.info(f"Shard dataset in {number_shards} shards")
     shards = []
     for shard_id in range(number_shards):
-        shard = get_shard(ds, shard_id=shard_id, number_shards=number_shards)
+        shard = get_shard(shard_id=shard_id, number_shards=number_shards, ds=ds)
         shards.append(shard)
 
     # # Parallel version
