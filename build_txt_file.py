@@ -27,8 +27,8 @@ def main():
     dataset = load_dataset(args.dataset_path, data_files="**.jsonl.gz", split="train")
 
     with open(args.save_file, "w") as fo:
-        for text in tqdm(dataset["text"]):
-            fo.write(f"{text}\n")
+        for row in tqdm(dataset):
+            fo.write(f"{row['text']}\n")
 
 if __name__ == "__main__":
     main()
