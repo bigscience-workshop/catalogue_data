@@ -330,7 +330,8 @@ SAVE_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/meg-ds/$DATASET_NAM
 mkdir -p $(basename $SAVE_PATH)
 
 echo "Downloading ${DATASET_NAME}"
-HF_DATASETS_OFFLINE=1
+export HF_DATASETS_OFFLINE=1
+
 
 module load git-lfs
 module load unrar
