@@ -324,10 +324,26 @@ DATASETS_NAMES=(
 "/gpfswork/rech/six/commun/train_tokenizer/datasets/bigscience-catalogue-lm-data/tokenization_nigercongo"
 "/gpfswork/rech/six/commun/train_tokenizer/datasets/bigscience-catalogue-lm-data/lm_code_github/data"
 )
-DATASET_NAME=${DATASETS_NAMES[$SLURM_ARRAY_TASK_ID]}
+DATASET_PATH=${DATASETS_NAMES[$SLURM_ARRAY_TASK_ID]}
+
+if [[ DATASET_PATH = /gpfswork/rech/six/commun/train_tokenizer/datasets/* ]]
+then
+    if [[ DATASET_PATH = */data ]]
+    then
+        DATASET_NAME=${$DATASET_PATH:51:-5}
+    else
+        DATASET_NAME=${$DATASET_PATH:51}
+    fi
+fi
 
 SAVE_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/meg-ds/$DATASET_NAME/data.jsonl
 mkdir -p $(dirname $SAVE_PATH)
+
+if [[ -f "$SAVE_PATH" ]];
+then
+    echo "$SAVE_PATH exists."
+    exit 0
+fi
 
 echo "Downloading ${DATASET_NAME}"
 export HF_DATASETS_OFFLINE=1
@@ -335,4 +351,4 @@ export HF_DATASETS_OFFLINE=1
 
 module load git-lfs
 module load unrar
-python -c "from datasets import load_dataset; ds = load_dataset(\"$DATASET_NAME\", use_auth_token=True, split=\"train\"); ds.to_json(\"$SAVE_PATH\", num_proc=40)"
+python -c "from datasets import load_dataset; ds = load_dataset(\"$DATASET_PATH\", use_auth_token=True, split=\"train\"); ds.to_json(\"$SAVE_PATH\", num_proc=40)"
