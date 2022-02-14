@@ -326,14 +326,16 @@ DATASETS_NAMES=(
 )
 DATASET_PATH=${DATASETS_NAMES[$SLURM_ARRAY_TASK_ID]}
 
-if [[ DATASET_PATH = /gpfswork/rech/six/commun/train_tokenizer/datasets/* ]]
+if [[ $DATASET_PATH=/gpfswork/rech/six/commun/train_tokenizer/datasets/* ]]
 then
-    if [[ DATASET_PATH = */data ]]
+    if [[ $DATASET_PATH=*/data ]]
     then
         DATASET_NAME=${$DATASET_PATH:51:-5}
     else
         DATASET_NAME=${$DATASET_PATH:51}
     fi
+else
+    DATASET_NAME=$DATASET_PATH
 fi
 
 SAVE_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/meg-ds/$DATASET_NAME/data.jsonl
