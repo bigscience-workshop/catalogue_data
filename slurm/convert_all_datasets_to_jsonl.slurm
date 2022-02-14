@@ -333,4 +333,4 @@ HF_DATASETS_OFFLINE=1
 
 module load git-lfs
 module load unrar
-python -c "from datasets import load_dataset; ds = load_dataset("$DATASET_NAME", use_auth_token=True); ds.to_json(tmp_save_path, num_proc=num_proc)"
+python -c "from datasets import load_dataset; ds = load_dataset("$DATASET_NAME", use_auth_token=True); ds.to_json("$SAVE_PATH", num_proc=40)"
