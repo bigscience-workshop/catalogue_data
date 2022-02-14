@@ -327,7 +327,7 @@ DATASETS_NAMES=(
 DATASET_NAME=${DATASETS_NAMES[$SLURM_ARRAY_TASK_ID]}
 
 SAVE_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/meg-ds/$DATASET_NAME/data.jsonl
-mkdir -p $(basename $SAVE_PATH)
+mkdir -p $(dirname $SAVE_PATH)
 
 echo "Downloading ${DATASET_NAME}"
 export HF_DATASETS_OFFLINE=1
