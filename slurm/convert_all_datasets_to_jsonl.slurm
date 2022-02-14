@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=onvert_all_catalogue_to_jsonl
+#SBATCH --job-name=convert_all_catalogue_to_jsonl
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1          # crucial - only 1 task per dist per node!
 #SBATCH --cpus-per-task=40         # number of cores per tasks
@@ -333,4 +333,4 @@ HF_DATASETS_OFFLINE=1
 
 module load git-lfs
 module load unrar
-python -c "from datasets import load_dataset; ds = load_dataset("'$DATASET_NAME'", use_auth_token=True); ds.to_json("'$SAVE_PATH'", num_proc=40)"
+python -c "from datasets import load_dataset; ds = load_dataset(\"$DATASET_NAME\", use_auth_token=True); ds.to_json(\"$SAVE_PATH\", num_proc=40)"
