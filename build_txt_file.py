@@ -24,7 +24,7 @@ def get_args():
 def main():
     args = get_args()
 
-    dataset = load_dataset(args.dataset_path, data_files="**.jsonl.gz", split="train")
+    dataset = load_dataset(args.dataset_path, data_files="**.jsonl", split="train")
 
     with open(args.save_file, "w") as fo:
         for row in tqdm(dataset):

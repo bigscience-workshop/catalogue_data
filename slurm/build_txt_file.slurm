@@ -20,5 +20,5 @@ export HF_DATASETS_OFFLINE=1
 pushd $CATALOGUE_DATA_REPO
 
 python build_txt_file.py \
-  --dataset-path /gpfsscratch/rech/six/commun/tokenizer/dataset/tokenization_dataset \
-  --save-file /gpfsscratch/rech/six/commun/tokenizer/dataset/tokenization_dataset/data.txt
+  --dataset-path /gpfsscratch/rech/six/commun/tokenizer/dataset/tokenization_dataset_v2 \
+  --save-file /gpfsscratch/rech/six/commun/tokenizer/dataset/tokenization_dataset_v2/data.txt
