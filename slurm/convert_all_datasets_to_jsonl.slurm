@@ -338,7 +338,7 @@ else
     DATASET_NAME=$DATASET_PATH
 fi
 
-SAVE_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/meg-ds/$DATASET_NAME/data.jsonl
+SAVE_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/jsonl/$DATASET_NAME/data.jsonl
 mkdir -p $(dirname $SAVE_PATH)
 
 if [[ -f "$SAVE_PATH" ]];
