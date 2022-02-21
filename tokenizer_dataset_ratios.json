@@ -1,6 +1,6 @@
 [
   {
-    "dataset_path": "/gpfswork/rech/six/uty16tp/dataset/tokenization/bigscience-catalogue-lm-data/lm_ar_multilingual_knowledge_questions_answers",
+    "dataset_path": "bigscience-catalogue-lm-data/lm_ar_multilingual_knowledge_questions_answers",
     "is_catalogue": true,
     "ratio": 1.22369125e-06
   },
