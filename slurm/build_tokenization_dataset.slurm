@@ -17,7 +17,7 @@ conda activate thomas_data_tooling # Debug deepspeed temporarily
 CATALOGUE_DATA_REPO=$WORK/code/big_science/catalogue_data
 DATASET_RATIOS_FILE=$CATALOGUE_DATA_REPO/tokenizer_dataset_ratios.json
 
-SAVE_DATASET_PATH=$six_ALL_CCFRSCRATCH/tokenizer/dataset/tokenization_dataset
+SAVE_DATASET_PATH=$six_ALL_CCFRSCRATCH/tokenizer/dataset/tokenization_dataset_v3
 mkdir -p $SAVE_DATASET_PATH
 
 export HF_DATASETS_OFFLINE=1
