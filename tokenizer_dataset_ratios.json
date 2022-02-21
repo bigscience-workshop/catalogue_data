@@ -1,6 +1,6 @@
 [
   {
-    "dataset_path": "bigscience-catalogue-lm-data/lm_ar_multilingual_knowledge_questions_answers",
+    "dataset_path": "/gpfswork/rech/six/uty16tp/dataset/tokenization/bigscience-catalogue-lm-data/lm_ar_multilingual_knowledge_questions_answers",
     "is_catalogue": true,
     "ratio": 1.22369125e-06
   },
@@ -345,7 +345,7 @@
     "ratio": 0.0001005533025
   },
   {
-    "dataset_path": "bigscience-catalogue-lm-data/lm_en_no_code_stackexchange",
+    "dataset_path": "/gpfswork/rech/six/uty16tp/dataset/tokenization/bigscience-catalogue-lm-data/lm_en_no_code_stackexchange",
     "is_catalogue": true,
     "ratio": 0.0001005533025
   },
@@ -370,7 +370,7 @@
     "ratio": 0.0001005533025
   },
   {
-    "dataset_path": "bigscience-catalogue-lm-data/lm_en_s2orc_ai2_abstracts",
+    "dataset_path": "/gpfswork/rech/six/uty16tp/dataset/tokenization/bigscience-catalogue-lm-data/lm_en_s2orc_ai2_abstracts",
     "is_catalogue": true,
     "ratio": 0.0001005533025
   },
@@ -385,7 +385,7 @@
     "ratio": 0.0001005533025
   },
   {
-    "dataset_path": "bigscience-catalogue-lm-data/lm_en_s2orc_ai2_pdf_parses",
+    "dataset_path": "/gpfswork/rech/six/uty16tp/dataset/tokenization/bigscience-catalogue-lm-data/lm_en_s2orc_ai2_pdf_parses",
     "is_catalogue": true,
     "ratio": 0.0001005533025
   },

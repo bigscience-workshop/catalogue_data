@@ -164,6 +164,7 @@ def process_catalogue_meta(batch, source_dataset=None, columns_not_in_meta_or_te
         batch["meta"] = [process_single_catalogue_meta_(meta, source_dataset) for meta in batch["meta"]]
     else:
         batch["meta"] = [default_meta for _ in range(num_elts)]
+
     return {"text": batch["text"], "meta": batch["meta"]}
 
 def load_single_dataset(args):
