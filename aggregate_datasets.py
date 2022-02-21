@@ -192,8 +192,11 @@ def load_single_dataset(args):
 
         # Sample dataset
         if ratio < 1:
+            num_samples = int(len(ds) * ratio)
+            if num_samples == 0:
+                return None
             rng = default_rng(seed)
-            indices = rng.choice(len(ds), size=int(len(ds) * ratio), replace=False, shuffle=False)
+            indices = rng.choice(len(ds), size=num_samples, replace=False, shuffle=False)
             ds = ds.select(indices)
 
         # Process meta: add source_dataset and cast dict to str
