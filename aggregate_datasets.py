@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import multiprocessing
+import re
 from contextlib import contextmanager
 from functools import partial
 from math import ceil
@@ -202,8 +203,9 @@ def load_single_dataset(args):
         # Process meta: add source_dataset and cast dict to str
         if is_catalogue:
             columns_not_in_meta_or_text = [column_name for column_name in ds.column_names if column_name not in ["text", "meta"]]
+            source_dataset = re.match(r".*bigscience-catalogue-lm-data/(lm_([^/])*)(/data)?", ds_name).group(1)
             ds = ds.map(
-                partial(process_catalogue_meta, source_dataset=ds_name.split("/")[-1], columns_not_in_meta_or_text=columns_not_in_meta_or_text),
+                partial(process_catalogue_meta, source_dataset=source_dataset, columns_not_in_meta_or_text=columns_not_in_meta_or_text),
                 batched=True,
                 num_proc=num_proc,
                 desc=f"Processing {ds_name}",
@@ -228,7 +230,7 @@ def compute_number_of_shards(ds, max_size=10_000_000_000):
 
 def get_shard(shard_id: int, number_shards: int, ds: Dataset) -> Dataset:
     logger.info(f"Shard {shard_id}/{number_shards}")
-    shard = ds.shard(num_shards=number_shards, index=shard_id)
+    shard = ds.shard(num_shards=number_shards, index=shard_id, contiguous=True)
     return shard
 
 def shard_dataset(ds, num_proc, max_size=10_000_000_000):
