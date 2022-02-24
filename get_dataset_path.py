@@ -19,7 +19,7 @@ def main():
         data = json.load(fi)
 
     assert args.index < len(data)
-    print(data[args.index])
+    print(data[args.index]["dataset_path"])
 
 
 if __name__ == "__main__":
