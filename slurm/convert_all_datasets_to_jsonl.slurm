@@ -457,13 +457,13 @@ DATASET_PATH=$(python get_dataset_path.py --dataset-ratios-file tokenizer_datase
 echo "Converting $DATASET_PATH to json"
 
 
-if [[ $DATASET_PATH == /gpfswork/rech/six/commun/train_tokenizer/datasets/* ]]
+if [[ $DATASET_PATH == /gpfswork/rech/six/uty16tp/dataset/tokenization/* ]]
 then
     if [[ $DATASET_PATH == */data ]]
     then
-        DATASET_NAME=${DATASET_PATH:51:-5}
+        DATASET_NAME=${DATASET_PATH:48:-5}
     else
-        DATASET_NAME=${DATASET_PATH:51}
+        DATASET_NAME=${DATASET_PATH:48}
     fi
 else
     DATASET_NAME=$DATASET_PATH
