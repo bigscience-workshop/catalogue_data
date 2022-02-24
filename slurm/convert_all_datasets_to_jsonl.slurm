@@ -7,7 +7,7 @@
 #SBATCH --partition=cpu_p1
 #SBATCH --time 10:00:00              # maximum execution time (HH:MM:SS)
 #SBATCH --output=logs/convert_all_catalogue_to_jsonl/%x-%j.out           # output file name
-#SBATCH --array=0-430   # TODO: modify according to the number of models you want to evaluated
+#SBATCH --array=0-491   # TODO: modify according to the number of models you want to evaluated
 #SBATCH --account=six@cpu
 
 set -x -e
@@ -452,7 +452,7 @@ DATASETS_NAMES=(
 "/gpfswork/rech/six/commun/train_tokenizer/datasets/bigscience-catalogue-lm-data/lm_fr_hal_archives_ouvertes/data"
 )
 
-DATASET_PATH=${DATASETS_NAMES[$SLURM_ARRAY_TASK_ID]}
+# DATASET_PATH=${DATASETS_NAMES[$SLURM_ARRAY_TASK_ID]}
 DATASET_PATH=$(python get_dataset_path.py --dataset-ratios-file tokenizer_dataset_ratios.json --index $SLURM_ARRAY_TASK_ID)
 echo "Converting $DATASET_PATH to json"
 
