@@ -451,7 +451,11 @@ DATASETS_NAMES=(
 "/gpfswork/rech/six/commun/train_tokenizer/datasets/bigscience-catalogue-lm-data/lm_en_s2orc_ai2_pdf_parses/data"
 "/gpfswork/rech/six/commun/train_tokenizer/datasets/bigscience-catalogue-lm-data/lm_fr_hal_archives_ouvertes/data"
 )
+
 DATASET_PATH=${DATASETS_NAMES[$SLURM_ARRAY_TASK_ID]}
+DATASET_PATH=$(python get_dataset_path.py --dataset-ratios-file tokenizer_dataset_ratios.json --index $SLURM_ARRAY_TASK_ID)
+echo "Converting $DATASET_PATH to json"
+
 
 if [[ $DATASET_PATH == /gpfswork/rech/six/commun/train_tokenizer/datasets/* ]]
 then
