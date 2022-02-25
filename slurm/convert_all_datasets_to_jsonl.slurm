@@ -56,7 +56,7 @@ for shard_id in range($NUM_SHARDS):
     if filepath.exists():
         continue
     shard = ds.shard(num_shards=$NUM_SHARDS,index=shard_id)
-    tempfilepath = f"{str(filepath.absolute())}.tmp"
+    tempfilepath = Path(f\"{str(filepath.absolute())}.tmp\")
     shard.to_json(tempfilepath, num_proc=10)
     tempfilepath.rename(filepath)
 "
