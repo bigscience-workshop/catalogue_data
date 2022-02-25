@@ -456,7 +456,6 @@ DATASETS_NAMES=(
 DATASET_PATH=$(python get_dataset_path.py --dataset-ratios-file tokenizer_dataset_ratios.json --index $SLURM_ARRAY_TASK_ID)
 echo "Converting $DATASET_PATH to json"
 
-
 if [[ $DATASET_PATH == /gpfswork/rech/six/uty16tp/dataset/tokenization/* ]]
 then
     if [[ $DATASET_PATH == */data ]]
