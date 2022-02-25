@@ -468,19 +468,22 @@ else
     DATASET_NAME=$DATASET_PATH
 fi
 
-SAVE_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/jsonl/$DATASET_NAME/data.jsonl
-mkdir -p $(dirname $SAVE_PATH)
-
-if [[ -f "$SAVE_PATH" ]];
-then
-    echo "$SAVE_PATH exists."
-    exit 0
-fi
+SAVE_PREFIX=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/jsonl/$DATASET_NAME/data
+mkdir -p $(dirname $SAVE_PREFIX)
 
 echo "Downloading ${DATASET_NAME}"
 export HF_DATASETS_OFFLINE=1
 
+NUM_SHARDS=8
 
 module load git-lfs
 module load unrar
-python -c "from datasets import load_dataset; ds = load_dataset(\"$DATASET_PATH\", use_auth_token=True, split=\"train\"); ds.to_json(\"$SAVE_PATH\", num_proc=40)"
+python -c "
+from datasets import load_dataset
+
+ds = load_dataset(\"$DATASET_PATH\", use_auth_token=True, split=\"train\")
+
+for shard_id in range($NUM_SHARDS):
+    shard = ds.shard(num_shards=$NUM_SHARDS,shard_id=shard_id)
+    shard.to_json(f\"$SAVE_PREFIX_{shard_id}_$NUM_SHARDS.jsonl\", num_proc=10)
+"
