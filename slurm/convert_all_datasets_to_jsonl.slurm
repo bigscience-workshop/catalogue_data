@@ -485,6 +485,6 @@ from datasets import load_dataset
 ds = load_dataset(\"$DATASET_PATH\", use_auth_token=True, split=\"train\")
 
 for shard_id in range($NUM_SHARDS):
-    shard = ds.shard(num_shards=$NUM_SHARDS,shard_id=shard_id)
+    shard = ds.shard(num_shards=$NUM_SHARDS,index=shard_id)
     shard.to_json(f\"$SAVE_PREFIX_{shard_id}_$NUM_SHARDS.jsonl\", num_proc=10)
 "
