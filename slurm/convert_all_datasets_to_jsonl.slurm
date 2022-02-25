@@ -468,13 +468,14 @@ else
     DATASET_NAME=$DATASET_PATH
 fi
 
-SAVE_PREFIX=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/jsonl/$DATASET_NAME/data
+NUM_SHARDS=8
+
+SAVE_PREFIX=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/jsonl_"$NUM_SHARDS"_shards/$DATASET_NAME/data
 mkdir -p $(dirname $SAVE_PREFIX)
 
 echo "Downloading ${DATASET_NAME}"
 export HF_DATASETS_OFFLINE=1
 
-NUM_SHARDS=8
 
 module load git-lfs
 module load unrar
