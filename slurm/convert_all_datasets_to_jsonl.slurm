@@ -7,7 +7,7 @@
 #SBATCH --partition=cpu_p1
 #SBATCH --time 10:00:00              # maximum execution time (HH:MM:SS)
 #SBATCH --output=logs/convert_all_catalogue_to_jsonl/%x-%j.out           # output file name
-#SBATCH --array=0-491   # TODO: modify according to the number of models you want to evaluated
+#SBATCH --array=0-509   # TODO: modify according to the number of models you want to evaluated
 #SBATCH --account=six@cpu
 
 set -x -e
