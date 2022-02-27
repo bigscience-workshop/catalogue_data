@@ -1625,7 +1625,7 @@
     "ratio": 0.0001421613075
   },
   {
-    "dataset_path": "bigscience-catalogue-lm-data/lm_hi_pseudocrawl-filtered_515_www_aajtak_in",
+    "dataset_path": "bigscience-catalogue-lm-data/lm_indic-hi_pseudocrawl-filtered_515_www_aajtak_in",
     "is_catalogue": true,
     "ratio": 0.0006125
   },
@@ -1640,7 +1640,7 @@
     "ratio": 0.0008846629225
   },
   {
-    "dataset_path": "bigscience-catalogue-lm-data/lm_hi_pseudocrawl-filtered_667_www_bhaskar_com",
+    "dataset_path": "bigscience-catalogue-lm-data/lm_indic-hi_pseudocrawl-filtered_667_www_bhaskar_com",
     "is_catalogue": true,
     "ratio": 0.0018125
   },
