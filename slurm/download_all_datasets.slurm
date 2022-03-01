@@ -451,10 +451,34 @@ DATASETS_NAMES=(
 "'/gpfswork/rech/six/commun/train_tokenizer/datasets/bigscience-catalogue-lm-data/lm_en_s2orc_ai2_pdf_parses', ignore_verifications=True"
 "'/gpfswork/rech/six/commun/train_tokenizer/datasets/bigscience-catalogue-lm-data/lm_fr_hal_archives_ouvertes', ignore_verifications=True"
 )
+
+DATASET_NAMES=(
+"'lm_indic-te_open_subtitles'"
+"'lm_eu_open_subtitles'"
+"'lm_pt_open_subtitles'"
+"'lm_zh_open_subtitles'"
+"'lm_es_open_subtitles'"
+"'lm_indic-ta_open_subtitles'"
+"'lm_en_open_subtitles'"
+"'lm_es_uncorpus'"
+"'lm_id_open_subtitles'"
+"'lm_indic-hi_open_subtitles'"
+"'lm_ar_open_subtitles'"
+"'lm_indic-ml_open_subtitles'"
+"'lm_zh_uncorpus'"
+"'lm_fr_open_subtitles'"
+"'lm_vi_open_subtitles'"
+"'lm_indic-ur_open_subtitles'"
+"'lm_ar_uncorpus'"
+"'lm_ca_open_subtitles'"
+"'lm_fr_uncorpus'"
+"'lm_en_uncorpus'"
+"'lm_indic-bn_open_subtitles'"
+)
 DATASET_NAME=${DATASETS_NAMES[$SLURM_ARRAY_TASK_ID]}
 
 echo "Downloading ${DATASET_NAME}"
 
 module load git-lfs
 module load unrar
-python -c "from datasets import load_dataset; load_dataset($DATASET_NAME, use_auth_token=True)"
+python -c "from datasets import load_dataset; load_dataset($DATASET_NAME, download_mode=\"force_redownload\", use_auth_token=True)"
