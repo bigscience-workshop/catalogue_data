@@ -452,7 +452,7 @@ DATASETS_NAMES=(
 "'/gpfswork/rech/six/commun/train_tokenizer/datasets/bigscience-catalogue-lm-data/lm_fr_hal_archives_ouvertes', ignore_verifications=True"
 )
 
-DATASET_NAMES=(
+DATASETS_NAMES=(
 "'lm_indic-te_open_subtitles'"
 "'lm_eu_open_subtitles'"
 "'lm_pt_open_subtitles'"
