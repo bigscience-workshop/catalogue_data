@@ -70,7 +70,7 @@ def apply_function(function_name: str, ds: Dataset, num_proc: int, batch_size: i
             )
             logger.info(f"     Initial number of samples: {len(ds)} samples")
             logger.info(f"     Modified samples: {len(ds) - len(mapped_diff_ds)} samples")
-            logger.info(f"     Modified percentage: {(len(ds) - len(mapped_diff_ds)) / len(ds) * 100:.2f} %")
+            logger.info(f"     Modified percentage: {(len(ds) - len(mapped_diff_ds)) / len(ds):.2%}")
             idx_samples = random.sample(range(len(mapped_diff_ds)), min(len(mapped_diff_ds), 10))
             logger.info("Examples of modified examples:")
             for idx in idx_samples:
