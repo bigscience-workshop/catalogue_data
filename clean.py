@@ -52,11 +52,10 @@ def get_args():
     args.checks_save_path = Path(args.checks_save_path) if args.checks_save_path is not None else None
     return args
 
-def log_remove(title: str, original_size: int, after_transformation_size: int):
-    logger.info(title)
+def log_stats(title: str, original_size: int, after_transformation_size: int, operation_type: str):
     logger.info(f"     Initial number of samples: {original_size} samples")
-    logger.info(f"     Removed samples: {original_size - after_transformation_size} samples")
-    logger.info(f"     Removed percentage: {(original_size - after_transformation_size) / original_size * 100:.2f} %")
+    logger.info(f"     {operation_type} samples: {original_size - after_transformation_size} samples")
+    logger.info(f"     {operation_type} percentage: {(original_size - after_transformation_size) / original_size * 100:.2f} %")
 
 def get_filtered_out_documents(
     ds: Dataset,
@@ -75,9 +74,32 @@ def get_filtered_out_documents(
         logger.info(f"     Examples n°{idx} of filtered out examples:\n{filtered_out_ds[idx]}")
     return filtered_out_ds
 
+def get_modified_documents(
+    ds: Dataset,
+    mapped_ds: Dataset,
+    num_proc: int,
+    batch_size: int,
+) -> Dataset:
+    in_text_col_map, out_text_col_map = "old_text", "text"
+    remove_columns = set(ds.column_names)
+    remove_columns.remove("text")
+    ds = ds. remove_columns(remove_columns )
+    ds = ds.rename_column("text", "old_text")
+
+    mapped_diff_ds = concatenate_datasets([mapped_ds, ds], axis=1).filter(
+        partial(filter_diff_text, in_text_col=in_text_col_map, out_text_col=out_text_col_map),
+        batched=True, 
+        num_proc=num_proc, 
+        batch_size=batch_size
+    )
+    logger.info("Examples of modified examples:")
+    idx_samples = random.sample(range(len(mapped_diff_ds)), min(len(mapped_diff_ds), 10))
+    for idx in idx_samples:
+        logger.info(f"     Examples n°{idx} :\n{mapped_diff_ds[idx]}")
+    return mapped_diff_ds
+
 def apply_function(function_name: str, ds: Dataset, num_proc: int, batch_size: int, save_checks: bool) -> Tuple[Dataset, Optional[Dataset]]:
     if function_name in MAPS:
-        in_text_col_map, out_text_col_map = "old_text", "text"
         map_function = MAPS[function_name]
         mapped_ds = ds.map(
                 map_function, 
@@ -85,32 +107,17 @@ def apply_function(function_name: str, ds: Dataset, num_proc: int, batch_size: i
                 num_proc=num_proc, 
                 batch_size=batch_size
             )
-        logger.info(f"Applied map function: {function_name}")
         if save_checks:
-            remove_columns = set(ds.column_names)
-            remove_columns.remove("text")
-            ds = ds. remove_columns(remove_columns )
-            ds = ds.rename_column("text", "old_text")
-            mapped_diff_ds = concatenate_datasets([mapped_ds, ds], axis=1).filter(
-                partial(filter_diff_text, in_text_col=in_text_col_map, out_text_col=out_text_col_map),
-                batched=True, 
-                num_proc=num_proc, 
-                batch_size=batch_size
-            )
-            logger.info(f"     Initial number of samples: {len(ds)} samples")
-            logger.info(f"     Modified samples: {len(ds) - len(mapped_diff_ds)} samples")
-            logger.info(f"     Modified percentage: {(len(ds) - len(mapped_diff_ds)) / len(ds):.2%}")
-            idx_samples = random.sample(range(len(mapped_diff_ds)), min(len(mapped_diff_ds), 10))
-            logger.info("Examples of modified examples:")
-            for idx in idx_samples:
-                logger.info(f"     Examples n°{idx} :\n{mapped_diff_ds[idx]}")
+            mapped_diff_ds = get_modified_documents(ds, mapped_ds, num_proc, batch_size)
+            log_stats(f"Applied map function: {function_name}", len(ds), len(mapped_diff_ds), operation_type="Modified")
             return mapped_ds, mapped_diff_ds
         else:
+            logger.info(f"Applied map function: {function_name}")
             return mapped_ds, None
     elif function_name in FILTERS:
         filter_function = FILTERS[function_name]
         filtered_ds = ds.filter(filter_function, batched=True, num_proc=num_proc, batch_size=batch_size)
-        log_remove(f"Applied filter: {function_name}", len(ds), len(filtered_ds))
+        log_stats(f"Applied filter: {function_name}", len(ds), len(filtered_ds), operation_type="Removed")
         if save_checks:
             return filtered_ds, get_filtered_out_documents(ds, filter_function, num_proc=num_proc, batch_size=batch_size)
         else:
@@ -118,7 +125,7 @@ def apply_function(function_name: str, ds: Dataset, num_proc: int, batch_size: i
     elif function_name in DEDUPS:
         dedup_function = DEDUPS[function_name]
         deduplicated_ds = dedup_function(ds, num_proc=num_proc, batch_size=batch_size)
-        log_remove(f"Applied deduplication: {function_name}", len(ds), len(deduplicated_ds))
+        log_stats(f"Applied deduplication: {function_name}", len(ds), len(deduplicated_ds), operation_type="Removed")
         return deduplicated_ds, None
     else:
         raise NotImplemented(f"{function_name} has not matched any existing function names. Available names:\n"
