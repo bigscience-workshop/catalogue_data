@@ -69,9 +69,9 @@ def apply_function(function_name: str, ds: Dataset, num_proc: int, batch_size: i
             logger.info(f"     Modified samples: {len(ds) - len(mapped_diff_ds)} samples")
             logger.info(f"     Modified percentage: {(len(ds) - len(mapped_diff_ds)) / len(ds) * 100:.2f} %")
             idx_samples = random.sample(range(len(mapped_diff_ds)), min(len(mapped_diff_ds), 10))
-            logger.info("Examples of filtered out examples:")
+            logger.info("Examples of modified examples:")
             for idx in idx_samples:
-                logger.info(f"     Examples n°{idx} of filtered out examples:\n{mapped_diff_ds[idx]}")
+                logger.info(f"     Examples n°{idx} :\n{mapped_diff_ds[idx]}")
             mapped_ds = mapped_ds.remove_columns([in_text_col_map])
             mapped_ds = mapped_ds.rename_column(out_text_col_map, in_text_col_map)
             return mapped_ds, mapped_diff_ds
@@ -116,7 +116,7 @@ def main():
     if args.load_arrow_file:
         ds = load_from_disk(args.dataset_path)
     else:
-        ds = load_dataset(args.dataset_path, split="train", ignore_verifications=True)
+        ds = load_dataset(args.dataset_path, split="train", use_auth_token=True, ignore_verifications=True)
 
     # Apply series of maps and filters
     logger.info(f" ===== Applying transformations =====")
