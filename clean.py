@@ -171,7 +171,7 @@ def main():
             saving_path = args.checks_save_path / f"{idx}_{map_or_filter}_checks"
             if saving_path.exists():
                 continue
-            tmp_save_path = Path(saving_path.parent, f"{saving_path.name}.tmp")
+            tmp_save_path = Path(saving_path.parent, f"tmp-{saving_path.name}")
             logger.info(f" ===== Saving examples to check after {map_or_filter}  =====")
             ds_out.save_to_disk(tmp_save_path)
             tmp_save_path.rename(saving_path)
@@ -181,7 +181,7 @@ def main():
     if not args.save_path.exists():
         logger.info(f" ===== Saving dataset =====")
         logger.info(f"Saving to json format at {args.save_path}.")
-        tmp_save_path = Path(args.save_path.parent, f"{args.save_path.name}.tmp")
+        tmp_save_path = Path(args.save_path.parent, f"tmp-{args.save_path.name}")
         ds.to_json(
             tmp_save_path,
             num_proc=args.num_proc
