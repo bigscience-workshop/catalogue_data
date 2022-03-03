@@ -1,2 +1,3 @@
 from .filter_wiki_meta import filter_wiki_user_titles, filter_wiki_non_text_type
 from .filter_small_docs_in_datasets import build_small_docs_filter
+from .map_arabic import replace_newline_with_space

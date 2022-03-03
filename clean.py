@@ -3,15 +3,16 @@ import logging
 from datasets import Dataset, load_dataset, load_from_disk
 
 from datasets.utils.logging import set_verbosity_info
-from clean_helpers import filter_wiki_user_titles, filter_wiki_non_text_type
-from clean_helpers import build_small_docs_filter
+from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, filter_wiki_user_titles, replace_newline_with_space
 
 set_verbosity_info()
 logger = logging.getLogger(__name__)
 
 
 # Map functions
-MAPS = {}
+MAPS = {
+    "replace_newline_with_space": replace_newline_with_space
+}
 # Filter functions
 FILTERS = {
     "filter_wiki_user_titles": filter_wiki_user_titles,
