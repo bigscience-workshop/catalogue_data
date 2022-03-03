@@ -58,7 +58,7 @@ def main():
     if args.load_arrow_file:
         ds = load_from_disk(args.dataset_path)
     else:
-        ds = load_dataset(args.dataset_path)
+        ds = load_dataset(args.dataset_path, split="train", ignore_verifications=True)
 
     # Apply series of maps and filters
     logger.info(f" ===== Applying transformations =====")
