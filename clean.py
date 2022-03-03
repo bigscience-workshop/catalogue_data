@@ -4,6 +4,7 @@ from datasets import Dataset, load_dataset, load_from_disk
 
 from datasets.utils.logging import set_verbosity_info
 from clean_helpers import filter_wiki_non_text_type
+from clean_helpers import filter_small_docs
 
 set_verbosity_info()
 logger = logging.getLogger(__name__)
@@ -13,7 +14,8 @@ logger = logging.getLogger(__name__)
 MAPS = {}
 # Filter functions
 FILTERS = {
-    "filter_wiki_non_text_type": filter_wiki_non_text_type
+    "filter_wiki_non_text_type": filter_wiki_non_text_type,
+    "filter_small_docs": filter_small_docs,
 }
 
 assert set(MAPS.keys()).isdisjoint(set(FILTERS.keys()))

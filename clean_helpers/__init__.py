@@ -1,1 +1,2 @@
 from .filter_wiki_meta import filter_wiki_non_text_type
+from .filter_small_docs_in_datasets import filter_small_docs
