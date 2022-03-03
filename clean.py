@@ -3,8 +3,8 @@ import argparse
 import logging
 import random
 from datasets import Dataset, load_dataset, load_from_disk, concatenate_datasets
-from functools import partial
-
+from pathlib import Path
+from typing import Tuple, Optional
 from datasets.utils.logging import set_verbosity_info
 from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, filter_wiki_user_titles, replace_newline_with_space
 
@@ -35,16 +35,18 @@ def filter_diff_text(examples, in_text_col, out_text_col):
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset-path", type=str, required=True)
-    parser.add_argument("--maps-and-filters", nargs="+", type=str, required=True)
+    parser.add_argument("--maps-and-filters", nargs="*", type=str, required=True)
     parser.add_argument("--save-path", type=str, required=True)
     parser.add_argument("--checks-save-path", type=str, default=None)
     parser.add_argument("--num-proc", type=int, default=1)
     parser.add_argument("--batch-size", type=int)
     parser.add_argument("--load-arrow-file", action="store_true")
     args = parser.parse_args()
+
+    args.checks_save_path = Path(args.checks_save_path) if args.checks_save_path is not None else None
     return args
 
-def apply_function(function_name: str, ds: Dataset, num_proc: int, batch_size: int, save_checks: bool) -> Dataset:
+def apply_function(function_name: str, ds: Dataset, num_proc: int, batch_size: int, save_checks: bool) -> Tuple[Dataset, Optional[Dataset]]:
     if function_name in MAPS:
         in_text_col_map, out_text_col_map = "old_text", "text"
         map_function = MAPS[function_name]
@@ -119,10 +121,10 @@ def main():
 
     # Apply series of maps and filters
     logger.info(f" ===== Applying transformations =====")
-    for map_or_filter in args.maps_and_filters:
+    for idx, map_or_filter in enumerate(args.maps_and_filters):
         ds, ds_out = apply_function(map_or_filter, ds, args.num_proc, args.batch_size, save_checks= args.checks_save_path is not None)
         if ds_out is not None and len(ds_out) != 0:
-            saving_path = os.path.join(args.checks_save_path, f"{map_or_filter}_checks")
+            saving_path = args.checks_save_path / f"{idx}_{map_or_filter}_checks"
             logger.info(f" ===== Saving examples to check after {map_or_filter}  =====")
             ds_out.save_to_disk(saving_path)
 
