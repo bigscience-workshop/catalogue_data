@@ -42,7 +42,7 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset-path", type=str, required=True)
     parser.add_argument("--maps-and-filters", nargs="*", type=str, required=True)
-    parser.add_argument("--save-path", type=str, required=True)
+    parser.add_argument("--save-path", type=Path, required=True)
     parser.add_argument("--checks-save-path", type=Path, default=None)
     parser.add_argument("--num-proc", type=int, default=1)
     parser.add_argument("--batch-size", type=int)
@@ -169,17 +169,24 @@ def main():
         ds, ds_out = apply_function(map_or_filter, ds, args)
         if ds_out is not None and len(ds_out) != 0:
             saving_path = args.checks_save_path / f"{idx}_{map_or_filter}_checks"
+            if saving_path.exists():
+                continue
+            tmp_save_path = Path(saving_path.parent, f"{saving_path.name}.tmp")
             logger.info(f" ===== Saving examples to check after {map_or_filter}  =====")
-            ds_out.save_to_disk(saving_path)
+            ds_out.save_to_disk(tmp_save_path)
+            tmp_save_path.rename(saving_path)
 
 
     # Save to disk
-    logger.info(f" ===== Saving dataset =====")
-    logger.info(f"Saving to json format at {args.save_path}.")
-    ds.to_json(
-        args.save_path,
-        num_proc=args.num_proc
-    )
+    if not args.save_path.exists():
+        logger.info(f" ===== Saving dataset =====")
+        logger.info(f"Saving to json format at {args.save_path}.")
+        tmp_save_path = Path(args.save_path.parent, f"{args.save_path.name}.tmp")
+        ds.to_json(
+            tmp_save_path,
+            num_proc=args.num_proc
+        )
+        tmp_save_path.rename(args.save_path)
 
 
 if __name__ == "__main__":
