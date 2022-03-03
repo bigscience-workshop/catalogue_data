@@ -24,6 +24,12 @@ assert set(MAPS.keys()).isdisjoint(set(FILTERS.keys()))
 def revert_bool_output(examples, filter_function):
     booleans = filter_function(examples)
     return [not boolean for boolean in booleans]
+
+def filter_diff_text(examples, in_text_col, out_text_col):
+    booleans = []
+    for text_in, text_out in zip(examples[in_text_col], examples[out_text_col]):
+        booleans.append(text_in!=text_out)
+    return booleans
     
 def get_args():
     parser = argparse.ArgumentParser()
@@ -39,10 +45,34 @@ def get_args():
 
 def apply_function(function_name: str, ds: Dataset, num_proc: int, batch_size: int, save_checks: bool) -> Dataset:
     if function_name in MAPS:
+        in_text_col_map, out_text_col_map = "text", "new_text"
         map_function = MAPS[function_name]
-        mapped_function = ds.map(map_function, batched=True, num_proc=num_proc, batch_size=batch_size)
+        mapped_ds = ds.map(
+                partial(map_function, in_text_col=in_text_col_map, out_text_col=out_text_col_map), 
+                batched=True, 
+                num_proc=num_proc, 
+                batch_size=batch_size
+            )
         logger.info(f"Applied map function: {function_name}")
-        return mapped_function, None
+        if save_checks:
+            mapped_diff_ds = mapped_ds.filter(
+                partial(filter_diff_text, in_text_col=in_text_col_map, out_text_col=out_text_col_map),
+                batched=True, 
+                num_proc=num_proc, 
+                batch_size=batch_size
+            )
+            logger.info(f"     Initial number of samples: {len(ds)} samples")
+            logger.info(f"     Modified samples: {len(ds) - len(mapped_diff_ds)} samples")
+            logger.info(f"     Modified percentage: {(len(ds) - len(mapped_diff_ds)) / len(ds) * 100:.2f} %")
+            idx_samples = random.sample(range(len(mapped_diff_ds)), min(len(mapped_diff_ds), 10))
+            logger.info("Examples of filtered out examples:")
+            for idx in idx_samples:
+                logger.info(f"     Examples n°{idx} of filtered out examples:\n{mapped_diff_ds[idx]}")
+            mapped_ds = mapped_ds.remove_columns([in_text_col_map])
+            mapped_ds = mapped_ds.rename_column(out_text_col_map, in_text_col_map)
+            return mapped_ds, mapped_diff_ds
+        else:
+            return mapped_ds, None
     elif function_name in FILTERS:
         filter_function = FILTERS[function_name]
         filtered_ds = ds.filter(filter_function, batched=True, num_proc=num_proc, batch_size=batch_size)
