@@ -1,4 +1,5 @@
 def remove_lines_with_curly_brackets(examples):
+    """Removes lines containing a '{' from the texts."""
     fixed_texts = []
     for text in examples["text"]:
         fixed_lines = []
