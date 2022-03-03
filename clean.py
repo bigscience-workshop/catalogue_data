@@ -22,7 +22,7 @@ assert set(MAPS.keys()).isdisjoint(set(FILTERS.keys()))
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset-path", type=str, required=True)
-    parser.add_argument("--maps-and-filters", nargs="+", type=str, required=True)
+    parser.add_argument("--maps-and-filters", nargs="*", type=str, required=True)
     parser.add_argument("--save-path", type=str, required=True)
     parser.add_argument("--num-proc", type=int, default=1)
     parser.add_argument("--batch-size", type=int)
