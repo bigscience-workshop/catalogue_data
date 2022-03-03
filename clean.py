@@ -6,7 +6,7 @@ from datasets import Dataset, load_dataset, load_from_disk, concatenate_datasets
 from pathlib import Path
 from typing import Tuple, Optional, Callable
 from datasets.utils.logging import set_verbosity_info
-from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, filter_wiki_user_titles, replace_newline_with_space
+from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, filter_wiki_user_titles, replace_newline_with_space, remove_lines_with_curly_brackets
 
 set_verbosity_info()
 logger = logging.getLogger(__name__)
@@ -14,7 +14,8 @@ logger = logging.getLogger(__name__)
 
 # Map functions: function(batch: Dict) -> Dict
 MAPS = {
-    "replace_newline_with_space": replace_newline_with_space
+    "replace_newline_with_space": replace_newline_with_space,
+    "remove_lines_with_curly_brackets": remove_lines_with_curly_brackets
 }
 # Filter functions: function(batch: Dict) -> Dict
 FILTERS = {
