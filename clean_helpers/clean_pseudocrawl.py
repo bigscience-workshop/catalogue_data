@@ -1,0 +1,10 @@
+def remove_lines_with_curly_brackets(examples):
+    fixed_texts = []
+    for text in examples["text"]:
+        fixed_lines = []
+        for line in text.split("\n"):
+            if "{" not in line:
+                fixed_lines.append(line)
+        fixed_texts.append("\n".join(fixed_lines))
+    examples["text"] = fixed_texts
+    return examples
