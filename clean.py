@@ -43,13 +43,14 @@ def get_args():
     parser.add_argument("--dataset-path", type=str, required=True)
     parser.add_argument("--maps-and-filters", nargs="*", type=str, required=True)
     parser.add_argument("--save-path", type=str, required=True)
-    parser.add_argument("--checks-save-path", type=str, default=None)
+    parser.add_argument("--checks-save-path", type=Path, default=None)
     parser.add_argument("--num-proc", type=int, default=1)
     parser.add_argument("--batch-size", type=int)
     parser.add_argument("--load-arrow-file", action="store_true")
+    parser.add_argument("--sampling-size-map-checks", type=int, default=None)
+    parser.add_argument("--sampling-size-filter-checks", type=int, default=None)
     args = parser.parse_args()
 
-    args.checks_save_path = Path(args.checks_save_path) if args.checks_save_path is not None else None
     return args
 
 def log_stats(title: str, original_size: int, after_transformation_size: int, operation_type: str):
@@ -62,7 +63,12 @@ def get_filtered_out_documents(
     filter_function: Callable,
     num_proc: int,
     batch_size: int,
+    sampling_size: Optional[int]
 ) -> Dataset:
+    if sampling_size is not None:
+        idx_samples = random.sample(range(len(filtered_out_ds)), min(len(filtered_out_ds), sampling_size))
+        filtered_out_ds = filtered_out_ds.select(idx_samples)
+
     filtered_out_ds = ds.filter(
         partial(revert_bool_output, filter_function=filter_function),
         batched=True, num_proc=num_proc,
@@ -79,12 +85,19 @@ def get_modified_documents(
     mapped_ds: Dataset,
     num_proc: int,
     batch_size: int,
+    sampling_size: Optional[int],
+    function_name: str
 ) -> Dataset:
     in_text_col_map, out_text_col_map = "old_text", "text"
     remove_columns = set(ds.column_names)
     remove_columns.remove("text")
     ds = ds. remove_columns(remove_columns )
     ds = ds.rename_column("text", "old_text")
+
+    if sampling_size is not None:
+        idx_samples = random.sample(range(len(ds)), min(len(ds), sampling_size))
+        ds = ds.select(idx_samples)
+        mapped_ds = mapped_ds.select(idx_samples)
 
     mapped_diff_ds = concatenate_datasets([mapped_ds, ds], axis=1).filter(
         partial(filter_diff_text, in_text_col=in_text_col_map, out_text_col=out_text_col_map),
@@ -96,35 +109,36 @@ def get_modified_documents(
     idx_samples = random.sample(range(len(mapped_diff_ds)), min(len(mapped_diff_ds), 10))
     for idx in idx_samples:
         logger.info(f"     Examples n°{idx} :\n{mapped_diff_ds[idx]}")
+
+    log_stats(f"Applied map function: {function_name}", len(ds), len(ds)-len(mapped_diff_ds), operation_type="Modified")
     return mapped_diff_ds
 
-def apply_function(function_name: str, ds: Dataset, num_proc: int, batch_size: int, save_checks: bool) -> Tuple[Dataset, Optional[Dataset]]:
+def apply_function(function_name: str, ds: Dataset, args) -> Tuple[Dataset, Optional[Dataset]]:
     if function_name in MAPS:
         map_function = MAPS[function_name]
         mapped_ds = ds.map(
                 map_function, 
                 batched=True, 
-                num_proc=num_proc, 
-                batch_size=batch_size
+                num_proc=args.num_proc, 
+                batch_size=args.batch_size
             )
-        if save_checks:
-            mapped_diff_ds = get_modified_documents(ds, mapped_ds, num_proc, batch_size)
-            log_stats(f"Applied map function: {function_name}", len(ds), len(mapped_diff_ds), operation_type="Modified")
+        if args.checks_save_path is not None:
+            mapped_diff_ds = get_modified_documents(ds, mapped_ds, args.num_proc, args.batch_size, args.sampling_size_map_checks, function_name)
             return mapped_ds, mapped_diff_ds
         else:
             logger.info(f"Applied map function: {function_name}")
             return mapped_ds, None
     elif function_name in FILTERS:
         filter_function = FILTERS[function_name]
-        filtered_ds = ds.filter(filter_function, batched=True, num_proc=num_proc, batch_size=batch_size)
+        filtered_ds = ds.filter(filter_function, batched=True, num_proc=args.num_proc, batch_size=args.batch_size)
         log_stats(f"Applied filter: {function_name}", len(ds), len(filtered_ds), operation_type="Removed")
-        if save_checks:
-            return filtered_ds, get_filtered_out_documents(ds, filter_function, num_proc=num_proc, batch_size=batch_size)
+        if args.checks_save_path is not None:
+            return filtered_ds, get_filtered_out_documents(ds, filter_function, args.num_proc, args.batch_size, args.sampling_size_filter_checks)
         else:
             return filtered_ds, None
     elif function_name in DEDUPS:
         dedup_function = DEDUPS[function_name]
-        deduplicated_ds = dedup_function(ds, num_proc=num_proc, batch_size=batch_size)
+        deduplicated_ds = dedup_function(ds, num_proc=args.num_proc, batch_size=args.batch_size)
         log_stats(f"Applied deduplication: {function_name}", len(ds), len(deduplicated_ds), operation_type="Removed")
         return deduplicated_ds, None
     else:
@@ -151,7 +165,7 @@ def main():
     # Apply series of maps and filters
     logger.info(f" ===== Applying transformations =====")
     for idx, map_or_filter in enumerate(args.maps_and_filters):
-        ds, ds_out = apply_function(map_or_filter, ds, args.num_proc, args.batch_size, save_checks= args.checks_save_path is not None)
+        ds, ds_out = apply_function(map_or_filter, ds, args)
         if ds_out is not None and len(ds_out) != 0:
             saving_path = args.checks_save_path / f"{idx}_{map_or_filter}_checks"
             logger.info(f" ===== Saving examples to check after {map_or_filter}  =====")
