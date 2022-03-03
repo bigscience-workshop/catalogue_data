@@ -32,7 +32,7 @@ def revert_bool_output(examples, filter_function):
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset-path", type=str, required=True)
-    parser.add_argument("--maps-and-filters", nargs="+", type=str, required=True)
+    parser.add_argument("--maps-and-filters", nargs="*", type=str, required=True)
     parser.add_argument("--save-path", type=str, required=True)
     parser.add_argument("--checks-save-path", type=str, default=None)
     parser.add_argument("--num-proc", type=int, default=1)
