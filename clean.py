@@ -54,6 +54,7 @@ def get_args():
     return args
 
 def log_stats(title: str, original_size: int, after_transformation_size: int, operation_type: str):
+    logger.info(title)
     logger.info(f"     Initial number of samples: {original_size} samples")
     logger.info(f"     {operation_type} samples: {original_size - after_transformation_size} samples")
     logger.info(f"     {operation_type} percentage: {(original_size - after_transformation_size) / original_size * 100:.2f} %")
