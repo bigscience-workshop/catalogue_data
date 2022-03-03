@@ -4,7 +4,7 @@ import random
 from datasets import Dataset, load_dataset, load_from_disk
 from functools import partial
 from pathlib import Path
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Callable
 from datasets.utils.logging import set_verbosity_info
 from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, filter_wiki_user_titles, replace_newline_with_space
 
@@ -12,23 +12,29 @@ set_verbosity_info()
 logger = logging.getLogger(__name__)
 
 
-# Map functions
+# Map functions: function(batch: Dict) -> Dict
 MAPS = {
     "replace_newline_with_space": replace_newline_with_space
 }
-# Filter functions
+# Filter functions: function(batch: Dict) -> Dict
 FILTERS = {
     "filter_wiki_user_titles": filter_wiki_user_titles,
     "filter_wiki_non_text_type": filter_wiki_non_text_type,
     "filter_small_docs": build_small_docs_filter(15),
 }
+# Deduplication functions: function(ds: Dataset, num_proc: int, batch_size: int) -> Dataset
+DEDUPS = {}
 
-assert set(MAPS.keys()).isdisjoint(set(FILTERS.keys()))
+MAPS_KEYS = set(MAPS.keys())
+FILTERS_KEYS = set(FILTERS.keys())
+DEDUPS_KEYS = set(DEDUPS.keys())
+assert MAPS_KEYS.isdisjoint(FILTERS_KEYS)
+assert (MAPS_KEYS | FILTERS_KEYS).isdisjoint(DEDUPS_KEYS)
 
 def revert_bool_output(examples, filter_function):
     booleans = filter_function(examples)
     return [not boolean for boolean in booleans]
-    
+
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset-path", type=str, required=True)
@@ -43,6 +49,29 @@ def get_args():
     args.checks_save_path = Path(args.checks_save_path) if args.checks_save_path is not None else None
     return args
 
+def log_remove(title: str, original_size: int, after_transformation_size: int):
+    logger.info(title)
+    logger.info(f"     Initial number of samples: {original_size} samples")
+    logger.info(f"     Removed samples: {original_size - after_transformation_size} samples")
+    logger.info(f"     Removed percentage: {(original_size - after_transformation_size) / original_size * 100:.2f} %")
+
+def get_filtered_out_documents(
+    ds: Dataset,
+    filter_function: Callable,
+    num_proc: int,
+    batch_size: int,
+) -> Dataset:
+    filtered_out_ds = ds.filter(
+        partial(revert_bool_output, filter_function=filter_function),
+        batched=True, num_proc=num_proc,
+        batch_size=batch_size
+    )
+    idx_samples = random.sample(range(len(filtered_out_ds)), min(len(filtered_out_ds), 10))
+    logger.info("Examples of filtered out examples:")
+    for idx in idx_samples:
+        logger.info(f"     Examples n°{idx} of filtered out examples:\n{filtered_out_ds[idx]}")
+    return filtered_out_ds
+
 def apply_function(function_name: str, ds: Dataset, num_proc: int, batch_size: int, save_checks: bool) -> Tuple[Dataset, Optional[Dataset]]:
     if function_name in MAPS:
         map_function = MAPS[function_name]
@@ -52,23 +81,16 @@ def apply_function(function_name: str, ds: Dataset, num_proc: int, batch_size: i
     elif function_name in FILTERS:
         filter_function = FILTERS[function_name]
         filtered_ds = ds.filter(filter_function, batched=True, num_proc=num_proc, batch_size=batch_size)
-        logger.info(f"Applied filter: {function_name}")
-        logger.info(f"     Initial number of samples: {len(ds)} samples")
-        logger.info(f"     Removed samples: {len(ds) - len(filtered_ds)} samples")
-        logger.info(f"     Removed percentage: {(len(ds) - len(filtered_ds)) / len(ds) * 100:.2f} %")
+        log_remove(f"Applied filter: {function_name}", len(ds), len(filtered_ds))
         if save_checks:
-            filtered_out_ds = ds.filter(
-                    partial(revert_bool_output, filter_function=filter_function), 
-                    batched=True, num_proc=num_proc, 
-                    batch_size=batch_size
-                )
-            idx_samples = random.sample(range(len(filtered_out_ds)), min(len(filtered_out_ds), 10))
-            logger.info("Examples of filtered out examples:")
-            for idx in idx_samples:
-                logger.info(f"     Examples n°{idx} of filtered out examples:\n{filtered_out_ds[idx]}")
-            return filtered_ds, filtered_out_ds
+            return filtered_ds, get_filtered_out_documents(ds, filter_function, num_proc=num_proc, batch_size=batch_size)
         else:
             return filtered_ds, None
+    elif function_name in DEDUPS:
+        dedup_function = DEDUPS[function_name]
+        deduplicated_ds = dedup_function(ds, num_proc=num_proc, batch_size=batch_size)
+        log_remove(f"Applied deduplication: {function_name}", len(ds), len(deduplicated_ds))
+        return deduplicated_ds, None
     else:
         raise NotImplemented(f"{function_name} has not matched any existing function names. Available names:\n"
                              f"Map functions: {MAPS.keys()}\n"
