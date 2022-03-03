@@ -41,7 +41,7 @@ def get_args():
     args = parser.parse_args()
     return args
 
-def apply_function(function_name: str, ds: Dataset, num_proc: int, batch_size: int, save_checks: bool) -> Dataset:
+def apply_function(function_name: str, ds: Dataset, num_proc: int, batch_size: int, save_checks: bool) -> Tuple[Dataset, Optional[Dataset]]:
     if function_name in MAPS:
         map_function = MAPS[function_name]
         mapped_function = ds.map(map_function, batched=True, num_proc=num_proc, batch_size=batch_size)
