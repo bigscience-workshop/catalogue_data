@@ -3,7 +3,7 @@ import logging
 from datasets import Dataset, load_dataset, load_from_disk
 
 from datasets.utils.logging import set_verbosity_info
-from clean_helpers import filter_user_titles, filter_wiki_non_text_type
+from clean_helpers import filter_wiki_user_titles, filter_wiki_non_text_type
 
 set_verbosity_info()
 logger = logging.getLogger(__name__)
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 MAPS = {}
 # Filter functions
 FILTERS = {
-    "filter_user_titles": filter_user_titles,
+    "filter_wiki_user_titles": filter_wiki_user_titles,
     "filter_wiki_non_text_type": filter_wiki_non_text_type,
 }
 
@@ -38,7 +38,7 @@ def apply_function(function_name: str, ds: Dataset, num_proc: int, batch_size: i
         return mapped_function
     elif function_name in FILTERS:
         filter_function = FILTERS[function_name]
-        filtered_ds = ds.filter(filter_function, batched=True, num_proc=num_proc, batch_size=batch_size)
+        filtered_ds = ds.filter(filter_function, batched=True, num_proc=num_proc, batch_size=batch_size, load_from_cache_file=False)
         logger.info(f"Applied filter: {function_name}")
         logger.info(f"     Initial number of samples: {len(ds)} samples")
         logger.info(f"     Removed samples: {len(ds) - len(filtered_ds)} samples")
