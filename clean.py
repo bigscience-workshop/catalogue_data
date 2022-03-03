@@ -17,23 +17,24 @@ assert set(MAPS.keys()).isdisjoint(set(FILTERS.keys()))
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument( "--dataset-path", type=str, required=True)
+    parser.add_argument("--dataset-path", type=str, required=True)
     parser.add_argument("--maps-and-filters", nargs="+", type=str, required=True)
     parser.add_argument("--save-path", type=str, required=True)
     parser.add_argument("--num-proc", type=int, default=1)
+    parser.add_argument("--batch-size", type=int)
     parser.add_argument("--load-arrow-file", action="store_true")
     args = parser.parse_args()
     return args
 
-def apply_function(function_name: str, ds: Dataset, num_proc: int) -> Dataset:
+def apply_function(function_name: str, ds: Dataset, num_proc: int, batch_size: int) -> Dataset:
     if function_name in MAPS:
         map_function = MAPS[function_name]
-        mapped_function = ds.map(map_function, batched=True, num_proc=num_proc)
+        mapped_function = ds.map(map_function, batched=True, num_proc=num_proc, batch_size=batch_size)
         logger.info(f"Applied map function: {function_name}")
         return mapped_function
     elif function_name in FILTERS:
         filter_function = FILTERS[function_name]
-        filtered_ds = ds.filter(filter_function, batched=True, num_proc=num_proc)
+        filtered_ds = ds.filter(filter_function, batched=True, num_proc=num_proc, batch_size=batch_size)
         logger.info(f"Applied filter: {function_name}")
         logger.info(f"     Initial number of samples: {len(ds)} samples")
         logger.info(f"     Removed samples: {len(ds) - len(filtered_ds)} samples")
@@ -63,7 +64,7 @@ def main():
     # Apply series of maps and filters
     logger.info(f" ===== Applying transformations =====")
     for map_or_filter in args.maps_and_filters:
-        ds = apply_function(map_or_filter, ds, args.num_proc)
+        ds = apply_function(map_or_filter, ds, args.num_proc, args.batch_size)
 
     # Save to disk
     logger.info(f" ===== Saving dataset =====")
