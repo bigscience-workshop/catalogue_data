@@ -38,7 +38,7 @@ def apply_function(function_name: str, ds: Dataset, num_proc: int, batch_size: i
         return mapped_function
     elif function_name in FILTERS:
         filter_function = FILTERS[function_name]
-        filtered_ds = ds.filter(filter_function, batched=True, num_proc=num_proc, batch_size=batch_size, load_from_cache_file=False)
+        filtered_ds = ds.filter(filter_function, batched=True, num_proc=num_proc, batch_size=batch_size)
         logger.info(f"Applied filter: {function_name}")
         logger.info(f"     Initial number of samples: {len(ds)} samples")
         logger.info(f"     Removed samples: {len(ds) - len(filtered_ds)} samples")
