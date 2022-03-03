@@ -144,9 +144,11 @@ def apply_function(function_name: str, ds: Dataset, args) -> Tuple[Dataset, Opti
         log_stats(f"Applied deduplication: {function_name}", len(ds), len(deduplicated_ds), operation_type="Removed")
         return deduplicated_ds, None
     else:
-        raise NotImplemented(f"{function_name} has not matched any existing function names. Available names:\n"
-                             f"Map functions: {MAPS.keys()}\n"
-                             f"Filter functions: {FILTERS.keys()}\n")
+        raise NotImplementedError(f"{function_name} has not matched any existing function names. Available names:\n"
+                                  f"Map functions: {MAPS_KEYS}\n"
+                                  f"Filter functions: {FILTERS_KEYS}\n"
+                                  f"Dedup functions: {DEDUPS_KEYS}\n"
+                                  )
 
 def main():
     logging.basicConfig(

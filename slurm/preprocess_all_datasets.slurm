@@ -33,8 +33,8 @@ if pd.notnull(dataset[\"--maps-and-filters argument\"]):
 else:
     print()
 ")
-DATASET_PATH=${$DATASET_PATH_AND_FUNCTIONS[0]}
-MAPS_AND_FILTERS=${$DATASET_PATH_AND_FUNCTIONS[1]}
+DATASET_PATH=${DATASET_PATH_AND_FUNCTIONS[0]}
+MAPS_AND_FILTERS=${DATASET_PATH_AND_FUNCTIONS[1]}
 
 # ====== OBTAIN DATASET_NAME =======
 
@@ -61,7 +61,7 @@ python clean.py \
     --dataset-path $DATASET_PATH \
     --maps-and-filters $MAPS_AND_FILTERS \
     --save-path $SAVE_PATH \
-    --checks-save-path $CHECKS_SAVE_PATH /
+    --checks-save-path $CHECKS_SAVE_PATH \
     --num-proc 40 \
     --batch-size 100
 
