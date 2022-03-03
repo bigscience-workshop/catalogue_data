@@ -1,1 +1,1 @@
-from .filter_wiki_meta import filter_user_titles
+from .filter_wiki_meta import filter_user_titles, filter_wiki_non_text_type

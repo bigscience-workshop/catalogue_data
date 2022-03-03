@@ -3,7 +3,7 @@ import logging
 from datasets import Dataset, load_dataset, load_from_disk
 
 from datasets.utils.logging import set_verbosity_info
-from clean_helpers import filter_user_titles
+from clean_helpers import filter_user_titles, filter_wiki_non_text_type
 
 set_verbosity_info()
 logger = logging.getLogger(__name__)
@@ -13,7 +13,8 @@ logger = logging.getLogger(__name__)
 MAPS = {}
 # Filter functions
 FILTERS = {
-    "filter_user_titles": filter_user_titles
+    "filter_user_titles": filter_user_titles,
+    "filter_wiki_non_text_type": filter_wiki_non_text_type,
 }
 
 assert set(MAPS.keys()).isdisjoint(set(FILTERS.keys()))
