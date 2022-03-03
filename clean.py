@@ -2,7 +2,7 @@ import os
 import argparse
 import logging
 import random
-from datasets import Dataset, load_dataset, load_from_disk
+from datasets import Dataset, load_dataset, load_from_disk, concatenate_datasets
 from functools import partial
 
 from datasets.utils.logging import set_verbosity_info
@@ -30,10 +30,7 @@ def revert_bool_output(examples, filter_function):
     return [not boolean for boolean in booleans]
 
 def filter_diff_text(examples, in_text_col, out_text_col):
-    booleans = []
-    for text_in, text_out in zip(examples[in_text_col], examples[out_text_col]):
-        booleans.append(text_in!=text_out)
-    return booleans
+    return [text_in!=text_out for text_in, text_out in zip(examples[in_text_col], examples[out_text_col])]
     
 def get_args():
     parser = argparse.ArgumentParser()
@@ -49,17 +46,21 @@ def get_args():
 
 def apply_function(function_name: str, ds: Dataset, num_proc: int, batch_size: int, save_checks: bool) -> Dataset:
     if function_name in MAPS:
-        in_text_col_map, out_text_col_map = "text", "new_text"
+        in_text_col_map, out_text_col_map = "old_text", "text"
         map_function = MAPS[function_name]
         mapped_ds = ds.map(
-                partial(map_function, in_text_col=in_text_col_map, out_text_col=out_text_col_map), 
+                map_function, 
                 batched=True, 
                 num_proc=num_proc, 
                 batch_size=batch_size
             )
         logger.info(f"Applied map function: {function_name}")
         if save_checks:
-            mapped_diff_ds = mapped_ds.filter(
+            remove_columns = set(ds.column_names)
+            remove_columns.remove("text")
+            ds = ds. remove_columns(remove_columns )
+            ds = ds.rename_column("text", "old_text")
+            mapped_diff_ds = concatenate_datasets([mapped_ds, ds], axis=1).filter(
                 partial(filter_diff_text, in_text_col=in_text_col_map, out_text_col=out_text_col_map),
                 batched=True, 
                 num_proc=num_proc, 
@@ -72,8 +73,6 @@ def apply_function(function_name: str, ds: Dataset, num_proc: int, batch_size: i
             logger.info("Examples of modified examples:")
             for idx in idx_samples:
                 logger.info(f"     Examples n°{idx} :\n{mapped_diff_ds[idx]}")
-            mapped_ds = mapped_ds.remove_columns([in_text_col_map])
-            mapped_ds = mapped_ds.rename_column(out_text_col_map, in_text_col_map)
             return mapped_ds, mapped_diff_ds
         else:
             return mapped_ds, None
