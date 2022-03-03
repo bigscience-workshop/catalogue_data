@@ -49,9 +49,7 @@ def get_args():
     parser.add_argument("--load-arrow-file", action="store_true")
     parser.add_argument("--sampling-size-map-checks", type=int, default=None)
     parser.add_argument("--sampling-size-filter-checks", type=int, default=None)
-    args = parser.parse_args()
-
-    return args
+    return parser.parse_args()
 
 def log_stats(title: str, original_size: int, after_transformation_size: int, operation_type: str):
     logger.info(title)
@@ -66,19 +64,21 @@ def get_filtered_out_documents(
     batch_size: int,
     sampling_size: Optional[int]
 ) -> Dataset:
-    if sampling_size is not None:
-        idx_samples = random.sample(range(len(filtered_out_ds)), min(len(filtered_out_ds), sampling_size))
-        filtered_out_ds = filtered_out_ds.select(idx_samples)
-
     filtered_out_ds = ds.filter(
         partial(revert_bool_output, filter_function=filter_function),
         batched=True, num_proc=num_proc,
         batch_size=batch_size
     )
+
     idx_samples = random.sample(range(len(filtered_out_ds)), min(len(filtered_out_ds), 10))
     logger.info("Examples of filtered out examples:")
     for idx in idx_samples:
         logger.info(f"     Examples n°{idx} of filtered out examples:\n{filtered_out_ds[idx]}")
+
+    if sampling_size is not None:
+        idx_samples = random.sample(range(len(filtered_out_ds)), min(len(filtered_out_ds), sampling_size))
+        filtered_out_ds = filtered_out_ds.select(idx_samples)
+
     return filtered_out_ds
 
 def get_modified_documents(
@@ -89,19 +89,14 @@ def get_modified_documents(
     sampling_size: Optional[int],
     function_name: str
 ) -> Dataset:
-    in_text_col_map, out_text_col_map = "old_text", "text"
     remove_columns = set(ds.column_names)
     remove_columns.remove("text")
     ds = ds. remove_columns(remove_columns )
     ds = ds.rename_column("text", "old_text")
 
-    if sampling_size is not None:
-        idx_samples = random.sample(range(len(ds)), min(len(ds), sampling_size))
-        ds = ds.select(idx_samples)
-        mapped_ds = mapped_ds.select(idx_samples)
-
+    assert len(mapped_ds) == len(ds), f"Mapping function are batched, but they should not alternate the size of the batch."
     mapped_diff_ds = concatenate_datasets([mapped_ds, ds], axis=1).filter(
-        partial(filter_diff_text, in_text_col=in_text_col_map, out_text_col=out_text_col_map),
+        partial(filter_diff_text, in_text_col="old_text", out_text_col="text"),
         batched=True, 
         num_proc=num_proc, 
         batch_size=batch_size
@@ -112,6 +107,11 @@ def get_modified_documents(
         logger.info(f"     Examples n°{idx} :\n{mapped_diff_ds[idx]}")
 
     log_stats(f"Applied map function: {function_name}", len(ds), len(ds)-len(mapped_diff_ds), operation_type="Modified")
+
+    if sampling_size is not None:
+        idx_samples = random.sample(range(len(ds)), min(len(ds), sampling_size))
+        mapped_diff_ds = ds.select(idx_samples)
+
     return mapped_diff_ds
 
 def apply_function(function_name: str, ds: Dataset, args) -> Tuple[Dataset, Optional[Dataset]]:
