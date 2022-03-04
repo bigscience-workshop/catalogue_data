@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 def get_size(name_dataset):
     try:
-        dataset = load_dataset(name_dataset, use_auth_token="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", ignore_verifications=True, split="train")
+        dataset = load_dataset(name_dataset, use_auth_token=True, ignore_verifications=True, split="train")
         dataset = dataset.map(None, remove_columns=[column for column in dataset.column_names if column != "text"])
         print("Done for dataset:", name_dataset)
         return (name_dataset, sum([sys.getsizeof(item["text"]) for item in tqdm(dataset)]))

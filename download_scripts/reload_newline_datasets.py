@@ -8,11 +8,11 @@ from tqdm import tqdm
 
 def download_dataset_multiprocessing(name_dataset):
     try:
-        dataset = load_dataset(name_dataset, use_auth_token="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",
+        dataset = load_dataset(name_dataset, use_auth_token=True,
                                ignore_verifications=True)
         samples = "".join(dataset["train"].select(range(10))["text"])
         if samples.count("/n") > samples.count("\n"):
-            dataset = load_dataset(name_dataset, use_auth_token="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",
+            dataset = load_dataset(name_dataset, use_auth_token=True,
                                    ignore_verifications=True, download_mode="force_redownload")
             print(f"Reloaded for dataset {name_dataset}")
             samples = "".join(dataset["train"].select(range(10))["text"])
