@@ -15,8 +15,7 @@ def simplify_meta_dict(meta_dict, name):
 
 folder_name = './'
 dataset_names, meta_dicts = [], []
-lang_map = {
-    "zh-HK": "zh", "zh-TW": "zh", "zh-CN": "zh", "zht": "zh", "zhs": "zh",}
+lang_map = {"zh-HK": "zh", "zh-TW": "zh", "zh-CN": "zh", "zht": "zh", "zhs": "zh", "zh-cn": "zh", "zh-tw": "zh"}
 
 
 with open(folder_name+"datasets.txt", "r") as f_data:
@@ -36,9 +35,11 @@ df = pd.DataFrame.from_records(simple_dicts)
 
 df["lang"] = df["name"].apply(lambda x: x.split("_")[1])
 df["name"] = df["name"].apply(lambda x: "_".join(x.split("_")[2:]))
-df["lang"] = df["lang"].apply(lambda x: lang_map[x] if x in lang_map else x)
 
 df.to_csv(folder_name+"meta_table.csv", index=False)
+
+df["lang"] = df["lang"].apply(lambda x: lang_map[x] if x in lang_map else x)
+df["lang"] = df["lang"].apply(lambda x: "nigercongo" if "nigercongo" in x else x)
 
 df_agg = df.groupby("lang")[["size", "samples"]].sum().sort_values(by="size", ascending=False).reset_index()
 df_agg["bytes-per-sample"] = df_agg["size"]/df_agg["samples"]
