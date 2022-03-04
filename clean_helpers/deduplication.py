@@ -60,8 +60,9 @@ def dedup_document(ds: Dataset, num_proc: int, batch_size: int) -> Dataset:
     hashes = set()
 
     return hashed_documents.filter(
-        lambda batch: [is_new_hash(hash_, hashes) for hash_ in batch["hash"]],
+        lambda hashes_: [is_new_hash(hash_, hashes) for hash_ in hashes_],
         num_proc=1,  # VERY IMPORTANT: hashes will be updated, and is not thread safe.
+        input_columns=["hash"],
         batched=True,
         batch_size=batch_size,
         remove_columns=["hash"]
