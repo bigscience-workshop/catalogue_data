@@ -16,7 +16,7 @@ def build_short_line_remover(min_length: int):
         return {
             **batch,
             "text": [
-                "\n".join([line for line in text.split("\n") if len(line.split(" ")) < min_length])
+                "\n".join([line for line in text.split("\n") if len(line.split(" ")) >= min_length])
                 for text in batch["text"]
             ]
         }
