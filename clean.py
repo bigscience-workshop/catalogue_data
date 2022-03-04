@@ -2,13 +2,13 @@ import argparse
 import logging
 import random
 from functools import partial
-from clean_helpers.clean_pseudocrawl import remove_lines_with_code
 from datasets import Dataset, load_dataset, load_from_disk, concatenate_datasets
 from pathlib import Path
 from typing import Tuple, Optional, Callable
 from datasets.utils.logging import set_verbosity_info
 from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, filter_wiki_user_titles, \
-    replace_newline_with_space, remove_lines_with_curly_brackets, build_dedup_template, dedup_document
+    replace_newline_with_space, build_dedup_template, dedup_document, build_bad_substring_remover
+    
 
 set_verbosity_info()
 logger = logging.getLogger(__name__)
@@ -17,7 +17,8 @@ logger = logging.getLogger(__name__)
 # Map functions: function(batch: Dict) -> Dict
 MAPS = {
     "replace_newline_with_space": replace_newline_with_space,
-    "remove_lines_with_code": remove_lines_with_code
+    "remove_lines_with_code": build_bad_substring_remover(["{", "}", "[if", "<script"]), 
+    "remove_html_spans": build_bad_substring_remover(["<span", "</span>", "<div", "</div>", "<a", "</a>", "br>"])
 }
 # Filter functions: function(batch: Dict) -> Dict
 FILTERS = {
