@@ -20,15 +20,20 @@ MAPS = {
 }
 # Filter functions: function(batch: Dict) -> Dict
 FILTERS = {
+    "filter_remove_empty_docs": filter_wiki_user_titles,
     "filter_wiki_user_titles": filter_wiki_user_titles,
     "filter_wiki_non_text_type": filter_wiki_non_text_type,
     "filter_small_docs": build_small_docs_filter(min_word=15),
 }
 # Deduplication functions: function(ds: Dataset, num_proc: int, batch_size: int) -> Dataset
 DEDUPS = {
-    "dedup_template_mediapart": build_dedup_template(
+    "dedup_template_soft": build_dedup_template(
         min_template_line_size=50,
         min_template_line_occurence=20,
+    ),
+    "dedup_pseudocrawl_newspapers": build_dedup_template(
+        min_template_line_size=0,
+        min_template_line_occurence=2,
     ),
 }
 
@@ -147,8 +152,13 @@ def apply_function(function_name: str, ds: Dataset, args) -> Tuple[Dataset, Opti
     elif function_name in DEDUPS:
         dedup_function = DEDUPS[function_name]
         deduplicated_ds = dedup_function(ds, num_proc=args.num_proc, batch_size=args.batch_size)
-        log_stats(f"Applied deduplication: {function_name}", len(ds), len(deduplicated_ds), operation_type="Removed")
-        return deduplicated_ds, None
+        log_stats(f"Applied deduplication: {function_name}", len(ds), len(deduplicated_ds), operation_type="Modified")
+        if args.checks_save_path is not None:
+            deduped_diff_ds = get_modified_documents(ds, deduplicated_ds, args.num_proc, args.batch_size, args.sampling_size_map_checks, function_name)
+            return deduplicated_ds, deduped_diff_ds
+        else:
+            logger.info(f"Applied map function: {function_name}")
+            return deduplicated_ds, None
     else:
         raise NotImplementedError(f"{function_name} has not matched any existing function names. Available names:\n"
                                   f"Map functions: {MAPS_KEYS}\n"
@@ -175,27 +185,28 @@ def main():
     # Apply series of maps and filters
     logger.info(f" ===== Applying transformations =====")
     for idx, map_or_filter in enumerate(args.maps_and_filters):
-        ds, ds_out = apply_function(map_or_filter, ds, args)
-        if ds_out is not None and len(ds_out) != 0:
+        ds, ds_diff = apply_function(map_or_filter, ds, args)
+        if ds_diff is not None and len(ds_diff) != 0:
             saving_path = args.checks_save_path / f"{idx}_{map_or_filter}_checks"
             if saving_path.exists():
                 continue
             tmp_save_path = Path(saving_path.parent, f"tmp-{saving_path.name}")
             logger.info(f" ===== Saving examples to check after {map_or_filter}  =====")
-            ds_out.save_to_disk(tmp_save_path)
+            ds_diff.save_to_disk(tmp_save_path)
             tmp_save_path.rename(saving_path)
 
 
     # Save to disk
-    if not args.save_path.exists():
-        logger.info(f" ===== Saving dataset =====")
-        logger.info(f"Saving to json format at {args.save_path}.")
-        tmp_save_path = Path(args.save_path.parent, f"tmp-{args.save_path.name}")
-        ds.to_json(
-            tmp_save_path,
-            num_proc=args.num_proc
-        )
-        tmp_save_path.rename(args.save_path)
+    # if not args.save_path.exists():
+    logger.info(f" ===== Saving dataset =====")
+    logger.info(f"Saving to json format at {args.save_path}.")
+    tmp_save_path = Path(args.save_path.parent, f"tmp-{args.save_path.name}")
+    ds.to_json(
+        tmp_save_path,
+        num_proc=args.num_proc
+    )
+    print(tmp_save_path)
+    tmp_save_path.rename(args.save_path)
 
 
 if __name__ == "__main__":
