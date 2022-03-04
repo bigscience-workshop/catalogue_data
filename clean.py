@@ -154,13 +154,12 @@ def apply_function(function_name: str, ds: Dataset, args) -> Tuple[Dataset, Opti
     elif function_name in DEDUPS:
         dedup_function = DEDUPS[function_name]
         deduplicated_ds = dedup_function(ds, num_proc=args.num_proc, batch_size=args.batch_size)
-        log_stats(f"Applied deduplication: {function_name}", len(ds), len(deduplicated_ds), operation_type="Modified")
+        log_stats(f"Applied deduplication function: {function_name}", len(ds), len(deduplicated_ds), operation_type="Deduplicated")
         # Some deduplication do not preserve the number of samples, so alignement is lost. For example "dedup_document"
         if args.checks_save_path is not None and function_name != "dedup_document":
             deduped_diff_ds = get_modified_documents(ds, deduplicated_ds, args.num_proc, args.batch_size, args.sampling_size_map_checks, function_name)
             return deduplicated_ds, deduped_diff_ds
         else:
-            log_stats(f"Applied deduplication function: {function_name}", len(ds), len(deduplicated_ds), operation_type="Deduplicated")
             return deduplicated_ds, None
     else:
         raise NotImplementedError(f"{function_name} has not matched any existing function names. Available names:\n"
