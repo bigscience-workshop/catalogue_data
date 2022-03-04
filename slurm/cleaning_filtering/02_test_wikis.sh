@@ -3,6 +3,8 @@ echo -n $(date) >> $DEBUG_LOG
 
 conda activate datacatalog
 
+export HF_DATASETS_OFFLINE=/home/teven/.cache/huggingface/datasets
+
 CATALOGUE_DATA_REPO="/home/lucile/code/catalogue_data"
 
 cd $CATALOGUE_DATA_REPO
@@ -16,7 +18,7 @@ python clean.py \
     --dataset-path bigscience-catalogue-lm-data/$ds_name \
     --maps-and-filters filter_wiki_user_titles filter_wiki_non_text_type \
     --save-path /home/lucile/data/result_filtering_cleaning/$ds_name.jsonl \
-    --checks-save-path /home/lucile/data/result_filtering_cleaning/$ds_name_checks \
+    --checks-save-path /home/lucile/data/result_filtering_cleaning/$ds_name \
     --num-proc 40 \
     --sampling-size-map-check 100000 \
     --sampling-size-filter-check 100000 \
