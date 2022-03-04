@@ -7,8 +7,8 @@ from pathlib import Path
 from typing import Tuple, Optional, Callable
 from datasets.utils.logging import set_verbosity_info
 from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, filter_wiki_user_titles, \
-    replace_newline_with_space, build_dedup_template, dedup_document, build_line_with_substring_remover, en_wiktionary_stripper
-
+    replace_newline_with_space, build_dedup_template, dedup_document, build_line_with_substring_remover, \
+    en_wiktionary_stripper, build_small_docs_bytes_filter
 
 set_verbosity_info()
 logger = logging.getLogger(__name__)
@@ -29,6 +29,9 @@ FILTERS = {
     "filter_wiki_user_titles": filter_wiki_user_titles,
     "filter_wiki_non_text_type": filter_wiki_non_text_type,
     "filter_small_docs": build_small_docs_filter(min_word=15),
+    ** {
+        f"filter_small_docs_bytes_{i}": build_small_docs_bytes_filter(min_bytes=i) for i in [500, 1000, 7000]
+    },
 }
 # Deduplication functions: function(ds: Dataset, num_proc: int, batch_size: int) -> Dataset
 DEDUPS = {
