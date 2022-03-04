@@ -6,7 +6,8 @@ from datasets import Dataset, load_dataset, load_from_disk, concatenate_datasets
 from pathlib import Path
 from typing import Tuple, Optional, Callable
 from datasets.utils.logging import set_verbosity_info
-from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, filter_wiki_user_titles, replace_newline_with_space, remove_lines_with_curly_brackets
+from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, filter_wiki_user_titles, \
+    replace_newline_with_space, remove_lines_with_curly_brackets, build_dedup_template
 
 set_verbosity_info()
 logger = logging.getLogger(__name__)
@@ -21,10 +22,15 @@ MAPS = {
 FILTERS = {
     "filter_wiki_user_titles": filter_wiki_user_titles,
     "filter_wiki_non_text_type": filter_wiki_non_text_type,
-    "filter_small_docs": build_small_docs_filter(15),
+    "filter_small_docs": build_small_docs_filter(min_word=15),
 }
 # Deduplication functions: function(ds: Dataset, num_proc: int, batch_size: int) -> Dataset
-DEDUPS = {}
+DEDUPS = {
+    "dedup_template_mediapart": build_dedup_template(
+        min_template_line_size=50,
+        min_template_line_occurence=20,
+    ),
+}
 
 MAPS_KEYS = set(MAPS.keys())
 FILTERS_KEYS = set(FILTERS.keys())

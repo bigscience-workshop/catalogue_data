@@ -64,4 +64,3 @@ python clean.py \
     --checks-save-path $CHECKS_SAVE_PATH \
     --num-proc 40 \
     --batch-size 100
-
