@@ -32,7 +32,7 @@ def build_remove_template_lines(template_line_hashes: Set[str]):
         ]
         return {
             **{
-                key: [elt for elt, cleaned_text in zip(value, cleaned_texts)]
+                key: value
                 for key, value in batch.items()
                 if key not in ["lines", "hashes"]
             },

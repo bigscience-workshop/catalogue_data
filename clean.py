@@ -61,6 +61,7 @@ def get_args():
     parser.add_argument("--load-arrow-file", action="store_true")
     parser.add_argument("--sampling-size-map-checks", type=int, default=None)
     parser.add_argument("--sampling-size-filter-checks", type=int, default=None)
+    parser.add_argument("--from-scratch", action="store_true", help="Resave all datasets on disk.")
     return parser.parse_args()
 
 def log_stats(title: str, original_size: int, after_transformation_size: int, operation_type: str):
@@ -188,7 +189,7 @@ def main():
         ds, ds_diff = apply_function(map_or_filter, ds, args)
         if ds_diff is not None and len(ds_diff) != 0:
             saving_path = args.checks_save_path / f"{idx}_{map_or_filter}_checks"
-            if saving_path.exists():
+            if not args.from_scratch and saving_path.exists():
                 continue
             tmp_save_path = Path(saving_path.parent, f"tmp-{saving_path.name}")
             logger.info(f" ===== Saving examples to check after {map_or_filter}  =====")
@@ -197,16 +198,16 @@ def main():
 
 
     # Save to disk
-    # if not args.save_path.exists():
-    logger.info(f" ===== Saving dataset =====")
-    logger.info(f"Saving to json format at {args.save_path}.")
-    tmp_save_path = Path(args.save_path.parent, f"tmp-{args.save_path.name}")
-    ds.to_json(
-        tmp_save_path,
-        num_proc=args.num_proc
-    )
-    print(tmp_save_path)
-    tmp_save_path.rename(args.save_path)
+    if args.from_scratch or not args.save_path.exists():
+        logger.info(f" ===== Saving dataset =====")
+        logger.info(f"Saving to json format at {args.save_path}.")
+        tmp_save_path = Path(args.save_path.parent, f"tmp-{args.save_path.name}")
+        ds.to_json(
+            tmp_save_path,
+            num_proc=args.num_proc
+        )
+        print(tmp_save_path)
+        tmp_save_path.rename(args.save_path)
 
 
 if __name__ == "__main__":
