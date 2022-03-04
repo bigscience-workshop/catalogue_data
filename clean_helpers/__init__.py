@@ -1,5 +1,5 @@
 from .filter_wiki_meta import filter_wiki_user_titles, filter_wiki_non_text_type
 from .filter_small_docs_in_datasets import build_small_docs_filter
 from .map_arabic import replace_newline_with_space
-from .clean_pseudocrawl import remove_lines_with_curly_brackets
+from .clean_pseudocrawl import remove_lines_with_code
 from .deduplication import build_dedup_template, dedup_document
