@@ -38,6 +38,10 @@ DEDUPS = {
         min_template_line_size=0,
         min_template_line_occurence=2,
     ),
+    "dedup_template_pt_bwarc": build_dedup_template(
+        min_template_line_occurence=50,
+        min_template_line_size=0
+    ),
     "dedup_document": dedup_document
 }
 
