@@ -72,7 +72,7 @@ def dedup_document(ds: Dataset, num_proc: int, batch_size: int) -> Dataset:
 
 def get_hash(texts: List[str]) -> List[str]:
     """Get hash of content field."""
-    return [hashlib.md5(text.encode("utf-8")).hexdigest() for text in texts]
+    return [hashlib.md5(text.strip().encode("utf-8")).hexdigest() for text in texts]
 
 
 def split_text_in_lines(text: str) -> List[str]:
