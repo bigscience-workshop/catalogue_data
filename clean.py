@@ -20,7 +20,7 @@ MAPS = {
     "remove_lines_with_code": build_line_with_substring_remover(["{", "}", "[if", "<script"]), 
     "remove_html_spans": build_line_with_substring_remover(["<span", "</span>", "<div", "</div>", "<a", "</a>", "br>"]),
     "remove_html_spans_sanad": build_line_with_substring_remover(["<img", "]]>", "<![CDATA", "//DW", "var ", "xtImg", "To view this video please enable JavaScript"]),
-    "remove_wiki_mojobake": build_line_with_substring_remover(["À À À"])
+    "remove_wiki_mojobake": build_line_with_substring_remover(["À À"])
 }
 # Filter functions: function(batch: Dict) -> Dict
 FILTERS = {
