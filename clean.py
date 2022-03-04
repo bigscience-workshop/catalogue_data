@@ -2,13 +2,12 @@ import argparse
 import logging
 import random
 from functools import partial
-from clean_helpers.clean_pseudocrawl import remove_lines_with_code
 from datasets import Dataset, load_dataset, load_from_disk, concatenate_datasets
 from pathlib import Path
 from typing import Tuple, Optional, Callable
 from datasets.utils.logging import set_verbosity_info
 from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, filter_wiki_user_titles, \
-    replace_newline_with_space, remove_lines_with_curly_brackets, build_dedup_template, dedup_document, \
+    replace_newline_with_space, remove_lines_with_code, build_dedup_template, dedup_document, \
     remove_html_spans
 
 set_verbosity_info()
