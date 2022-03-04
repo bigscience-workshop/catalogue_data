@@ -65,6 +65,7 @@ def get_args():
     parser.add_argument("--sampling-size-map-checks", type=int, default=None)
     parser.add_argument("--sampling-size-filter-checks", type=int, default=None)
     parser.add_argument("--from-scratch", action="store_true", help="Resave all datasets on disk.")
+    parser.add_argument("--save-to-json", action="store_true", help="Save output dataset in json format.")
     return parser.parse_args()
 
 def log_stats(title: str, original_size: int, after_transformation_size: int, operation_type: str):
@@ -205,11 +206,13 @@ def main():
         logger.info(f" ===== Saving dataset =====")
         logger.info(f"Saving to json format at {args.save_path}.")
         tmp_save_path = Path(args.save_path.parent, f"tmp-{args.save_path.name}")
-        ds.to_json(
-            tmp_save_path,
-            num_proc=args.num_proc
-        )
-        print(tmp_save_path)
+        if args.save_to_json:
+            ds.to_json(
+                tmp_save_path,
+                num_proc=args.num_proc
+            )
+        else:
+            ds.save_to_disk(tmp_save_path)
         tmp_save_path.rename(args.save_path)
 
 
