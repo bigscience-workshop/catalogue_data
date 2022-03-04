@@ -7,7 +7,7 @@ from datasets import load_dataset
 
 def download_dataset_multiprocessing(name_dataset):
     try:
-        dataset = load_dataset(name_dataset, use_auth_token="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", ignore_verifications=True)
+        dataset = load_dataset(name_dataset, use_auth_token=True, ignore_verifications=True)
         print("Done for dataset:", name_dataset)
     except:
         print("Failed for dataset:", name_dataset)
