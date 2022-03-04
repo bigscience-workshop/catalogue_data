@@ -73,10 +73,11 @@ def dedup_document(ds: Dataset, num_proc: int, batch_size: int) -> Dataset:
 # =========== HELPERS ===============
 
 # this only keeps letter characters
+remove_non_character_regex = re.compile(f'\s+|\d+|[{re.escape(string.punctuation)}]')
 def get_hash_stripped(texts: List[str]) -> List[str]:
     """Get hash of content field."""
-    stripped_texts = [re.sub(f'\s+|\d+|[{re.escape(string.punctuation)}]','', text) for text in texts]
-    return [hashlib.md5(text.strip().encode("utf-8")).hexdigest() for text in stripped_texts]
+    stripped_texts = [remove_non_character_regex.sub('', text) for text in texts]
+    return [hashlib.md5(text.encode("utf-8")).hexdigest() for text in stripped_texts]
 
 # this doesn't, it just strips the whitespace
 def get_hash(texts: List[str]) -> List[str]:
