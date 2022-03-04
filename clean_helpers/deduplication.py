@@ -1,6 +1,8 @@
 from collections import defaultdict
 from typing import List, Set, Tuple
 import hashlib
+import re
+import string
 
 from datasets import Dataset
 
@@ -72,7 +74,8 @@ def dedup_document(ds: Dataset, num_proc: int, batch_size: int) -> Dataset:
 
 def get_hash(texts: List[str]) -> List[str]:
     """Get hash of content field."""
-    return [hashlib.md5(text.strip().encode("utf-8")).hexdigest() for text in texts]
+    stripped_texts = [re.sub(f'\s+|\d+|[{re.escape(string.punctuation)}]','', text) for text in texts]
+    return [hashlib.md5(text.strip().encode("utf-8")).hexdigest() for text in stripped_texts]
 
 
 def split_text_in_lines(text: str) -> List[str]:
