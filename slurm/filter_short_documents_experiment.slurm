@@ -6,7 +6,7 @@
 #SBATCH --hint=nomultithread         # we get physical cores not logical
 #SBATCH --partition=cpu_p1
 #SBATCH --time 20:00:00              # maximum execution time (HH:MM:SS)
-#SBATCH --output=logs/preprocess_all_catalogue_datasets/%x-%j.out           # output file name
+#SBATCH --output=logs/filter_short_document_catalogue/%x-%j.out           # output file name
 #SBATCH --array=0-509   # TODO: modify according to the number of models you want to evaluated
 #SBATCH --account=six@cpu
 
