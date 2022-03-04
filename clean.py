@@ -9,7 +9,7 @@ from typing import Tuple, Optional, Callable
 from datasets.utils.logging import set_verbosity_info
 from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, filter_wiki_user_titles, \
     replace_newline_with_space, remove_lines_with_curly_brackets, build_dedup_template, dedup_document, \
-        build_substring_stripper, en_wiktionary_stripper
+        en_wiktionary_stripper
 
 set_verbosity_info()
 logger = logging.getLogger(__name__)
