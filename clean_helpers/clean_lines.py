@@ -1,6 +1,6 @@
 from typing import List
 
-def build_bad_substring_remover(bad_strings: List[str]):
+def build_line_with_substring_remover(bad_strings: List[str]):
     def remove_bad_substring(batch):
         return {
             **batch,
