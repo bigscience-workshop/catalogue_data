@@ -1,11 +1,12 @@
 from collections import defaultdict
 from typing import List, Set, Tuple
+import hashlib
 
 from datasets import Dataset
 
 def get_hash(texts: List[str]) -> List[int]:
     """Get hash of content field."""
-    return [hash(text.replace(" ", "")) for text in texts]
+    return [int(hashlib.md5(text.encode("utf-8")).hexdigest(), 16) for text in texts]
 
 def split_text_in_lines(text: str) -> List[str]:
     return [line.strip() for line in text.split("\n")]
