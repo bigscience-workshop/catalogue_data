@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 MAPS = {
     "replace_newline_with_space": replace_newline_with_space,
     "remove_lines_with_code": build_bad_substring_remover(["{", "}", "[if", "<script"]), 
-    "remove_html_spans": build_bad_substring_remover(["<", ">"])
+    "remove_html_spans": build_bad_substring_remover(["<span", "<div", "<a", "/span>", "br>"])
 }
 # Filter functions: function(batch: Dict) -> Dict
 FILTERS = {
