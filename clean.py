@@ -2,6 +2,7 @@ import argparse
 import logging
 import random
 from functools import partial
+from clean_helpers.clean_pseudocrawl import remove_lines_with_code
 from datasets import Dataset, load_dataset, load_from_disk, concatenate_datasets
 from pathlib import Path
 from typing import Tuple, Optional, Callable
@@ -16,7 +17,7 @@ logger = logging.getLogger(__name__)
 # Map functions: function(batch: Dict) -> Dict
 MAPS = {
     "replace_newline_with_space": replace_newline_with_space,
-    "remove_lines_with_curly_brackets": remove_lines_with_curly_brackets
+    "remove_lines_with_code": remove_lines_with_code
 }
 # Filter functions: function(batch: Dict) -> Dict
 FILTERS = {

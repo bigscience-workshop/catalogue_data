@@ -1,4 +1,4 @@
-def remove_lines_with_curly_brackets(examples):
+def remove_lines_with_code(examples):
     """Removes lines containing a '{', '}', "[if", or "<script" from the texts."""
     bad_strings = ["{", "}", "[if", "<script"]
     return {
