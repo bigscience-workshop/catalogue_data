@@ -2,14 +2,13 @@ import argparse
 import logging
 import random
 from functools import partial
-from clean_helpers.clean_pseudocrawl import remove_lines_with_code
 from datasets import Dataset, load_dataset, load_from_disk, concatenate_datasets
 from pathlib import Path
 from typing import Tuple, Optional, Callable
 from datasets.utils.logging import set_verbosity_info
 from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, filter_wiki_user_titles, \
-    replace_newline_with_space, remove_lines_with_curly_brackets, build_dedup_template, dedup_document, \
-        en_wiktionary_stripper
+    replace_newline_with_space, build_dedup_template, dedup_document, build_line_with_substring_remover, en_wiktionary_stripper
+
 
 set_verbosity_info()
 logger = logging.getLogger(__name__)
@@ -18,8 +17,11 @@ logger = logging.getLogger(__name__)
 # Map functions: function(batch: Dict) -> Dict
 MAPS = {
     "replace_newline_with_space": replace_newline_with_space,
-    "remove_lines_with_code": remove_lines_with_code,
-    "strip_substrings_en_wiktionary": en_wiktionary_stripper,
+    "remove_lines_with_code": build_line_with_substring_remover(["{", "}", "[if", "<script"]), 
+    "remove_html_spans": build_line_with_substring_remover(["<span", "</span>", "<div", "</div>", "<a", "</a>", "br>"]),
+    "remove_html_spans_sanad": build_line_with_substring_remover(["<img", "]]>", "<![CDATA", "//DW", "var ", "xtImg", "To view this video please enable JavaScript"]),
+    "remove_wiki_mojobake": build_line_with_substring_remover(["À À"]),
+    "strip_substrings_en_wiktionary": en_wiktionary_stripper
 }
 # Filter functions: function(batch: Dict) -> Dict
 FILTERS = {
@@ -66,6 +68,7 @@ def get_args():
     parser.add_argument("--sampling-size-map-checks", type=int, default=None)
     parser.add_argument("--sampling-size-filter-checks", type=int, default=None)
     parser.add_argument("--from-scratch", action="store_true", help="Resave all datasets on disk.")
+    parser.add_argument("--save-to-json", action="store_true", help="Save output dataset in json format.")
     return parser.parse_args()
 
 def log_stats(title: str, original_size: int, after_transformation_size: int, operation_type: str):
@@ -206,11 +209,13 @@ def main():
         logger.info(f" ===== Saving dataset =====")
         logger.info(f"Saving to json format at {args.save_path}.")
         tmp_save_path = Path(args.save_path.parent, f"tmp-{args.save_path.name}")
-        ds.to_json(
-            tmp_save_path,
-            num_proc=args.num_proc
-        )
-        print(tmp_save_path)
+        if args.save_to_json:
+            ds.to_json(
+                tmp_save_path,
+                num_proc=args.num_proc
+            )
+        else:
+            ds.save_to_disk(tmp_save_path)
         tmp_save_path.rename(args.save_path)
 
 
