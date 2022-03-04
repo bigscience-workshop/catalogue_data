@@ -53,7 +53,7 @@ def build_dedup_template(min_template_line_size: int, min_template_line_occurenc
 
 def dedup_document(ds: Dataset, num_proc: int, batch_size: int) -> Dataset:
     hashed_documents = ds.map(
-        lambda batch: {**batch, "hash": get_hash(batch["text"])},
+        lambda batch: {**batch, "hash": get_hash_stripped(batch["text"])},
         num_proc=num_proc,
         batched=True,
         batch_size=batch_size,
