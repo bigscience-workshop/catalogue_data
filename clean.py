@@ -9,7 +9,7 @@ from typing import Tuple, Optional, Callable
 from datasets.utils.logging import set_verbosity_info
 from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, filter_wiki_user_titles, \
     replace_newline_with_space, remove_lines_with_curly_brackets, build_dedup_template, dedup_document, \
-        build_substring_stripper
+        build_substring_stripper, en_wiktionary_stripper
 
 set_verbosity_info()
 logger = logging.getLogger(__name__)
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 MAPS = {
     "replace_newline_with_space": replace_newline_with_space,
     "remove_lines_with_code": remove_lines_with_code,
-    "strip_substrings_kn_wikisource": build_substring_stripper([["അവലംബം","പുറത്തേക്കുള്ള കണ്ണികൾ"]]),
+    "strip_substrings_en_wiktionary": en_wiktionary_stripper,
 }
 # Filter functions: function(batch: Dict) -> Dict
 FILTERS = {
