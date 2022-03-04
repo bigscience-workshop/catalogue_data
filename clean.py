@@ -8,7 +8,8 @@ from pathlib import Path
 from typing import Tuple, Optional, Callable
 from datasets.utils.logging import set_verbosity_info
 from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, filter_wiki_user_titles, \
-    replace_newline_with_space, remove_lines_with_curly_brackets, build_dedup_template, dedup_document
+    replace_newline_with_space, remove_lines_with_curly_brackets, build_dedup_template, dedup_document, \
+    remove_html_spans
 
 set_verbosity_info()
 logger = logging.getLogger(__name__)
@@ -17,7 +18,8 @@ logger = logging.getLogger(__name__)
 # Map functions: function(batch: Dict) -> Dict
 MAPS = {
     "replace_newline_with_space": replace_newline_with_space,
-    "remove_lines_with_code": remove_lines_with_code
+    "remove_lines_with_code": remove_lines_with_code, 
+    "remove_html_spans": remove_html_spans
 }
 # Filter functions: function(batch: Dict) -> Dict
 FILTERS = {
