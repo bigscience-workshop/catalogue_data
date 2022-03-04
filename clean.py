@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Tuple, Optional, Callable
 from datasets.utils.logging import set_verbosity_info
 from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, filter_wiki_user_titles, \
-    replace_newline_with_space, build_dedup_template, dedup_document, build_bad_substring_remover
+    replace_newline_with_space, build_dedup_template, dedup_document, build_line_with_substring_remover
     
 
 set_verbosity_info()
@@ -17,10 +17,10 @@ logger = logging.getLogger(__name__)
 # Map functions: function(batch: Dict) -> Dict
 MAPS = {
     "replace_newline_with_space": replace_newline_with_space,
-    "remove_lines_with_code": build_bad_substring_remover(["{", "}", "[if", "<script"]), 
-    "remove_html_spans": build_bad_substring_remover(["<span", "</span>", "<div", "</div>", "<a", "</a>", "br>"]),
-    "remove_html_spans_sanad": build_bad_substring_remover(["<img", "]]>", "<![CDATA", "//DW", "var ", "xtImg", "To view this video please enable JavaScript"]),
-    "remove_wiki_mojobake": build_bad_substring_remover(["À À À"])
+    "remove_lines_with_code": build_line_with_substring_remover(["{", "}", "[if", "<script"]), 
+    "remove_html_spans": build_line_with_substring_remover(["<span", "</span>", "<div", "</div>", "<a", "</a>", "br>"]),
+    "remove_html_spans_sanad": build_line_with_substring_remover(["<img", "]]>", "<![CDATA", "//DW", "var ", "xtImg", "To view this video please enable JavaScript"]),
+    "remove_wiki_mojobake": build_line_with_substring_remover(["À À À"])
 }
 # Filter functions: function(batch: Dict) -> Dict
 FILTERS = {
