@@ -36,6 +36,12 @@ else:
 DATASET_PATH=${DATASET_PATH_AND_FUNCTIONS[0]}
 MAPS_AND_FILTERS=${DATASET_PATH_AND_FUNCTIONS[1]}
 
+if [[ $MAPS_AND_FILTERS == KILL ]]
+then
+    echo "Not supposed to preprocess $DATASET_PATH"
+    exit 0
+fi
+
 # ====== OBTAIN DATASET_NAME =======
 
 if [[ $DATASET_PATH == /gpfswork/rech/six/uty16tp/dataset/tokenization/* ]]
@@ -59,6 +65,7 @@ mkdir -p $(dirname $SAVE_PATH)
 mkdir -p $CHECKS_SAVE_PATH
 
 HF_DATASETS_OFFLINE=1
+
 python clean.py \
     --dataset-path $DATASET_PATH \
     --maps-and-filters $MAPS_AND_FILTERS \
