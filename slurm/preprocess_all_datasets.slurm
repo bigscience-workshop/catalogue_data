@@ -60,6 +60,7 @@ fi
 
 SAVE_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/clean/$DATASET_NAME/final
 CHECKS_SAVE_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/clean/$DATASET_NAME/checks
+LOG_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/filter/$DATASET_NAME/logs.txt
 
 mkdir -p $(dirname $SAVE_PATH)
 mkdir -p $CHECKS_SAVE_PATH
@@ -74,4 +75,5 @@ python clean.py \
     --num-proc 40 \
     --batch-size 100 \
     --sampling-size-map-checks 1000 \
-    --sampling-size-filter-checks 1000
+    --sampling-size-filter-checks 1000 \
+    2>&1 | tee $LOGS_PATH
