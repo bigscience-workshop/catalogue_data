@@ -32,7 +32,7 @@ FILTERS = {
     "filter_remove_empty_docs": filter_wiki_user_titles,
     "filter_wiki_user_titles": filter_wiki_user_titles,
     "filter_wiki_non_text_type": filter_wiki_non_text_type,
-    "filter_small_docs": build_small_docs_filter(500),
+    "filter_small_docs": build_small_docs_filter(min_word=15),
     ** {
         f"filter_small_docs_bytes_{i}": build_small_docs_bytes_filter(min_bytes=i) for i in [500, 1000, 7000]
     },
@@ -41,11 +41,11 @@ FILTERS = {
 DEDUPS = {
     "dedup_template_soft": build_dedup_template(
         min_template_line_size=15,
-        min_template_line_occurence=20,
+        min_template_line_occurence=5,
     ),
     "dedup_pseudocrawl_newspapers": build_dedup_template(
         min_template_line_size=0,
-        min_template_line_occurence=1000,
+        min_template_line_occurence=2,
     ),
     "dedup_document": dedup_document
 }
