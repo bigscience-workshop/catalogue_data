@@ -76,13 +76,26 @@ print(\" \".join([f\"filter_small_docs_bytes_{i}\" for i in [500, 1000, 7000]]))
 # language = r.match(dataset[\"dataset_name\"]).group(1)
 # filter_min_length = language_to_short_filter_document[language]
 # if filter_min_length > 0:
-#     print(f\"filter_small_docs_bytes_{filter_min_length }\")
+#     print(f\"filter_small_docs_bytes_{filter_min_length}\")
 # else:
 #     print()
+
+if pd.notnull(dataset[\"--maps-and-filters argument\"]):
+    print(dataset[\"--maps-and-filters argument\"])
+else:
+    print()
 ")
 
 DATASET_PATH=${DATASET_PATH_AND_FUNCTIONS[0]}
 MAPS_AND_FILTERS=${DATASET_PATH_AND_FUNCTIONS[1]}
+OFFICIAL_MAPS_AND_FILERS=${DATASET_PATH_AND_FUNCTIONS[2]}
+
+if [[ $OFFICIAL_MAPS_AND_FILERS == KILL ]]
+then
+    echo "Not supposed to preprocess $DATASET_PATH"
+    exit 0
+fi
+
 
 # ====== OBTAIN DATASET_NAME =======
 
