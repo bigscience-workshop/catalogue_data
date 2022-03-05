@@ -61,13 +61,26 @@ def dedup_document(ds: Dataset, num_proc: int, batch_size: int) -> Dataset:
 
     hashes = set()
 
-    return hashed_documents.filter(
-        lambda hashes_: [is_new_hash(hash_, hashes) for hash_ in hashes_],
+    def delete_text_from_duplicates(examples):
+        examples = {"text": [text if is_new_hash(hash, hashes) else "" for text, hash in zip(examples["text"], examples["hash"])]}
+        return examples
+
+    return hashed_documents.map(
+        delete_text_from_duplicates,
         num_proc=1,  # VERY IMPORTANT: hashes will be updated, and is not thread safe.
-        input_columns=["hash"],
         batched=True,
         batch_size=batch_size,
+        load_from_cache_file=False,
     ).remove_columns("hash")
+
+    # return hashed_documents.filter(
+    #     lambda hashes_: [is_new_hash(hash_, hashes) for hash_ in hashes_],
+    #     num_proc=1,  # VERY IMPORTANT: hashes will be updated, and is not thread safe.
+    #     input_columns=["hash"],
+    #     batched=True,
+    #     batch_size=batch_size,
+    #     load_from_cache_file=False,
+    # ).remove_columns("hash")
 
 
 # =========== HELPERS ===============
