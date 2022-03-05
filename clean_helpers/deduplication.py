@@ -69,6 +69,31 @@ def dedup_document(ds: Dataset, num_proc: int, batch_size: int) -> Dataset:
         batch_size=batch_size,
     ).remove_columns("hash")
 
+url_regex = re.compile(r"^(.[^?]*)")
+def dedup_document_on_url(ds: Dataset, num_proc: int, batch_size: int) -> Dataset:
+    hashed_documents = ds.map(
+        lambda batch: {
+            **batch,
+            "hash": get_hash([
+                url_regex.match(eval(meta)["url"]).group(1)
+                for meta in batch["meta"]
+            ])}
+        ,
+        num_proc=num_proc,
+        batched=True,
+        batch_size=batch_size,
+    )
+
+    hashes = set()
+
+    return hashed_documents.filter(
+        lambda hashes_: [is_new_hash(hash_, hashes) for hash_ in hashes_],
+        num_proc=1,  # VERY IMPORTANT: hashes will be updated, and is not thread safe.
+        input_columns=["hash"],
+        batched=True,
+        batch_size=batch_size,
+    ).remove_columns("hash")
+
 
 # =========== HELPERS ===============
 
