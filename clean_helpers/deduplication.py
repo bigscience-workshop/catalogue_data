@@ -61,25 +61,27 @@ def dedup_document(ds: Dataset, num_proc: int, batch_size: int) -> Dataset:
 
     hashes = set()
 
-    def delete_text_from_duplicates(examples):
-        examples = {"text": [text if is_new_hash(hash, hashes) else "" for text, hash in zip(examples["text"], examples["hash"])]}
-        return examples
+    def delete_text_from_duplicates(batch):
+        return {
+            **{k: v for k, v in batch.items() if k != "hash"},
+            "text": [text if is_new_hash(hash_, hashes) else "" for text, hash_ in zip(batch["text"], batch["hash"])]
+        }
 
     return hashed_documents.map(
         delete_text_from_duplicates,
         num_proc=1,  # VERY IMPORTANT: hashes will be updated, and is not thread safe.
         batched=True,
         batch_size=batch_size,
-        load_from_cache_file=False,
-    ).remove_columns("hash")
+        remove_columns=hashed_documents.column_names
+    )
 
+    # # TODO: This version is memory efficient and runs faster, but we lose alignment
     # return hashed_documents.filter(
     #     lambda hashes_: [is_new_hash(hash_, hashes) for hash_ in hashes_],
     #     num_proc=1,  # VERY IMPORTANT: hashes will be updated, and is not thread safe.
     #     input_columns=["hash"],
     #     batched=True,
     #     batch_size=batch_size,
-    #     load_from_cache_file=False,
     # ).remove_columns("hash")
 
 
