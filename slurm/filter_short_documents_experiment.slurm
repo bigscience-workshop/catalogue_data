@@ -127,4 +127,6 @@ python clean.py \
     --save-path $SAVE_PATH \
     --checks-save-path $CHECKS_SAVE_PATH \
     --num-proc 40 \
-    --batch-size 100
+    --batch-size 100 \
+    --sampling-size-map-checks 1000 \
+    --sampling-size-filter-checks 1000
