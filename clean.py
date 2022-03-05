@@ -8,7 +8,7 @@ from typing import Tuple, Optional, Callable
 from datasets.utils.logging import set_verbosity_info
 from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, filter_wiki_user_titles, \
     replace_newline_with_space, build_dedup_template, dedup_document, build_line_with_substring_remover, \
-    en_wiktionary_stripper, build_small_docs_bytes_filter
+    en_wiktionary_stripper, build_small_docs_bytes_filter, dedup_document_on_url
 
 set_verbosity_info()
 logger = logging.getLogger(__name__)
@@ -43,7 +43,8 @@ DEDUPS = {
         min_template_line_size=0,
         min_template_line_occurence=2,
     ),
-    "dedup_document": dedup_document
+    "dedup_document": dedup_document,
+    "dedup_document_on_url": dedup_document_on_url
 }
 
 MAPS_KEYS = set(MAPS.keys())
