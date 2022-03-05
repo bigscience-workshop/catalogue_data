@@ -210,8 +210,11 @@ def main():
     # Save to disk
     if args.from_scratch or not args.save_path.exists():
         logger.info(f" ===== Saving dataset =====")
-        logger.info(f"Saving to json format at {args.save_path}.")
+        logger.info(f"Saving to final dataset at {args.save_path}.")
         tmp_save_path = Path(args.save_path.parent, f"tmp-{args.save_path.name}")
+        if len(ds) == 0:
+            logger.info("Dataset was empty. Not saving anything.")
+            return
         if args.save_to_json:
             ds.to_json(
                 tmp_save_path,
