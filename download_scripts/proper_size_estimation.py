@@ -12,7 +12,8 @@ def get_size(name_dataset):
         dataset = load_dataset(name_dataset, use_auth_token=True, ignore_verifications=True, split="train")
         dataset = dataset.map(None, remove_columns=[column for column in dataset.column_names if column != "text"])
         print("Done for dataset:", name_dataset)
-        return (name_dataset, sum([sys.getsizeof(item["text"]) for item in tqdm(dataset)]))
+        return (name_dataset, sys.getsizeof("".join(dataset["text"])))
+        # return (name_dataset, sum([sys.getsizeof(item["text"]) for item in tqdm(dataset)]))
     except Exception as e:
         print(f"Failed for dataset: {name_dataset} because of {e}")
         return (name_dataset, 0)
@@ -36,10 +37,10 @@ if __name__ == '__main__':
         previous_sizes = None
 
     p = multiprocessing.Pool(processes=multiprocessing.cpu_count()-1)
-    async_result = p.imap_unordered(get_size, tqdm(list_datasets))
-    result = dict(async_result)
+    async_result = p.imap_unordered(get_size, list_datasets)
+    result = dict(tqdm(async_result))
     if previous_sizes is not None:
-        result = dict(result, **previous_sizes)
+        result = dict(previous_sizes, **result)
     json.dump(result, open("dataset_sizes.json", "w"), ensure_ascii=False, indent=2)
     p.close()
     p.join()
