@@ -1,12 +1,12 @@
 #!/bin/bash
-#SBATCH --job-name=preprocess_all_catalogue_datasets
+#SBATCH --job-name=filter_short_document_all_catalogue_datasets
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1          # crucial - only 1 task per dist per node!
 #SBATCH --cpus-per-task=40         # number of cores per tasks
 #SBATCH --hint=nomultithread         # we get physical cores not logical
 #SBATCH --partition=cpu_p1
 #SBATCH --time 20:00:00              # maximum execution time (HH:MM:SS)
-#SBATCH --output=logs/filter_short_document_catalogue/%x-%j.out           # output file name
+#SBATCH --output=logs/filter_short_document_catalogue_1/%x-%j.out           # output file name
 #SBATCH --array=0-509   # TODO: modify according to the number of models you want to evaluated
 #SBATCH --account=six@cpu
 
@@ -71,12 +71,14 @@ data = pd.read_csv(\"${DATASET_TRAINING_CSV}\")
 dataset = data.iloc[$DATASET_ID]
 
 print(dataset[\"dataset_name\"])
-language = r.match(dataset[\"dataset_name\"]).group(1)
-filter_min_length = language_to_short_filter_document[language]
-if filter_min_length > 0:
-    print(f\"filter_small_docs_bytes_{filter_min_length }\")
-else:
-    print()
+print(\" \".join([f\"filter_small_docs_bytes_{i}\" for i in [500, 1000, 7000]]))
+
+# language = r.match(dataset[\"dataset_name\"]).group(1)
+# filter_min_length = language_to_short_filter_document[language]
+# if filter_min_length > 0:
+#     print(f\"filter_small_docs_bytes_{filter_min_length }\")
+# else:
+#     print()
 ")
 
 DATASET_PATH=${DATASET_PATH_AND_FUNCTIONS[0]}
@@ -98,8 +100,8 @@ fi
 
 # ====== RUN PYTHON SCRIPT =======
 
-SAVE_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/clean/$DATASET_NAME/final
-CHECKS_SAVE_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/clean/$DATASET_NAME/checks
+SAVE_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/filter/$DATASET_NAME/final
+CHECKS_SAVE_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/filter/$DATASET_NAME/checks
 
 mkdir -p $(dirname $SAVE_PATH)
 mkdir -p $CHECKS_SAVE_PATH
