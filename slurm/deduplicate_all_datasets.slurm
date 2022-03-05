@@ -1,12 +1,12 @@
 #!/bin/bash
-#SBATCH --job-name=filter_short_document_all_catalogue_datasets
+#SBATCH --job-name=deduplicate_all_catalogue_datasets
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1          # crucial - only 1 task per dist per node!
 #SBATCH --cpus-per-task=40         # number of cores per tasks
 #SBATCH --hint=nomultithread         # we get physical cores not logical
 #SBATCH --partition=cpu_p1
 #SBATCH --time 20:00:00              # maximum execution time (HH:MM:SS)
-#SBATCH --output=logs/filter_short_document_catalogue_1/%x-%j.out           # output file name
+#SBATCH --output=logs/deduplicate_all_catalogue_datasets/%x-%j.out           # output file name
 #SBATCH --array=0-509   # TODO: modify according to the number of models you want to evaluated
 #SBATCH --account=six@cpu
 
@@ -25,67 +25,21 @@ DATASET_TRAINING_CSV=$CATALOGUE_DATA_REPO/training.csv
 readarray -t DATASET_PATH_AND_FUNCTIONS < <(python -c "
 import pandas as pd
 
-language_to_short_filter_document = {
-    \"ar\": 1000,
-    \"ca\": 7000,
-    \"code\": 7000,
-    \"en\": 7000,
-    \"es\": 7000,
-    \"eu\": 0,
-    \"fr\": 7000,
-    \"id\": 500,
-    \"indic-as\": 0,
-    \"indic-bn\": 1000,
-    \"indic-gu\": 500,
-    \"indic-hi\": 1000,
-    \"indic-kn\": 500,
-    \"indic-ml\": 500,
-    \"indic-mr\": 500,
-    \"indic-ne\": 500,
-    \"indic-or\": 0,
-    \"indic-pa\": 500,
-    \"indic-ta\": 500,
-    \"indic-te\": 500,
-    \"indic-ur\": 500,
-    \"nigercongo\": 0,
-    \"nigercongo-fon\": 0,
-    \"nigercongo-ig\": 0,
-    \"nigercongo-lg\": 0,
-    \"nigercongo-rw\": 0,
-    \"nigercongo-sw\": 0,
-    \"nigercongo-wo\": 0,
-    \"nigercongo-xh\": 0,
-    \"nigercongo-yo\": 0,
-    \"nigercongo-zu\": 0,
-    \"pt\": 1000,
-    \"vi\": 500,
-    \"zh\": 7000,
-    \"zht\": 7000,
-}
-
-import re
-
-r = re.compile(r\"(?:/gpfswork/rech/six/uty16tp/dataset/tokenization/)?bigscience-catalogue-lm-data/lm_(.[^_]*)_*\")
-
 data = pd.read_csv(\"${DATASET_TRAINING_CSV}\")
 dataset = data.iloc[$DATASET_ID]
-
 print(dataset[\"dataset_name\"])
-print(\" \".join([f\"filter_small_docs_bytes_{i}\" for i in [500, 1000, 7000]]))
 
-# language = r.match(dataset[\"dataset_name\"]).group(1)
-# filter_min_length = language_to_short_filter_document[language]
-# if filter_min_length > 0:
-#     print(f\"filter_small_docs_bytes_{filter_min_length}\")
-# else:
-#     print()
+if \"pseudocrawl\" in dataset[\"dataset_name\"]:
+    list_of_dedups=[\"dedup_document_on_url\", \"dedup_document\", \"dedup_pseudocrawl_newspapers\"]
+else:
+    list_of_dedups=[\"dedup_document\", \"dedup_template_soft\"]
+print(\" \".join(list_of_dedups))
 
 if pd.notnull(dataset[\"--maps-and-filters argument\"]):
     print(dataset[\"--maps-and-filters argument\"])
 else:
     print()
 ")
-
 DATASET_PATH=${DATASET_PATH_AND_FUNCTIONS[0]}
 MAPS_AND_FILTERS=${DATASET_PATH_AND_FUNCTIONS[1]}
 OFFICIAL_MAPS_AND_FILERS=${DATASET_PATH_AND_FUNCTIONS[2]}
@@ -95,7 +49,6 @@ then
     echo "Not supposed to preprocess $DATASET_PATH"
     exit 0
 fi
-
 
 # ====== OBTAIN DATASET_NAME =======
 
@@ -113,7 +66,7 @@ fi
 
 # ====== RUN PYTHON SCRIPT =======
 
-BASE_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/filter/$DATASET_NAME
+BASE_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/dedup/$DATASET_NAME
 SAVE_PATH=$BASE_PATH/final
 CHECKS_SAVE_PATH=$BASE_PATH/checks
 LOGS_PATH=$BASE_PATH/logs.txt

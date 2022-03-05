@@ -58,9 +58,10 @@ fi
 
 # ====== RUN PYTHON SCRIPT =======
 
-SAVE_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/clean/$DATASET_NAME/final
-CHECKS_SAVE_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/clean/$DATASET_NAME/checks
-LOGS_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/clean/$DATASET_NAME/logs.txt
+BASE_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/clean/$DATASET_NAME
+SAVE_PATH=$BASE_PATH/final
+CHECKS_SAVE_PATH=$BASE_PATH/checks
+LOGS_PATH=$BASE_PATH/logs.txt
 
 mkdir -p $(dirname $SAVE_PATH)
 mkdir -p $CHECKS_SAVE_PATH
