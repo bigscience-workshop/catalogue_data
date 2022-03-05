@@ -60,7 +60,7 @@ fi
 
 SAVE_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/clean/$DATASET_NAME/final
 CHECKS_SAVE_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/clean/$DATASET_NAME/checks
-LOGS_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/filter/$DATASET_NAME/logs.txt
+LOGS_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/clean/$DATASET_NAME/logs.txt
 
 mkdir -p $(dirname $SAVE_PATH)
 mkdir -p $CHECKS_SAVE_PATH
