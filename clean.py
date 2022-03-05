@@ -15,7 +15,8 @@ from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, fi
 
 set_verbosity_info()
 logger = logging.getLogger(__name__)
-set_caching_enabled(False)
+# TODO: Uncomment when you have caching issue
+# set_caching_enabled(False)
 
 # Map functions: function(batch: Dict) -> Dict
 MAPS = {
