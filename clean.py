@@ -1,4 +1,5 @@
 import argparse
+import json
 import logging
 import random
 import sys
@@ -117,10 +118,9 @@ def get_filtered_out_documents(
     idx_samples = random.sample(range(len(filtered_out_ds)), min(len(filtered_out_ds), 10))
     logger.info("Examples of filtered out examples:")
     for idx in idx_samples:
-        logger.info(f"     Examples n°{idx} of filtered out examples:\n{filtered_out_ds[idx]}")
+        logger.info(f"     Examples n°{idx} of filtered out examples:\n{json.dumps(filtered_out_ds[idx], indent=2)}")
 
     if sampling_size is not None:
-
         idx_samples = random.sample(range(len(filtered_out_ds)), min(len(filtered_out_ds), sampling_size))
         filtered_out_ds = filtered_out_ds.select(idx_samples)
 
@@ -150,11 +150,11 @@ def get_modified_documents(
     logger.info("Examples of modified examples:")
     idx_samples = random.sample(range(len(mapped_diff_ds)), min(len(mapped_diff_ds), 10))
     for idx in idx_samples:
-        logger.info(f"     Examples n°{idx} :\n{mapped_diff_ds[idx]}")
+        logger.info(f"     Examples n°{idx} :\n{json.dumps(mapped_diff_ds[idx], indent=2)}")
 
     if sampling_size is not None:
         idx_samples = random.sample(range(len(mapped_diff_ds)), min(len(mapped_diff_ds), sampling_size))
-        mapped_diff_ds = ds.select(idx_samples)
+        mapped_diff_ds = mapped_diff_ds.select(idx_samples)
 
     return mapped_diff_ds
 
@@ -186,11 +186,6 @@ def apply_function(function_name: str, ds: Dataset, args) -> Tuple[Dataset, Opti
         dedup_function = DEDUPS[function_name]
         deduplicated_ds = dedup_function(ds, num_proc=args.num_proc, batch_size=args.batch_size)
         log_stats(f"Applied deduplication function: {function_name}",  ds,  deduplicated_ds,  operation_type="Deduplicated")
-        if args.sampling_size_map_checks is not None:
-            logger.info("Examples of modified examples:")
-            idx_samples = random.sample(range(len(deduplicated_ds)), min(len(deduplicated_ds), args.sampling_size_map_checks))
-            for idx in idx_samples:
-                logger.info(f"     Examples n°{idx} :\n{deduplicated_ds[idx]}")
 
         # Some deduplication do not preserve the number of samples, so alignement is lost. For example "dedup_document"
         if args.checks_save_path is not None:
