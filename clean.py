@@ -3,17 +3,20 @@ import logging
 import random
 import sys
 from functools import partial
-from datasets import Dataset, load_dataset, load_from_disk, concatenate_datasets
+from datasets import Dataset, load_dataset, load_from_disk, concatenate_datasets, set_caching_enabled
 from pathlib import Path
 from typing import Tuple, Optional, Callable
 from datasets.utils.logging import set_verbosity_info
+from numpy.random import default_rng
+
 from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, filter_wiki_user_titles, \
     replace_newline_with_space, build_dedup_template, dedup_document, build_line_with_substring_remover, \
     en_wiktionary_stripper, build_small_docs_bytes_filter
 
 set_verbosity_info()
 logger = logging.getLogger(__name__)
-from clean_helpers.filter_small_docs_in_datasets import build_small_docs_bytes_filter
+# TODO: Uncomment when you have caching issue
+# set_caching_enabled(False)
 
 # Map functions: function(batch: Dict) -> Dict
 MAPS = {
@@ -29,7 +32,7 @@ FILTERS = {
     "filter_remove_empty_docs": filter_wiki_user_titles,
     "filter_wiki_user_titles": filter_wiki_user_titles,
     "filter_wiki_non_text_type": filter_wiki_non_text_type,
-    "filter_small_docs": build_small_docs_bytes_filter(500),
+    "filter_small_docs": build_small_docs_filter(500),
     ** {
         f"filter_small_docs_bytes_{i}": build_small_docs_bytes_filter(min_bytes=i) for i in [500, 1000, 7000]
     },
@@ -54,10 +57,11 @@ assert MAPS_KEYS.isdisjoint(FILTERS_KEYS)
 assert (MAPS_KEYS | FILTERS_KEYS).isdisjoint(DEDUPS_KEYS)
 
 def quick_size_estimation(ds, content_key="text"):
-    ds = ds.shuffle(1991)
+    rng = default_rng(1991)
     subset_size = min(10000, len(ds))
+    indices = rng.choice(len(ds), size=subset_size, replace=False, shuffle=False)
+    partial_ds = ds.select(indices)
     ratio = float(len(ds)) / float(subset_size)
-    partial_ds = ds.select(range(subset_size))
     return sys.getsizeof("".join(partial_ds[content_key])) * ratio
 
 def revert_bool_output(examples, filter_function):
@@ -82,19 +86,20 @@ def get_args():
     parser.add_argument("--save-to-json", action="store_true", help="Save output dataset in json format.")
     return parser.parse_args()
 
-def log_stats_samples(title: str, original_size: int, after_transformation_size: int, operation_type: str):
+def log_stats(title: str, original_ds: Dataset, after_transformation_ds: Dataset, operation_type: str):
+    original_length = len(original_ds)
+    after_transformation_length = len(after_transformation_ds)
+    original_bytes = quick_size_estimation(original_ds, "text")
+    after_transformation_btyes = quick_size_estimation(after_transformation_ds, "text")
     logger.info(title)
-    logger.info(f"     Initial number of samples: {original_size} samples")
-    logger.info(f"     {operation_type} samples: {original_size - after_transformation_size} samples")
-    logger.info(f"     {operation_type} percentage: {(original_size - after_transformation_size) / original_size * 100:.2f} %")
-    logger.info(f"     Final number of samples: {after_transformation_size} samples")
-
-def log_stats_bytes(title: str, original_size: float, after_transformation_size: float, operation_type: str):
-    logger.info(title)
-    logger.info(f"     Initial size in bytes: {original_size * 1e-9:.4f} GB")
-    logger.info(f"     {operation_type} bytes: {(original_size - after_transformation_size) * 1e-9:.4f} GB")
-    logger.info(f"     {operation_type} percentage: {(original_size - after_transformation_size) / original_size * 100:.2f} %")
-    logger.info(f"     Final size in bytes: {after_transformation_size * 1e-9:.4f} GB")
+    logger.info(f"     Initial number of samples: {original_length} samples")
+    logger.info(f"     {operation_type} samples: {original_length - after_transformation_length} samples")
+    logger.info(f"     {operation_type} percentage: {(original_length - after_transformation_length) / original_length * 100:.2f} %")
+    logger.info(f"     Final number of samples: {after_transformation_length} samples")
+    logger.info(f"     Initial size in bytes: {original_bytes * 1e-9:.4f} GB")
+    logger.info(f"     {operation_type} bytes: {(original_bytes - after_transformation_btyes) * 1e-9:.4f} GB")
+    logger.info(f"     {operation_type} percentage in bytes: {(original_bytes - after_transformation_btyes) / original_bytes * 100:.2f} %")
+    logger.info(f"     Final size in bytes: {after_transformation_btyes * 1e-9:.4f} GB")
 
 def get_filtered_out_documents(
     ds: Dataset,
@@ -109,12 +114,14 @@ def get_filtered_out_documents(
         batch_size=batch_size
     )
 
+    idx_samples = random.sample(range(len(filtered_out_ds)), min(len(filtered_out_ds), 10))
+    logger.info("Examples of filtered out examples:")
+    for idx in idx_samples:
+        logger.info(f"     Examples n°{idx} of filtered out examples:\n{filtered_out_ds[idx]}")
+
     if sampling_size is not None:
 
         idx_samples = random.sample(range(len(filtered_out_ds)), min(len(filtered_out_ds), sampling_size))
-        logger.info("Examples of filtered out examples:")
-        for idx in idx_samples:
-            logger.info(f"     Examples n°{idx} of filtered out examples:\n{filtered_out_ds[idx]}")
         filtered_out_ds = filtered_out_ds.select(idx_samples)
 
     return filtered_out_ds
@@ -140,11 +147,13 @@ def get_modified_documents(
         batch_size=batch_size
     )
 
+    logger.info("Examples of modified examples:")
+    idx_samples = random.sample(range(len(mapped_diff_ds)), min(len(mapped_diff_ds), 10))
+    for idx in idx_samples:
+        logger.info(f"     Examples n°{idx} :\n{mapped_diff_ds[idx]}")
+
     if sampling_size is not None:
-        logger.info("Examples of modified examples:")
         idx_samples = random.sample(range(len(mapped_diff_ds)), min(len(mapped_diff_ds), sampling_size))
-        for idx in idx_samples:
-            logger.info(f"     Examples n°{idx} :\n{mapped_diff_ds[idx]}")
         mapped_diff_ds = ds.select(idx_samples)
 
     return mapped_diff_ds
@@ -158,9 +167,8 @@ def apply_function(function_name: str, ds: Dataset, args) -> Tuple[Dataset, Opti
                 batched=True,
                 num_proc=args.num_proc,
                 batch_size=args.batch_size,
-                load_from_cache_file=False,
             )
-        log_stats_bytes(f"Applied map function: {function_name}", len(ds), len(mapped_ds), operation_type="Modified")
+        log_stats(f"Applied map function: {function_name}", ds, mapped_ds, operation_type="Modified")
         if args.checks_save_path is not None:
             mapped_diff_ds = get_modified_documents(ds, mapped_ds, args.num_proc, args.batch_size, args.sampling_size_map_checks)
             return mapped_ds, mapped_diff_ds
@@ -169,7 +177,7 @@ def apply_function(function_name: str, ds: Dataset, args) -> Tuple[Dataset, Opti
     elif function_name in FILTERS:
         filter_function = FILTERS[function_name]
         filtered_ds = ds.filter(filter_function, batched=True, num_proc=args.num_proc, batch_size=args.batch_size)
-        log_stats_samples(f"Applied filter: {function_name}", len(ds), len(filtered_ds), operation_type="Removed")
+        log_stats(f"Applied filter: {function_name}", ds, filtered_ds, operation_type="Removed")
         if args.checks_save_path is not None:
             return filtered_ds, get_filtered_out_documents(ds, filter_function, args.num_proc, args.batch_size, args.sampling_size_filter_checks)
         else:
@@ -177,12 +185,7 @@ def apply_function(function_name: str, ds: Dataset, args) -> Tuple[Dataset, Opti
     elif function_name in DEDUPS:
         dedup_function = DEDUPS[function_name]
         deduplicated_ds = dedup_function(ds, num_proc=args.num_proc, batch_size=args.batch_size)
-        print(f"{len(ds)} samples in old ds")
-        print(f"{quick_size_estimation(ds)} bytes in old ds")
-        print(f"{len(deduplicated_ds)} samples in new ds")
-        print(f"{quick_size_estimation(deduplicated_ds)} bytes in new ds")
-        log_stats_bytes(f"Applied deduplication function: {function_name}", quick_size_estimation(ds), quick_size_estimation(deduplicated_ds), operation_type="Deduplicated")
-
+        log_stats(f"Applied deduplication function: {function_name}",  ds,  deduplicated_ds,  operation_type="Deduplicated")
         if args.sampling_size_map_checks is not None:
             logger.info("Examples of modified examples:")
             idx_samples = random.sample(range(len(deduplicated_ds)), min(len(deduplicated_ds), args.sampling_size_map_checks))
