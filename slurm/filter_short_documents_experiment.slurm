@@ -74,7 +74,7 @@ print(dataset[\"dataset_name\"])
 language = r.match(dataset[\"dataset_name\"]).group(1)
 filter_min_length = language_to_short_filter_document[language]
 if filter_min_length > 0:
-    print(f\"filter_small_docs_bytes_{filter_min_length }\"
+    print(f\"filter_small_docs_bytes_{filter_min_length }\")
 else:
     print()
 ")
