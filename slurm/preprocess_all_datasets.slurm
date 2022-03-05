@@ -64,7 +64,7 @@ CHECKS_SAVE_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/clean/$DATAS
 mkdir -p $(dirname $SAVE_PATH)
 mkdir -p $CHECKS_SAVE_PATH
 
-HF_DATASETS_OFFLINE=1
+export HF_DATASETS_OFFLINE=1
 
 python clean.py \
     --dataset-path $DATASET_PATH \
