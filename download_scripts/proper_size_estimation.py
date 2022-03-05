@@ -21,14 +21,12 @@ def get_size(name_dataset):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Load a dataset.')
-    parser.add_argument('--ratio_file', type=str, default=None)
+    parser.add_argument('--dataset_list', type=str, default=None)
     parser.add_argument('--reuse_previous', action="store_true")
     args = parser.parse_args()
 
-    f = open(args.ratio_file, "r")
-    ratios = json.load(f)
-    list_datasets = [item["dataset_path"] for item in ratios]
-    f.close()
+    list_datasets = [dataset_path.strip() for dataset_path in open(args.dataset_list).readlines()]
+    print(len(list_datasets))
 
     if args.reuse_previous:
         previous_sizes = json.load(open("dataset_sizes.json"))
@@ -42,5 +40,8 @@ if __name__ == '__main__':
     if previous_sizes is not None:
         result = dict(previous_sizes, **result)
     json.dump(result, open("dataset_sizes.json", "w"), ensure_ascii=False, indent=2)
+    with open("dataset_sizes.csv", "w") as g:
+        for dataset_name, size in sorted(result.items(), key=lambda x: x[0]):
+            g.write(f"{dataset_name},{size * 1e-9:.4f}\n")
     p.close()
     p.join()
