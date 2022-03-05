@@ -30,9 +30,9 @@ dataset = data.iloc[$DATASET_ID]
 print(dataset[\"dataset_name\"])
 
 if \"pseudocrawl\" in dataset[\"dataset_name\"]:
-    list_of_dedups=[\"dedup_document_on_url\", \"dedup_document\", \"dedup_pseudocrawl_newspapers\"]
+    list_of_dedups=[\"dedup_document_on_url\", \"dedup_document\", \"dedup_pseudocrawl_newspapers\", \"filter_remove_empty_docs\"]
 else:
-    list_of_dedups=[\"dedup_document\", \"dedup_template_soft\"]
+    list_of_dedups=[\"dedup_document\", \"dedup_template_soft\", \"filter_remove_empty_docs\"]
 print(\" \".join(list_of_dedups))
 
 if pd.notnull(dataset[\"--maps-and-filters argument\"]):

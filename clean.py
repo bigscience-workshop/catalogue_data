@@ -12,7 +12,7 @@ from numpy.random import default_rng
 
 from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, filter_wiki_user_titles, \
     replace_newline_with_space, build_dedup_template, dedup_document, build_line_with_substring_remover, \
-    en_wiktionary_stripper, build_small_docs_bytes_filter, dedup_document_on_url
+    en_wiktionary_stripper, build_small_docs_bytes_filter, dedup_document_on_url, filter_remove_empty_docs
 
 set_verbosity_info()
 logger = logging.getLogger(__name__)
@@ -30,7 +30,7 @@ MAPS = {
 }
 # Filter functions: function(batch: Dict) -> Dict
 FILTERS = {
-    "filter_remove_empty_docs": filter_wiki_user_titles,
+    "filter_remove_empty_docs": filter_remove_empty_docs,
     "filter_wiki_user_titles": filter_wiki_user_titles,
     "filter_wiki_non_text_type": filter_wiki_non_text_type,
     "filter_small_docs": build_small_docs_filter(min_word=15),
@@ -71,7 +71,7 @@ def revert_bool_output(examples, filter_function):
     return [not boolean for boolean in booleans]
 
 def filter_diff_text(examples, in_text_col, out_text_col):
-    return [text_in!=text_out for text_in, text_out in zip(examples[in_text_col], examples[out_text_col])]
+    return [text_in != text_out for text_in, text_out in zip(examples[in_text_col], examples[out_text_col])]
 
 def get_args():
     parser = argparse.ArgumentParser()
