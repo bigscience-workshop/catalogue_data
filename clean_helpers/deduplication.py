@@ -8,6 +8,8 @@ from datasets import Dataset
 
 
 # ======== DEDUPLICATION FUNCTIONS ===================
+from clean_helpers.utils import parse_meta
+
 
 def build_dedup_template(min_template_line_size: int, min_template_line_occurence: int):
     def dedup_template(ds: Dataset, num_proc: int, batch_size: int) -> Dataset:
@@ -91,7 +93,7 @@ def dedup_document_on_url(ds: Dataset, num_proc: int, batch_size: int) -> Datase
         lambda batch: {
             **batch,
             "hash": get_hash([
-                url_regex.match(meta["url"]).group(1)
+                url_regex.match(parse_meta(meta)["url"]).group(1)
                 for meta in batch["meta"]
             ])}
         ,
