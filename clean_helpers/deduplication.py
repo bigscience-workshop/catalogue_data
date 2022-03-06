@@ -1,5 +1,6 @@
 from collections import defaultdict
-from typing import List, Set, Tuple
+from functools import partial
+from typing import List, Set, Tuple, Dict
 import hashlib
 import re
 import string
@@ -63,14 +64,8 @@ def dedup_document(ds: Dataset, num_proc: int, batch_size: int) -> Dataset:
 
     hashes = set()
 
-    def delete_text_from_duplicates(batch):
-        return {
-            **{k: v for k, v in batch.items() if k != "hash"},
-            "text": [text if is_new_hash(hash_, hashes) else "" for text, hash_ in zip(batch["text"], batch["hash"])]
-        }
-
     return hashed_documents.map(
-        delete_text_from_duplicates,
+        partial(delete_text_from_duplicates, hashes=hashes),
         num_proc=1,  # VERY IMPORTANT: hashes will be updated, and is not thread safe.
         batched=True,
         batch_size=batch_size,
@@ -104,13 +99,21 @@ def dedup_document_on_url(ds: Dataset, num_proc: int, batch_size: int) -> Datase
 
     hashes = set()
 
-    return hashed_documents.filter(
-        lambda hashes_: [is_new_hash(hash_, hashes) for hash_ in hashes_],
+    return hashed_documents.map(
+        partial(delete_text_from_duplicates, hashes=hashes),
         num_proc=1,  # VERY IMPORTANT: hashes will be updated, and is not thread safe.
-        input_columns=["hash"],
         batched=True,
         batch_size=batch_size,
-    ).remove_columns("hash")
+        remove_columns=hashed_documents.column_names
+    )
+
+    # return hashed_documents.filter(
+    #     lambda hashes_: [is_new_hash(hash_, hashes) for hash_ in hashes_],
+    #     num_proc=1,  # VERY IMPORTANT: hashes will be updated, and is not thread safe.
+    #     input_columns=["hash"],
+    #     batched=True,
+    #     batch_size=batch_size,
+    # ).remove_columns("hash")
 
 
 # =========== HELPERS ===============
@@ -132,7 +135,7 @@ def split_text_in_lines(text: str) -> List[str]:
     return [line.strip() for line in text.split("\n")]
 
 
-def split_text_to_lines_and_hash(batch):
+def split_text_to_lines_and_hash(batch: Dict[str, List]):
     lines_per_texts = [split_text_in_lines(text) for text in batch["text"]]
     return {
         **{k: v for k, v in batch.items() if k != "text"},
@@ -146,7 +149,7 @@ def clean_text(lines_and_hashes: List[Tuple[str, int]], template_line_hashes: Se
 
 
 def build_remove_template_lines(template_line_hashes: Set[str]):
-    def remove_template_lines(batch):
+    def remove_template_lines(batch: Dict[str, List]):
         cleaned_texts = [
             clean_text(
                 list(zip(lines, hashes)),
@@ -166,10 +169,16 @@ def build_remove_template_lines(template_line_hashes: Set[str]):
     return remove_template_lines
 
 
-def is_new_hash(hash_: int, hashes: Set[int]) -> bool:
+def is_new_hash(hash_: str, hashes: Set[str]) -> bool:
     """Check if current hash is still in set of unique hashes and remove if true."""
     if hash_ in hashes:
         return False
     else:
         hashes.add(hash_)
         return True
+
+def delete_text_from_duplicates(batch: Dict[str, List], hashes: Set[str]) -> Dict[str, List]:
+    return {
+        **{k: v for k, v in batch.items() if k != "hash"},
+        "text": [text if is_new_hash(hash_, hashes) else "" for text, hash_ in zip(batch["text"], batch["hash"])]
+    }
