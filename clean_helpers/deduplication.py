@@ -86,11 +86,12 @@ def dedup_document(ds: Dataset, num_proc: int, batch_size: int) -> Dataset:
 
 url_regex = re.compile(r"^(.[^?]*)")
 def dedup_document_on_url(ds: Dataset, num_proc: int, batch_size: int) -> Dataset:
+    """Deduplication on meta['url']"""
     hashed_documents = ds.map(
         lambda batch: {
             **batch,
             "hash": get_hash([
-                url_regex.match(eval(meta)["url"]).group(1)
+                url_regex.match(meta["url"]).group(1)
                 for meta in batch["meta"]
             ])}
         ,
