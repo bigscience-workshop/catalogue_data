@@ -81,7 +81,7 @@ python clean.py \
     --maps-and-filters $MAPS_AND_FILTERS \
     --save-path $SAVE_PATH \
     --checks-save-path $CHECKS_SAVE_PATH \
-    --num-proc 40 \
+    --num-proc 10 \
     --batch-size 100 \
     --sampling-size-map-checks 1000 \
     --sampling-size-filter-checks 1000 \
