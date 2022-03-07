@@ -18,21 +18,12 @@ conda activate thomas_data_tooling # Debug deepspeed temporarily
 CATALOGUE_DATA_REPO=$WORK/code/big_science/catalogue_data
 pushd $CATALOGUE_DATA_REPO
 
-# DATASET_PATH=${DATASETS_NAMES[$SLURM_ARRAY_TASK_ID]}
-DATASET_PATH=$(python get_dataset_path.py --dataset-ratios-file training_dataset_ratios.json --index $SLURM_ARRAY_TASK_ID)
-echo "Converting $DATASET_PATH to json"
+# ===== GET DATASET ======
 
-if [[ $DATASET_PATH == /gpfswork/rech/six/uty16tp/dataset/tokenization/* ]]
-then
-    if [[ $DATASET_PATH == */data ]]
-    then
-        DATASET_NAME=${DATASET_PATH:48:-5}
-    else
-        DATASET_NAME=${DATASET_PATH:48}
-    fi
-else
-    DATASET_NAME=$DATASET_PATH
-fi
+DATASET_ID=$SLURM_ARRAY_TASK_ID
+DATASET_NAME=$(python get_dataset_name.py --dataset-csv-path training.csv --index $DATASET_ID)
+
+echo "Converting $DATASET_NAME to json"
 
 NUM_SHARDS=8
 
@@ -42,7 +33,6 @@ mkdir -p $(dirname $SAVE_PREFIX)
 
 echo "Downloading ${DATASET_NAME}"
 export HF_DATASETS_OFFLINE=1
-
 
 module load git-lfs
 module load unrar
