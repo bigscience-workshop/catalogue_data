@@ -13,6 +13,7 @@ from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, fi
     replace_newline_with_space, build_dedup_template, dedup_document, build_line_with_substring_remover, \
     en_wiktionary_stripper, build_small_docs_bytes_filter, dedup_document_on_url, filter_remove_empty_docs,\
     build_reference_remover, build_sentence_splitter, sentence_split_langs
+from clean_helpers.sentence_splitter import stanza_list
 from clean_helpers.stopwords import stopwords
 
 set_verbosity_info()
@@ -29,7 +30,7 @@ MAPS = {
     "remove_wiki_mojibake": build_line_with_substring_remover(["À À"]),
     "strip_substrings_en_wiktionary": en_wiktionary_stripper,
     ** {
-    f"remove_references_{lang}": build_reference_remover(lang) for lang in set(stopwords.keys())
+        f"remove_references_{lang}": build_reference_remover(lang) for lang in set(stopwords.keys())
     },
     ** {f"split_sentences_{lang}": build_sentence_splitter(lang) for lang in sentence_split_langs}
 }
@@ -198,10 +199,17 @@ def get_modified_documents(
 def apply_function(function_name: str, ds: Dataset, args) -> Tuple[Dataset, Optional[Dataset]]:
     if function_name in MAPS:
         map_function = MAPS[function_name]
+
+        # HACK stanza is doesn't handle multiprocessing correctly
+        if function_name in [f"split_sentences_{lang}" for lang in stanza_list]:
+            num_proc = 1
+        else:
+            num_proc = args.num_proc
+
         mapped_ds = ds.map(
                 map_function,
                 batched=True,
-                num_proc=args.num_proc,
+                num_proc=num_proc,
                 batch_size=args.batch_size,
                 load_from_cache_file=False
             )

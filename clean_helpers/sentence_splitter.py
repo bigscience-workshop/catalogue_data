@@ -56,14 +56,6 @@ def build_indic_splitter(lang):
 
 
 def build_sentence_splitter(lang):
-    stanza_list = {"ar", "ca", "eu", "id", "vi", "zhs", "zht"}
-    nltk_list = {"en", "fr", "pt", "es"}
-    indic_list = {"indic-bn", "indic-gu", "indic-hi", "indic-kn", "indic-ml", "indic-mr", "indic-pa", "indic-ta", "indic-te"}
-    
-    assert len(stanza_list & nltk_list) == 0
-    assert len(stanza_list & indic_list) == 0
-    assert len(indic_list & nltk_list) == 0
-
     if lang in stanza_list:
         return build_stanza_splitter(lang)
     elif lang in nltk_list:
@@ -74,6 +66,13 @@ def build_sentence_splitter(lang):
         NotImplementedError(f"Lang '{lang}' has no sentence splitter implemented.")
 
 
-sentence_split_langs = {"ar", "ca", "eu", "id", "vi", "zhs", "zht", "en", "fr", 
-                        "pt", "es", "indic-bn", "indic-gu", "indic-hi", "indic-kn",
-                        "indic-ml", "indic-mr", "indic-pa", "indic-ta", "indic-te"}
+stanza_list = {"ar", "ca", "eu", "id", "vi", "zhs", "zht"}
+nltk_list = {"en", "fr", "pt", "es"}
+indic_list = {"indic-bn", "indic-gu", "indic-hi", "indic-kn", "indic-ml", "indic-mr", "indic-pa", "indic-ta",
+              "indic-te"}
+
+assert len(stanza_list & nltk_list) == 0
+assert len(stanza_list & indic_list) == 0
+assert len(indic_list & nltk_list) == 0
+
+sentence_split_langs = stanza_list | nltk_list | indic_list
