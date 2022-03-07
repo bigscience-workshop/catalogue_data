@@ -39,15 +39,15 @@ def build_stanza_splitter(lang, batch_size=32):
 
 def build_indic_splitter(lang):
     lang_to_indic = {
-        "hindi-bn": "bn",
-        "hindi-gu": "gu",
-        "hindi-hi": "hi",
-        "hindi-kn": "kn",
-        "hindi-ml": "ml",
-        "hindi-mr": "mr",
-        "hindi-pa": "pa",
-        "hindi-ta": "ta",
-        "hindi-te": "te"
+        "indic-bn": "bn",
+        "indic-gu": "gu",
+        "indic-hi": "hi",
+        "indic-kn": "kn",
+        "indic-ml": "ml",
+        "indic-mr": "mr",
+        "indic-pa": "pa",
+        "indic-ta": "ta",
+        "indic-te": "te"
         }
     def splitter(examples):
         split_texts = ["\n".join(sentence_tokenize.sentence_split(text, lang=lang_to_indic[lang])) for text in examples["text"]]
@@ -58,7 +58,7 @@ def build_indic_splitter(lang):
 def build_sentence_splitter(lang):
     stanza_list = {"ar", "ca", "eu", "id", "vi", "zhs", "zht"}
     nltk_list = {"en", "fr", "pt", "es"}
-    indic_list = {"hindi-bn", "hindi-gu", "hindi-hi", "hindi-kn", "hindi-ml", "hindi-mr", "hindi-pa", "hindi-ta", "hindi-te"}
+    indic_list = {"indic-bn", "indic-gu", "indic-hi", "indic-kn", "indic-ml", "indic-mr", "indic-pa", "indic-ta", "indic-te"}
     
     assert len(stanza_list & nltk_list) == 0
     assert len(stanza_list & indic_list) == 0
@@ -75,5 +75,5 @@ def build_sentence_splitter(lang):
 
 
 sentence_split_langs = {"ar", "ca", "eu", "id", "vi", "zhs", "zht", "en", "fr", 
-                        "pt", "es", "hindi-bn", "hindi-gu", "hindi-hi", "hindi-kn",
-                        "hindi-ml", "hindi-mr", "hindi-pa", "hindi-ta", "hindi-te"}
+                        "pt", "es", "indic-bn", "indic-gu", "indic-hi", "indic-kn",
+                        "indic-ml", "indic-mr", "indic-pa", "indic-ta", "indic-te"}
