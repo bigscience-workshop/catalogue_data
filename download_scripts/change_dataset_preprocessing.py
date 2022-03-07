@@ -13,7 +13,7 @@ def get_dedup_args(row: Dict) -> List[str]:
     else:
         list_of_dedups = ["dedup_document"]
 
-    if all(black_list_ds not in ds_name for black_list_ds in ["open_subtitles", "europarl", "uncorpus"]):
+    if all(black_list_ds not in ds_name for black_list_ds in ["open_subtitles", "europarl", "uncorpus", "pseudocrawl"]):
         list_of_dedups += ["dedup_template_soft"]
 
     list_of_dedups += ["filter_remove_empty_docs"]
