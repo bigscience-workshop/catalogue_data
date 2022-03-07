@@ -24,8 +24,8 @@ def build_nltk_splitter(lang):
 
 
 def build_stanza_splitter(lang, batch_size=32):
-    if len(lang)==3:
-        lang.replace("zh", "zh-han") # zhs-> zh-hans, zht -> zh-hant
+    lang_to_stanza = {"zht": "zh-hant", "zhs": "zh-hans"}
+    lang = lang_to_stanza.get(lang, lang)
     tokenizer = stanza.Pipeline(lang, logging_level="WARNING", processors='tokenize',
     nlp = stanza.Pipeline(lang, logging_level="WARNING", processors='tokenize',
                           use_gpu=torch.cuda.is_available())
@@ -57,10 +57,14 @@ def build_indic_splitter(lang):
 
 
 def build_sentence_splitter(lang):
-    stanza_list = {"ar", "ca", "eu", "id", "vi", "zhs", "zht", "zh"}
+    stanza_list = {"ar", "ca", "eu", "id", "vi", "zhs", "zht"}
     nltk_list = {"en", "fr", "pt", "es"}
-    indic_list = {"bn", "gu", "hi", "kn", "ml", "mr", "pa", "ta", "te"}
+    indic_list = {"hindi-bn", "hindi-gu", "hindi-hi", "hindi-kn", "hindi-ml", "hindi-mr", "hindi-pa", "hindi-ta", "hindi-te"}
     
+    assert len(stanza_list & nltk_list) == 0
+    assert len(stanza_list & indic_list) == 0
+    assert len(indic_list & nltk_list) == 0
+
     if lang in stanza_list:
         return build_stanza_splitter(lang)
     elif lang in nltk_list:
@@ -71,9 +75,6 @@ def build_sentence_splitter(lang):
         return lambda x: x
 
 
-def remove_newlines(examples):
-    return {**examples, "text": [text.replace("\n", " ") for text in examples["text"]]}  
-
-
-sentence_split_langs = {"ar", "ca", "eu", "id", "vi", "zh", "zhs", "zht", "en", "fr", 
-                        "pt", "es", "bn", "gu", "hi", "kn", "ml", "mr", "pa", "ta", "te"}
+sentence_split_langs = {"ar", "ca", "eu", "id", "vi", "zhs", "zht", "en", "fr", 
+                        "pt", "es", "hindi-bn", "hindi-gu", "hindi-hi", "hindi-kn",
+                        "hindi-ml", "hindi-mr", "hindi-pa", "hindi-ta", "hindi-te"}
