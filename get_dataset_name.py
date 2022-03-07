@@ -1,7 +1,7 @@
 import argparse
-import json
 from pathlib import Path
-
+import pandas as pd
+import re
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -14,9 +14,6 @@ def get_args():
 
 def main():
     args = get_args()
-
-    import pandas as pd
-    import re
 
     normalise_dataset_name_regex = re.compile(
         r"^(?:/gpfswork/rech/six/uty16tp/dataset/tokenization/)?(bigscience-catalogue-lm-data/[^/]+)(?:/data)?$"
