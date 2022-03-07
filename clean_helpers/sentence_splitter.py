@@ -10,7 +10,6 @@ from nltk.tokenize import sent_tokenize
 
 
 def build_nltk_splitter(lang):
-    nltk.download("punkt")
     lang_to_punkt = {
         "en": "english",
         "fr": "french",
@@ -27,7 +26,7 @@ def build_nltk_splitter(lang):
 def build_stanza_splitter(lang, batch_size=32):
     if len(lang)==3:
         lang.replace("zh", "zh-han") # zhs-> zh-hans, zht -> zh-hant
-    stanza.download(lang, logging_level="WARNING")
+    tokenizer = stanza.Pipeline(lang, logging_level="WARNING", processors='tokenize',
     nlp = stanza.Pipeline(lang, logging_level="WARNING", processors='tokenize',
                           use_gpu=torch.cuda.is_available())
     
@@ -40,16 +39,20 @@ def build_stanza_splitter(lang, batch_size=32):
 
 
 def build_indic_splitter(lang):
-    INDIC_NLP_RESOURCES="./indic_nlp_resources"
-    INDIC_NLP_RESOURCES_REPO = "https://github.com/anoopkunchukuttan/indic_nlp_resources.git"
-
-    if not os.path.exists(INDIC_NLP_RESOURCES):
-        subprocess.run(["git", "clone", INDIC_NLP_RESOURCES_REPO])
-    common.set_resources_path(INDIC_NLP_RESOURCES)
-
+    lang_to_indic = {
+        "hindi-bn": "bn",
+        "hindi-gu": "gu",
+        "hindi-hi": "hi",
+        "hindi-kn": "kn",
+        "hindi-ml": "ml",
+        "hindi-mr": "mr",
+        "hindi-pa": "pa",
+        "hindi-ta": "ta",
+        "hindi-te": "te"
+        }
     def splitter(examples):
-        split_texts = ["\n".join(sentence_tokenize.sentence_split(text, lang=lang)) for text in examples["text"]]
-        return {**examples, "text": split_texts }        
+        split_texts = ["\n".join(sentence_tokenize.sentence_split(text, lang=lang_to_indic[lang])) for text in examples["text"]]
+        return {**examples, "text": split_texts }
     return splitter
 
 
