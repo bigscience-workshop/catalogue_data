@@ -8,4 +8,4 @@ def filter_wiki_non_text_type(examples):
     return [parse_meta(meta)["type"] == "text" for meta in examples["meta"]]
 
 def filter_remove_empty_docs(examples):
-    return [len(text) > 0 for text in examples["text"]]
+    return [len(text.stip()) > 0 for text in examples["text"]]
