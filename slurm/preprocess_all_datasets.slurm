@@ -28,15 +28,15 @@ import pandas as pd
 data = pd.read_csv(\"${DATASET_TRAINING_CSV}\")
 dataset = data.iloc[$DATASET_ID]
 print(dataset[\"dataset_name\"])
-if pd.notnull(dataset[\"--maps-and-filters argument\"]):
-    print(dataset[\"--maps-and-filters argument\"])
+if pd.notnull(dataset[\"--preprocessings\"]):
+    print(dataset[\"--preprocessings\"])
 else:
     print()
 ")
 DATASET_PATH=${DATASET_PATH_AND_FUNCTIONS[0]}
-MAPS_AND_FILTERS=${DATASET_PATH_AND_FUNCTIONS[1]}
+PREPROCESSINGS=${DATASET_PATH_AND_FUNCTIONS[1]}
 
-if [[ $MAPS_AND_FILTERS == KILL ]]
+if [[ $PREPROCESSINGS == KILL ]]
 then
     echo "Not supposed to preprocess $DATASET_PATH"
     exit 0
@@ -70,7 +70,7 @@ export HF_DATASETS_OFFLINE=1
 
 python clean.py \
     --dataset-path $DATASET_PATH \
-    --maps-and-filters $MAPS_AND_FILTERS \
+    --preprocessings $PREPROCESSINGS \
     --save-path $SAVE_PATH \
     --checks-save-path $CHECKS_SAVE_PATH \
     --num-proc 10 \

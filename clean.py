@@ -32,7 +32,7 @@ MAPS = {
     "remove_wiki_mojibake": build_line_with_substring_remover(["À À"]),
     "strip_substrings_en_wiktionary": en_wiktionary_stripper,
     ** {
-    f"remove_references_{lang}": build_reference_remover(lang) for lang in set(stopwords.keys())
+        f"remove_references_{lang}": build_reference_remover(lang) for lang in set(stopwords.keys())
     },
     ** {f"split_sentences_{lang}": build_sentence_splitter(lang) for lang in sentence_split_langs}
 }
@@ -102,7 +102,7 @@ def filter_diff_text(examples, in_text_col, out_text_col):
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset-path", type=str, required=True, help="Dataset path we load the dataset from.")
-    parser.add_argument("--maps-and-filters", nargs="*", type=str, required=True,
+    parser.add_argument("--preprocessings", nargs="*", type=str, required=True,
                         choices=(MAPS_KEYS | FILTERS_KEYS | DEDUPS_KEYS),
                         help="List of dataset modification we apply in sequence.")
     parser.add_argument("--save-path", type=Path, required=True,
@@ -257,14 +257,14 @@ def main():
 
     # Apply series of maps and filters
     logger.info(f" ===== Applying transformations =====")
-    for idx, map_or_filter in enumerate(args.maps_and_filters):
-        ds, ds_diff = apply_function(map_or_filter, ds, args)
+    for idx, preprocessing in enumerate(args.preprocessings):
+        ds, ds_diff = apply_function(preprocessing, ds, args)
         if ds_diff is not None and len(ds_diff) != 0:
-            saving_path = args.checks_save_path / f"{idx}_{map_or_filter}_checks"
+            saving_path = args.checks_save_path / f"{idx}_{preprocessing}_checks"
             if not args.from_scratch and saving_path.exists():
                 continue
             tmp_save_path = Path(saving_path.parent, f"tmp-{saving_path.name}")
-            logger.info(f" ===== Saving examples to check after {map_or_filter}  =====")
+            logger.info(f" ===== Saving examples to check after {preprocessing}  =====")
             ds_diff.save_to_disk(tmp_save_path)
             tmp_save_path.rename(saving_path)
 
