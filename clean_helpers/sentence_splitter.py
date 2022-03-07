@@ -72,7 +72,7 @@ def build_sentence_splitter(lang):
     elif lang in indic_list:
         return build_indic_splitter(lang)
     else:
-        return lambda x: x
+        NotImplementedError(f"Lang '{lang}' is has no sentence splitter implemented.")
 
 
 sentence_split_langs = {"ar", "ca", "eu", "id", "vi", "zhs", "zht", "en", "fr", 
