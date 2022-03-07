@@ -27,12 +27,11 @@ def build_stanza_splitter(lang, batch_size=32):
     lang_to_stanza = {"zht": "zh-hant", "zhs": "zh-hans"}
     lang = lang_to_stanza.get(lang, lang)
     tokenizer = stanza.Pipeline(lang, logging_level="WARNING", processors='tokenize',
-    nlp = stanza.Pipeline(lang, logging_level="WARNING", processors='tokenize',
                           use_gpu=torch.cuda.is_available())
     
     def splitter(examples):
         split_texts = []
-        for document in batch(examples["text"], nlp, batch_size=batch_size):
+        for document in batch(examples["text"], tokenizer, batch_size=batch_size):
             split_texts.append("\n".join([sentence.text for sentence in document.sentences]))
         return {**examples, "text": split_texts }        
     return splitter
