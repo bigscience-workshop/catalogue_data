@@ -5,7 +5,7 @@ import multiprocessing
 from datasets import load_dataset
 from tqdm import tqdm
 
-def get_size_per_example(texts, content_key):
+def get_size_per_example(texts):
     size_values = [len(text.encode()) for text in texts]
     examples = {
         "text": texts,
@@ -18,7 +18,7 @@ def get_size(name_dataset, args):
         dataset = load_dataset(name_dataset, use_auth_token=True, ignore_verifications=True, split="train")
 
         dataset = dataset.map(
-            partial(get_size_per_example, content_key="text"),
+            partial(get_size_per_example),
             batched=True, 
             num_proc=num_proc,
             batch_size=batch_size,
