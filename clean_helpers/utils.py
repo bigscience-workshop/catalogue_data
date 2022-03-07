@@ -7,7 +7,15 @@ def parse_meta(meta) -> Dict:
         meta = eval(meta)
     return meta
 
-language_regex = re.compile(r"^(?:/gpfswork/rech/six/uty16tp/dataset/tokenization/)?bigscience-catalogue-lm-data/lm_([^_]+)_.*(?:/data)?$")
+
+normalise_dataset_name_regex = re.compile(
+    r"^(?:/gpfswork/rech/six/uty16tp/dataset/tokenization/)?(bigscience-catalogue-lm-data/[^/]+)(?:/data)?$"
+)
+
+
+language_regex = re.compile(
+    r"^(?:/gpfswork/rech/six/uty16tp/dataset/tokenization/)?bigscience-catalogue-lm-data/lm_([^_]+)_.*(?:/data)?$"
+)
 def get_language(dataset_name: str):
     lang_candidate = language_regex.match(dataset_name).group(1)
 

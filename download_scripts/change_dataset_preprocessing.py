@@ -3,9 +3,9 @@ from typing import Optional, Dict, List
 import pandas as pd
 import re
 
-from clean_helpers.utils import get_language
+from clean_helpers.utils import get_language, normalise_dataset_name_regex
 
-normalise_dataset_name_regex = re.compile(r"^(?:/gpfswork/rech/six/uty16tp/dataset/tokenization/)?(bigscience-catalogue-lm-data/[^/]+)(?:/data)?$")
+
 def get_dedup_args(row: Dict) -> Optional[str]:
     ds_name = normalise_dataset_name_regex.match(row["dataset_name"]).group(1)
 

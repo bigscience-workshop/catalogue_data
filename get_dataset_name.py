@@ -1,7 +1,9 @@
 import argparse
 from pathlib import Path
 import pandas as pd
-import re
+
+from clean_helpers.utils import normalise_dataset_name_regex
+
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -14,10 +16,6 @@ def get_args():
 
 def main():
     args = get_args()
-
-    normalise_dataset_name_regex = re.compile(
-        r"^(?:/gpfswork/rech/six/uty16tp/dataset/tokenization/)?(bigscience-catalogue-lm-data/[^/]+)(?:/data)?$"
-    )
 
     data = pd.read_csv(args.dataset_csv_path)
     dataset = data.iloc[args.index]
