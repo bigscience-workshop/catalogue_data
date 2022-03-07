@@ -36,7 +36,8 @@ fi
 
 NUM_SHARDS=8
 
-SAVE_PREFIX=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/jsonl_"$NUM_SHARDS"_shards/$DATASET_NAME/data
+DATASET_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/clean/$DATASET_NAME/final
+SAVE_PREFIX=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/cleaned_jsonl_"$NUM_SHARDS"_shards/$DATASET_NAME/data
 mkdir -p $(dirname $SAVE_PREFIX)
 
 echo "Downloading ${DATASET_NAME}"
@@ -49,7 +50,7 @@ python -c "
 from datasets import load_dataset
 from pathlib import Path
 
-ds = load_dataset(\"$DATASET_PATH\", use_auth_token=True, split=\"train\")
+ds = load_from_disk(\"$DATASET_PATH\", split=\"train\")
 
 for shard_id in range($NUM_SHARDS):
     filepath = Path(f\"${SAVE_PREFIX}_{shard_id}_$NUM_SHARDS.jsonl\")
