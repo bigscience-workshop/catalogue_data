@@ -80,15 +80,27 @@ def filter_diff_text(examples, in_text_col, out_text_col):
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset-path", type=str, required=True)
-    parser.add_argument("--maps-and-filters", nargs="*", type=str, required=True)
-    parser.add_argument("--save-path", type=Path, required=True)
-    parser.add_argument("--checks-save-path", type=Path, default=None)
+    parser.add_argument("--dataset-path", type=str, required=True, help="Dataset path we load the dataset from.")
+    parser.add_argument("--maps-and-filters", nargs="*", type=str, required=True,
+                        choices=(MAPS_KEYS | FILTERS_KEYS | DEDUPS_KEYS),
+                        help="List of dataset modification we apply in sequence.")
+    parser.add_argument("--save-path", type=Path, required=True,
+                        help="Path where we save resulting dataset after modifications.")
+    parser.add_argument("--checks-save-path", type=Path, default=None,
+                        help="Path where we save samples we've removed or changed throughout the modifications.")
     parser.add_argument("--num-proc", type=int, default=1)
     parser.add_argument("--batch-size", type=int)
-    parser.add_argument("--load-arrow-file", action="store_true")
-    parser.add_argument("--sampling-size-map-checks", type=int, default=None)
-    parser.add_argument("--sampling-size-filter-checks", type=int, default=None)
+    parser.add_argument("--load-arrow-file", action="store_true",
+                        help="Option to indicate how to load original dataset. By default we use `load_dataset`. "
+                             "If the flag is use, we use `load_from_disk`")
+    parser.add_argument("--sampling-size-map-checks", type=int, default=None,
+                        help="Optional argument. Checked dataset, ie sample we've changed throughout the "
+                             "modifications, are either save in whole or only a subset. If set to None, this flag "
+                             "saves everything, otherwise it saves a subset with its size corresponding to this value.")
+    parser.add_argument("--sampling-size-filter-checks", type=int, default=None,
+                        help="Optional argument. Checked dataset, ie sample we've removed throughout the "
+                             "modifications, are either save in whole or only a subset. If set to None, this flag "
+                             "saves everything, otherwise it saves a subset with its size corresponding to this value.")
     parser.add_argument("--from-scratch", action="store_true", help="Resave all datasets on disk.")
     parser.add_argument("--save-to-json", action="store_true", help="Save output dataset in json format.")
     return parser.parse_args()
