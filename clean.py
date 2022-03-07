@@ -12,7 +12,9 @@ from numpy.random import default_rng
 
 from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, filter_wiki_user_titles, \
     replace_newline_with_space, build_dedup_template, dedup_document, build_line_with_substring_remover, \
-    en_wiktionary_stripper, build_small_docs_bytes_filter, dedup_document_on_url, filter_remove_empty_docs
+    en_wiktionary_stripper, build_small_docs_bytes_filter, dedup_document_on_url, filter_remove_empty_docs,\
+    build_reference_remover
+from clean_helpers.stopwords import stopwords
 
 set_verbosity_info()
 logger = logging.getLogger(__name__)
@@ -26,7 +28,10 @@ MAPS = {
     "remove_html_spans": build_line_with_substring_remover(["<span", "</span>", "<div", "</div>", "<a", "</a>", "br>"]),
     "remove_html_spans_sanad": build_line_with_substring_remover(["<img", "]]>", "<![CDATA", "//DW", "var ", "xtImg", "To view this video please enable JavaScript"]),
     "remove_wiki_mojibake": build_line_with_substring_remover(["À À"]),
-    "strip_substrings_en_wiktionary": en_wiktionary_stripper
+    "strip_substrings_en_wiktionary": en_wiktionary_stripper,
+    ** {
+    f"remove_references_{lang}": build_reference_remover(lang) for lang in set(stopwords.keys())
+    }
 }
 # Filter functions: function(batch: Dict) -> Dict
 FILTERS = {
@@ -140,7 +145,7 @@ def get_modified_documents(
     ds = ds.remove_columns(remove_columns)
     ds = ds.rename_column("text", "old_text")
 
-    assert len(mapped_ds) == len(ds), f"Mapping function are batched, but they should not alternate the size of the batch."
+    assert len(mapped_ds) == len(ds), f"Mapping function are batched, but they should not alter the size of the batch."
     mapped_diff_ds = concatenate_datasets([mapped_ds, ds], axis=1).filter(
         partial(filter_diff_text, in_text_col="old_text", out_text_col="text"),
         batched=True,
@@ -168,6 +173,7 @@ def apply_function(function_name: str, ds: Dataset, args) -> Tuple[Dataset, Opti
                 batched=True,
                 num_proc=args.num_proc,
                 batch_size=args.batch_size,
+                load_from_cache_file=False
             )
         log_stats(f"Applied map function: {function_name}", ds, mapped_ds, operation_type="Modified")
         if args.checks_save_path is not None:
