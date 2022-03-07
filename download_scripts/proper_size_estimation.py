@@ -1,7 +1,6 @@
 import argparse
 import json
 import multiprocessing
-import sys
 
 from datasets import load_dataset
 from tqdm import tqdm
@@ -12,8 +11,11 @@ def get_size(name_dataset):
         dataset = load_dataset(name_dataset, use_auth_token=True, ignore_verifications=True, split="train")
         dataset = dataset.map(None, remove_columns=[column for column in dataset.column_names if column != "text"])
         print("Done for dataset:", name_dataset)
-        return (name_dataset, sys.getsizeof("".join(dataset["text"])))
-        # return (name_dataset, sum([sys.getsizeof(item["text"]) for item in tqdm(dataset)]))
+
+        len_bytes = 0
+        for content in dataset["text"]:
+            len_bytes += len(content.encode())
+        return (name_dataset, len_bytes)
     except Exception as e:
         print(f"Failed for dataset: {name_dataset} because of {e}")
         return (name_dataset, 0)

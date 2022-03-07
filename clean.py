@@ -2,7 +2,6 @@ import argparse
 import json
 import logging
 import random
-import sys
 from functools import partial
 from datasets import Dataset, load_dataset, load_from_disk, concatenate_datasets, set_caching_enabled
 from pathlib import Path
@@ -69,7 +68,11 @@ def quick_size_estimation(ds, content_key="text"):
     indices = rng.choice(len(ds), size=subset_size, replace=False, shuffle=False)
     partial_ds = ds.select(indices)
     ratio = float(len(ds)) / float(subset_size)
-    return sys.getsizeof("".join(partial_ds[content_key])) * ratio
+
+    len_bytes = 0
+    for content in partial_ds[content_key]:
+        len_bytes += len(content.encode())
+    return len_bytes * ratio
 
 def revert_bool_output(examples, filter_function):
     booleans = filter_function(examples)
