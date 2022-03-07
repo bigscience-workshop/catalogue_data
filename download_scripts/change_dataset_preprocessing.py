@@ -80,10 +80,10 @@ def get_filter_on_small_documents_args(row: Dict) -> Optional[str]:
 def main():
     data = pd.read_csv("training.csv")
 
-    data["dedups"] = [" ".join(get_dedup_args(row[1])) for row in data.iterrows()]
+    data["dedups"] = data.apply(lambda row: " ".join(get_dedup_args(row)), axis=1)
     print(data[:5]["dedups"])
 
-    data["filter_short_documents"] = [get_filter_on_small_documents_args(row[1]) for row in data.iterrows()]
+    data["filter_short_documents"] = data.apply(get_filter_on_small_documents_args, axis=1)
     print(data[:5]["filter_short_documents"])
 
     data.to_csv("training_with_dedups.csv")
