@@ -64,10 +64,7 @@ assert (MAPS_KEYS | FILTERS_KEYS).isdisjoint(DEDUPS_KEYS)
 
 def get_size_per_example(texts):
     size_values = [len(text.encode()) for text in texts]
-    examples = {
-        "text": texts,
-        "bytes_len": size_values
-    }
+    examples = {"bytes_len": size_values}
     return examples
 
 def quick_size_estimation(ds, 

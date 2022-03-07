@@ -7,10 +7,7 @@ from tqdm import tqdm
 
 def get_size_per_example(texts):
     size_values = [len(text.encode()) for text in texts]
-    examples = {
-        "text": texts,
-        "bytes_len": size_values
-    }
+    examples = {"bytes_len": size_values}
     return examples
 
 def get_size(name_dataset, args):
