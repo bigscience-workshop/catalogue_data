@@ -85,7 +85,7 @@ def quick_size_estimation(ds,
         input_columns=[content_key],
         remove_columns=partial_ds.column_names,
     )
-    len_bytes = sum(partial_ds["bytes_len"][:])
+    len_bytes = sum(partial_ds["bytes_len"])
     return len_bytes * ratio
 
 def revert_bool_output(examples, filter_function):
