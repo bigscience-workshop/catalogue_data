@@ -5,16 +5,24 @@ import multiprocessing
 from datasets import load_dataset
 from tqdm import tqdm
 
+def get_size_per_example(examples, content_key):
+    size_values = [len(text.encode()) for text in examples[content_key]]
+    examples["bytes_len"] = size_values
+    return examples
 
-def get_size(name_dataset):
+def get_size(name_dataset, args):
     try:
         dataset = load_dataset(name_dataset, use_auth_token=True, ignore_verifications=True, split="train")
-        dataset = dataset.map(None, remove_columns=[column for column in dataset.column_names if column != "text"])
-        print("Done for dataset:", name_dataset)
 
-        len_bytes = 0
-        for content in dataset["text"]:
-            len_bytes += len(content.encode())
+        dataset = dataset.map(
+            partial(get_size_per_example, content_key="text"),
+            batched=True, 
+            num_proc=num_proc,
+            batch_size=batch_size,
+            remove_columns=[column for column in dataset.column_names if column != "text"]
+        )
+        len_bytes = sum(dataset["bytes_len"][:])
+        print("Done for dataset:", name_dataset)
         return (name_dataset, len_bytes)
     except Exception as e:
         print(f"Failed for dataset: {name_dataset} because of {e}")
@@ -25,6 +33,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Load a dataset.')
     parser.add_argument('--dataset_list', type=str, default=None)
     parser.add_argument('--reuse_previous', action="store_true")
+    parser.add_argument("--num-proc", type=int, default=1)
+    parser.add_argument("--batch-size", type=int)
     args = parser.parse_args()
 
     list_datasets = [dataset_path.strip() for dataset_path in open(args.dataset_list).readlines()]
