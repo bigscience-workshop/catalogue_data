@@ -12,7 +12,7 @@ from numpy.random import default_rng
 from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, filter_wiki_user_titles, \
     replace_newline_with_space, build_dedup_template, dedup_document, build_line_with_substring_remover, \
     en_wiktionary_stripper, build_small_docs_bytes_filter, dedup_document_on_url, filter_remove_empty_docs,\
-    build_reference_remover, build_sentence_splitter, remove_newlines, sentence_split_langs
+    build_reference_remover, build_sentence_splitter, sentence_split_langs
 from clean_helpers.stopwords import stopwords
 
 set_verbosity_info()
@@ -28,7 +28,6 @@ MAPS = {
     "remove_html_spans_sanad": build_line_with_substring_remover(["<img", "]]>", "<![CDATA", "//DW", "var ", "xtImg", "To view this video please enable JavaScript"]),
     "remove_wiki_mojibake": build_line_with_substring_remover(["À À"]),
     "strip_substrings_en_wiktionary": en_wiktionary_stripper,
-    "remove_newlines": remove_newlines,
     ** {
     f"remove_references_{lang}": build_reference_remover(lang) for lang in set(stopwords.keys())
     },
