@@ -78,7 +78,7 @@ def quick_size_estimation(ds,
     ratio = float(len(ds)) / float(subset_size)
 
     partial_ds = partial_ds.map(
-        partial(get_size_per_example, content_key=content_key),
+        get_size_per_example,
         batched=True, 
         num_proc=num_proc,
         batch_size=batch_size,
