@@ -10,9 +10,10 @@ from datasets.utils.logging import set_verbosity_info
 from numpy.random import default_rng
 
 from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, filter_wiki_user_titles, \
-    replace_newline_with_space, build_dedup_template, dedup_document, build_line_with_substring_remover, \
-    en_wiktionary_stripper, build_small_docs_bytes_filter, dedup_document_on_url, filter_remove_empty_docs,\
-    build_reference_remover
+    replace_newline_with_space, build_dedup_template, build_line_with_substring_remover, \
+    en_wiktionary_stripper, build_small_docs_bytes_filter, filter_remove_empty_docs,\
+    build_reference_remover, build_dedup_document
+from clean_helpers.deduplication import split_text_with_new_lines, compute_text_hash, compute_url_hash
 from clean_helpers.stopwords import stopwords
 
 set_verbosity_info()
@@ -47,13 +48,19 @@ DEDUPS = {
     "dedup_template_soft": build_dedup_template(
         min_template_line_size=15,
         min_template_line_occurence=5,
+        split_text=split_text_with_new_lines
     ),
     "dedup_pseudocrawl_newspapers": build_dedup_template(
         min_template_line_size=0,
         min_template_line_occurence=2,
+        split_text=split_text_with_new_lines
     ),
-    "dedup_document": dedup_document,
-    "dedup_document_on_url": dedup_document_on_url
+    "dedup_document": build_dedup_document(
+        compute_hash=compute_text_hash
+    ),
+    "dedup_document_on_url": build_dedup_document(
+        compute_hash=compute_url_hash
+    )
 }
 
 MAPS_KEYS = set(MAPS.keys())
