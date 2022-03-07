@@ -6,8 +6,14 @@ import re
 from clean_helpers.utils import get_language
 
 normalise_dataset_name_regex = re.compile(r"^(?:/gpfswork/rech/six/uty16tp/dataset/tokenization/)?(bigscience-catalogue-lm-data/[^/]+)(?:/data)?$")
-def get_dedup_args(row: Dict) -> List[str]:
+def get_dedup_args(row: Dict) -> Optional[str]:
     ds_name = normalise_dataset_name_regex.match(row["dataset_name"]).group(1)
+
+    # code only runs document deduplication.
+    lang = get_language(ds_name)
+    if lang == "code":
+        return " ".join(["dedup_document", "filter_remove_empty_docs"])
+
     if "pseudocrawl" in ds_name:
         list_of_dedups = ["dedup_document_on_url", "dedup_document", "dedup_pseudocrawl_newspapers"]
     else:
@@ -17,7 +23,7 @@ def get_dedup_args(row: Dict) -> List[str]:
         list_of_dedups += ["dedup_template_soft"]
 
     list_of_dedups += ["filter_remove_empty_docs"]
-    return list_of_dedups
+    return " ".join(list_of_dedups)
 
 language_to_short_filter_document = {
     "ar": 1000,
@@ -80,7 +86,7 @@ def get_filter_on_small_documents_args(row: Dict) -> Optional[str]:
 def main():
     data = pd.read_csv("training.csv")
 
-    data["dedups"] = data.apply(lambda row: " ".join(get_dedup_args(row)), axis=1)
+    data["dedups"] = data.apply(get_dedup_args, axis=1)
     print(data[:5]["dedups"])
 
     data["filter_short_documents"] = data.apply(get_filter_on_small_documents_args, axis=1)
