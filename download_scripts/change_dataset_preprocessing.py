@@ -12,7 +12,7 @@ def get_dedup_args(row: Dict) -> Optional[str]:
     # code only runs document deduplication.
     lang = get_language(ds_name)
     if lang == "code":
-        return None
+        return " ".join(["dedup_document", "filter_remove_empty_docs"])
 
     if "pseudocrawl" in ds_name:
         list_of_dedups = ["dedup_document_on_url", "dedup_document", "dedup_pseudocrawl_newspapers"]
