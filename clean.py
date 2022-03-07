@@ -62,9 +62,12 @@ DEDUPS_KEYS = set(DEDUPS.keys())
 assert MAPS_KEYS.isdisjoint(FILTERS_KEYS)
 assert (MAPS_KEYS | FILTERS_KEYS).isdisjoint(DEDUPS_KEYS)
 
-def get_size_per_example(examples, content_key):
-    size_values = [len(text.encode()) for text in examples[content_key]]
-    examples["bytes_len"] = size_values
+def get_size_per_example(texts, content_key):
+    size_values = [len(text.encode()) for text in texts]
+    examples = {
+        "text": texts,
+        "bytes_len": size_values
+    }
     return examples
 
 def quick_size_estimation(ds, 
@@ -81,7 +84,9 @@ def quick_size_estimation(ds,
         partial(get_size_per_example, content_key=content_key),
         batched=True, 
         num_proc=num_proc,
-        batch_size=batch_size
+        batch_size=batch_size,
+        input_columns=[content_key],
+        remove_columns=partial_ds.column_names,
     )
     len_bytes = sum(partial_ds["bytes_len"][:])
     return len_bytes * ratio

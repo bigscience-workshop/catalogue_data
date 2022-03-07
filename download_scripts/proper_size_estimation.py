@@ -5,9 +5,12 @@ import multiprocessing
 from datasets import load_dataset
 from tqdm import tqdm
 
-def get_size_per_example(examples, content_key):
-    size_values = [len(text.encode()) for text in examples[content_key]]
-    examples["bytes_len"] = size_values
+def get_size_per_example(texts, content_key):
+    size_values = [len(text.encode()) for text in texts]
+    examples = {
+        "text": texts,
+        "bytes_len": size_values
+    }
     return examples
 
 def get_size(name_dataset, args):
@@ -19,7 +22,8 @@ def get_size(name_dataset, args):
             batched=True, 
             num_proc=num_proc,
             batch_size=batch_size,
-            remove_columns=[column for column in dataset.column_names if column != "text"]
+            input_columns=["text"],
+            remove_columns=dataset.column_names
         )
         len_bytes = sum(dataset["bytes_len"][:])
         print("Done for dataset:", name_dataset)
