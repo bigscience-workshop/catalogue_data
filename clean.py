@@ -62,16 +62,28 @@ DEDUPS_KEYS = set(DEDUPS.keys())
 assert MAPS_KEYS.isdisjoint(FILTERS_KEYS)
 assert (MAPS_KEYS | FILTERS_KEYS).isdisjoint(DEDUPS_KEYS)
 
-def quick_size_estimation(ds, content_key="text"):
+def get_size_per_example(examples, content_key):
+    size_values = [len(text.encode()) for text in examples[content_key]]
+    examples["bytes_len"] = size_values
+    return examples
+
+def quick_size_estimation(ds, 
+    num_proc: int,
+    batch_size: int,
+    content_key:str ="text"):
     rng = default_rng(1991)
     subset_size = min(10000, len(ds))
     indices = rng.choice(len(ds), size=subset_size, replace=False, shuffle=False)
     partial_ds = ds.select(indices)
     ratio = float(len(ds)) / float(subset_size)
 
-    len_bytes = 0
-    for content in partial_ds[content_key]:
-        len_bytes += len(content.encode())
+    partial_ds = partial_ds.map(
+        partial(get_size_per_example, content_key=content_key),
+        batched=True, 
+        num_proc=num_proc,
+        batch_size=batch_size
+    )
+    len_bytes = sum(partial_ds["bytes_len"][:])
     return len_bytes * ratio
 
 def revert_bool_output(examples, filter_function):
@@ -96,11 +108,11 @@ def get_args():
     parser.add_argument("--save-to-json", action="store_true", help="Save output dataset in json format.")
     return parser.parse_args()
 
-def log_stats(title: str, original_ds: Dataset, after_transformation_ds: Dataset, operation_type: str):
+def log_stats(title: str, original_ds: Dataset, after_transformation_ds: Dataset, operation_type: str, args):
     original_length = len(original_ds)
     after_transformation_length = len(after_transformation_ds)
-    original_bytes = quick_size_estimation(original_ds, "text")
-    after_transformation_btyes = quick_size_estimation(after_transformation_ds, "text")
+    original_bytes = quick_size_estimation(original_ds, batch_size=args.batch_size, num_proc=args.num_proc, content_key="text")
+    after_transformation_btyes = quick_size_estimation(after_transformation_ds, batch_size=args.batch_size, num_proc=args.num_proc, content_key="text")
     logger.info(title)
     logger.info(f"     Initial number of samples: {original_length} samples")
     logger.info(f"     {operation_type} samples: {original_length - after_transformation_length} samples")
@@ -178,7 +190,7 @@ def apply_function(function_name: str, ds: Dataset, args) -> Tuple[Dataset, Opti
                 batch_size=args.batch_size,
                 load_from_cache_file=False
             )
-        log_stats(f"Applied map function: {function_name}", ds, mapped_ds, operation_type="Modified")
+        log_stats(f"Applied map function: {function_name}", ds, mapped_ds, operation_type="Modified", args=args)
         if args.checks_save_path is not None:
             mapped_diff_ds = get_modified_documents(ds, mapped_ds, args.num_proc, args.batch_size, args.sampling_size_map_checks)
             return mapped_ds, mapped_diff_ds
@@ -187,14 +199,14 @@ def apply_function(function_name: str, ds: Dataset, args) -> Tuple[Dataset, Opti
     elif function_name in FILTERS:
         filter_function = FILTERS[function_name]
         filtered_ds = ds.filter(filter_function, batched=True, num_proc=args.num_proc, batch_size=args.batch_size)
-        log_stats(f"Applied filter: {function_name}", ds, filtered_ds, operation_type="Removed")
+        log_stats(f"Applied filter: {function_name}", ds, filtered_ds, operation_type="Removed", args=args)
         if args.checks_save_path is not None:
             return filtered_ds, get_filtered_out_documents(ds, filter_function, args.num_proc, args.batch_size, args.sampling_size_filter_checks)
         else:
             return filtered_ds, None
     elif function_name in DEDUPS:
         dedup_function = DEDUPS[function_name]
-        deduplicated_ds = dedup_function(ds, num_proc=args.num_proc, batch_size=args.batch_size)
+        deduplicated_ds = dedup_function(ds, num_proc=args.num_proc, batch_size=args.batch_size, args=args)
         log_stats(f"Applied deduplication function: {function_name}",  ds,  deduplicated_ds,  operation_type="Deduplicated")
 
         # Some deduplication do not preserve the number of samples, so alignement is lost. For example "dedup_document"
