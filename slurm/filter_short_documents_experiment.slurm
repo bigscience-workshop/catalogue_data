@@ -7,7 +7,7 @@
 #SBATCH --partition=cpu_p1
 #SBATCH --time 20:00:00              # maximum execution time (HH:MM:SS)
 #SBATCH --output=logs/filter_short_document_catalogue_1/%x-%j.out           # output file name
-#SBATCH --array=0-509   # TODO: modify according to the number of models you want to evaluated
+#SBATCH --array=0-516   # TODO: modify according to the number of models you want to evaluated
 #SBATCH --account=six@cpu
 
 set -x -e
