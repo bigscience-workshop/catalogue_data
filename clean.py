@@ -3,6 +3,8 @@ import json
 import logging
 import random
 from functools import partial
+
+import torch
 from datasets import Dataset, load_dataset, load_from_disk, concatenate_datasets, set_caching_enabled
 from pathlib import Path
 from typing import Tuple, Optional, Callable
@@ -19,6 +21,7 @@ set_verbosity_info()
 logger = logging.getLogger(__name__)
 # TODO: Uncomment when you have caching issue
 # set_caching_enabled(False)
+torch.set_num_threads(1)
 
 # Map functions: function(batch: Dict) -> Dict
 MAPS = {
@@ -202,8 +205,7 @@ def apply_function(function_name: str, ds: Dataset, args) -> Tuple[Dataset, Opti
                 map_function,
                 batched=True,
                 num_proc=args.num_proc,
-                batch_size=args.batch_size,
-                load_from_cache_file=False
+                batch_size=args.batch_size
             )
         log_stats(f"Applied map function: {function_name}", ds, mapped_ds, operation_type="Modified", args=args)
         if args.checks_save_path is not None:
