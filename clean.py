@@ -203,6 +203,7 @@ def get_modified_documents(
 
 
 def apply_function(function_name: str, ds: Dataset, args) -> Tuple[Dataset, Optional[Dataset]]:
+    logger.info(f"Applying: {function_name}")
     if function_name in MAPS:
         map_function = MAPS[function_name]
         mapped_ds = ds.map(
