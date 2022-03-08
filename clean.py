@@ -290,6 +290,8 @@ def main():
         else:
             ds.save_to_disk(tmp_save_path)
         tmp_save_path.rename(args.save_path)
+    else:
+        logging.info(f"Dataset was already saved at {args.save_path}")
 
 
 if __name__ == "__main__":
