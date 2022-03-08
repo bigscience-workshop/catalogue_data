@@ -50,3 +50,26 @@ where you should replace:
 - `path_to_file_with_dataset_ratios`: path to JSON file containing a dict with dataset names (keys) and their ratio
   (values) between 0 and 1.
 - `<dir_path_to_save_aggregated_dataset>`: directory path to save the aggregated dataset
+
+
+## Downloads for cleaning
+
+### Stanza
+
+```python
+import stanza
+
+for lang in {"ar", "ca", "eu", "id", "vi", "zh-hans", "zh-hant"}:
+    stanza.download(lang, logging_level="WARNING")
+```
+
+### Indic NLP library
+
+```bash
+git clone https://github.com/anoopkunchukuttan/indic_nlp_resources.git
+export INDIC_RESOURCES_PATH=<PATH_TO_REPO>
+```
+
+### NLTK
+import nltk
+nltk.download("punkt")

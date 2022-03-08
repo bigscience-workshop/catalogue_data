@@ -3,6 +3,8 @@ import json
 import logging
 import random
 from functools import partial
+
+import torch
 from datasets import Dataset, load_dataset, load_from_disk, concatenate_datasets, set_caching_enabled
 from pathlib import Path
 from typing import Tuple, Optional, Callable
@@ -12,13 +14,14 @@ from numpy.random import default_rng
 from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, filter_wiki_user_titles, \
     replace_newline_with_space, build_dedup_template, dedup_document, build_line_with_substring_remover, \
     en_wiktionary_stripper, build_small_docs_bytes_filter, dedup_document_on_url, filter_remove_empty_docs,\
-    build_reference_remover
+    build_reference_remover, build_sentence_splitter, sentence_split_langs
 from clean_helpers.stopwords import stopwords
 
 set_verbosity_info()
 logger = logging.getLogger(__name__)
 # TODO: Uncomment when you have caching issue
 # set_caching_enabled(False)
+torch.set_num_threads(1)
 
 # Map functions: function(batch: Dict) -> Dict
 MAPS = {
@@ -30,7 +33,8 @@ MAPS = {
     "strip_substrings_en_wiktionary": en_wiktionary_stripper,
     ** {
     f"remove_references_{lang}": build_reference_remover(lang) for lang in set(stopwords.keys())
-    }
+    },
+    ** {f"split_sentences_{lang}": build_sentence_splitter(lang) for lang in sentence_split_langs}
 }
 # Filter functions: function(batch: Dict) -> Dict
 FILTERS = {
@@ -201,8 +205,7 @@ def apply_function(function_name: str, ds: Dataset, args) -> Tuple[Dataset, Opti
                 map_function,
                 batched=True,
                 num_proc=args.num_proc,
-                batch_size=args.batch_size,
-                load_from_cache_file=False
+                batch_size=args.batch_size
             )
         log_stats(f"Applied map function: {function_name}", ds, mapped_ds, operation_type="Modified", args=args)
         if args.checks_save_path is not None:

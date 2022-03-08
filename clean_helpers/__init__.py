@@ -5,3 +5,4 @@ from .map_strip_substring import en_wiktionary_stripper
 from .map_remove_references import build_reference_remover
 from .clean_lines import build_line_with_substring_remover
 from .deduplication import build_dedup_template, dedup_document, dedup_document_on_url
+from .sentence_splitter import build_sentence_splitter, sentence_split_langs
