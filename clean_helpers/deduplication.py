@@ -1,9 +1,10 @@
 from collections import defaultdict
 from functools import partial
-from typing import List, Set, Tuple, Dict, Callable
+from typing import List, Set, Tuple, Dict, Callable, Optional
 import hashlib
 import re
 import string
+import urllib
 
 from datasets import Dataset
 
@@ -61,6 +62,7 @@ def build_dedup_document(batch_normalizer: Callable[[Dict], List[str]]):
             num_proc=num_proc,
             batched=True,
             batch_size=batch_size,
+            load_from_cache_file=False
         )
 
         hashes = set()
@@ -141,6 +143,21 @@ def delete_text_from_duplicates(batch: Dict[str, List], hashes: Set[str]) -> Dic
         "text": [text if is_new_hash(hash_, hashes) else "" for text, hash_ in zip(batch["text"], batch["hash"])]
     }
 
+def url_with_only_some_query_param(url: str, query_param_map: Optional[dict] = None) -> str:
+    url_parse = urllib.parse.urlparse(url)
+    query = url_parse.query
+
+    url_query_params = urllib.parse.parse_qsl(query)
+
+    if query_param_map is None:
+        url_query_params_new = {}
+    else:
+        url_query_params_new = [(query_param_map[old_key], old_value) for (old_key, old_value) in url_query_params if old_key in query_param_map]
+        
+    url_new_query = urllib.parse.urlencode(url_query_params_new, encoding="utf-8")
+    url_parse = url_parse._replace(query=url_new_query)
+    new_url = urllib.parse.urlunparse(url_parse)
+    return new_url
 
 # =========== BATCH NORMALISER ===============
 
@@ -162,3 +179,6 @@ def url_host_and_path_batch_normalizer(batch: Dict) -> List[str]:
 lm_es_pseudocrawl_filtered_341_es_cointelegraph_com_regex = re.compile(r"^((?:(?!/amp)/?(?:[^?/]*))+)(?:/amp)?")
 def url_lm_es_pseudocrawl_filtered_341_es_cointelegraph_com(batch: Dict) -> List[str]:
     return [lm_es_pseudocrawl_filtered_341_es_cointelegraph_com_regex.match(parse_meta(meta)["url"]).group(1) for meta in batch["meta"]]
+
+def url_lm_en_pseudocrawl_filtered_619_www_qut_edu_au(batch: Dict) -> List[str]:
+    return [url_with_only_some_query_param(parse_meta(meta)["url"], {"id": "id", "news-id": "id"}) for meta in batch["meta"]]
