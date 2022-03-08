@@ -104,7 +104,7 @@ def convert_filter_to_map(batch: Dict, filter_function: Callable[[Dict], List[bo
     samples_to_keep = filter_function(batch)
     return {
         key: [elt for to_keep, elt in zip(samples_to_keep, value)]
-        for key, value in batch
+        for key, value in batch.items()
     }
 
 def filter_diff_text(examples, in_text_col, out_text_col):
