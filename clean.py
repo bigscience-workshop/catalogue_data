@@ -50,7 +50,7 @@ FILTERS = {
 DEDUPS = {
     "dedup_template_soft": build_dedup_template(
         min_template_line_size=15,
-        min_template_line_occurence=5,
+        min_template_line_occurence=10,
     ),
     "dedup_pseudocrawl_newspapers": build_dedup_template(
         min_template_line_size=0,
