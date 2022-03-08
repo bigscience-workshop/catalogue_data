@@ -37,7 +37,7 @@ print(
     "filter_small_docs_bytes_500 filter_small_docs_bytes_1000 filter_small_docs_bytes_7000"
 )
 
-if pd.notnull(dataset[\"--preprocessings\"]):
+if dataset[\"--preprocessings\"] = \"\":
     print(dataset[\"--preprocessings\"])
 else:
     print()
