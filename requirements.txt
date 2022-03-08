@@ -4,8 +4,8 @@ python-dotenv
 py7zr
 rarfile
 zstandard
-stanza==1.2.0
 stanza-batch
+stanza==1.2.3 # This breaks stanza-batch dependency
 nltk
 indic-nlp-library
 underthesea
