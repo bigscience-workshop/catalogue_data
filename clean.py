@@ -7,7 +7,7 @@ from functools import partial
 import torch
 from datasets import Dataset, load_dataset, load_from_disk, concatenate_datasets, set_caching_enabled
 from pathlib import Path
-from typing import Tuple, Optional, Callable
+from typing import Tuple, Optional, Callable, List, Dict
 from datasets.utils.logging import set_verbosity_info
 from numpy.random import default_rng
 
@@ -66,15 +66,19 @@ DEDUPS_KEYS = set(DEDUPS.keys())
 assert MAPS_KEYS.isdisjoint(FILTERS_KEYS)
 assert (MAPS_KEYS | FILTERS_KEYS).isdisjoint(DEDUPS_KEYS)
 
-def get_size_per_example(texts):
+def get_size_per_example(texts: List[str]) -> Dict:
     size_values = [len(text.encode()) for text in texts]
     examples = {"bytes_len": size_values}
     return examples
 
-def quick_size_estimation(ds, 
+def quick_size_estimation(
+    ds: Dataset,
     num_proc: int,
     batch_size: int,
-    content_key:str ="text"):
+    content_key:str ="text"
+) -> int:
+    if len(ds) == 0:
+        return 0
     rng = default_rng(1991)
     subset_size = min(10000, len(ds))
     indices = rng.choice(len(ds), size=subset_size, replace=False, shuffle=False)
