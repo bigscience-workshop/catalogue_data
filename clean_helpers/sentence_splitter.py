@@ -1,11 +1,7 @@
-import subprocess
-import os
-import torch
 import stanza
 from stanza_batch import batch
 from indicnlp import common
 from indicnlp.tokenize import sentence_tokenize
-import nltk
 from nltk.tokenize import sent_tokenize
 from underthesea import sent_tokenize as vi_sent_tokenize
 
