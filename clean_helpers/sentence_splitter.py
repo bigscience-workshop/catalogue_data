@@ -26,8 +26,9 @@ def build_nltk_splitter(lang):
 def build_stanza_splitter(lang, batch_size=32):
     lang_to_stanza = {"zht": "zh-hant", "zhs": "zh-hans"}
     lang = lang_to_stanza.get(lang, lang)
+    # TODO: @thomasw21 CUDA doesn't work well with multiprocessing
     tokenizer = stanza.Pipeline(lang, logging_level="WARNING", processors='tokenize',
-                          use_gpu=torch.cuda.is_available())
+                          use_gpu=False)
     
     def splitter(examples):
         split_texts = []
