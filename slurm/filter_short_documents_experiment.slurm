@@ -34,7 +34,7 @@ print(dataset[\"dataset_name\"])
 print(
     dataset[\"--dedups\"] + " " +
     dataset[\"--maps-and-filters argument\"] + " " +
-    "filter_small_docs_bytes_500 filter_small_docs_bytes_1000 filter_small_docs_bytes_7000"
+    "filter_small_docs_bytes_300 filter_small_docs_bytes_1024"
 )
 
 if dataset[\"--preprocessings\"] = \"\":

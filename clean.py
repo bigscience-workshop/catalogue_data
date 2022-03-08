@@ -43,7 +43,7 @@ FILTERS = {
     "filter_wiki_non_text_type": filter_wiki_non_text_type,
     "filter_small_docs": build_small_docs_filter(min_word=15),
     ** {
-        f"filter_small_docs_bytes_{i}": build_small_docs_bytes_filter(min_bytes=i) for i in [500, 1000, 7000]
+        f"filter_small_docs_bytes_{i}": build_small_docs_bytes_filter(min_bytes=i) for i in [300, 1024]
     },
 }
 # Deduplication functions: function(ds: Dataset, num_proc: int, batch_size: int) -> Dataset
