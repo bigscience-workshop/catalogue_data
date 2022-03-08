@@ -103,7 +103,7 @@ def revert_bool_output(examples, filter_function):
 def convert_filter_to_map(batch: Dict, filter_function: Callable[[Dict], List[bool]]) -> Dict:
     samples_to_keep = filter_function(batch)
     return {
-        key: [elt for to_keep, elt in zip(samples_to_keep, value)]
+        key: [elt for to_keep, elt in zip(samples_to_keep, value) if to_keep]
         for key, value in batch.items()
     }
 
