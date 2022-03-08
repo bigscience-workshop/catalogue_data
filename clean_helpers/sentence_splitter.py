@@ -1,12 +1,9 @@
-import subprocess
-import os
-import torch
 import stanza
 from stanza_batch import batch
 from indicnlp import common
 from indicnlp.tokenize import sentence_tokenize
-import nltk
 from nltk.tokenize import sent_tokenize
+from underthesea import sent_tokenize as vi_sent_tokenize
 
 
 def build_nltk_splitter(lang):
@@ -19,6 +16,13 @@ def build_nltk_splitter(lang):
     
     def splitter(examples):
         split_texts = ["\n".join(sent_tokenize(text, language=lang_to_punkt[lang])) for text in examples["text"]]
+        return {**examples, "text": split_texts }        
+    return splitter
+
+
+def build_vi_splitter(lang):
+    def splitter(examples):
+        split_texts = ["\n".join(vi_sent_tokenize(text)) for text in examples["text"]]
         return {**examples, "text": split_texts }        
     return splitter
 
@@ -57,13 +61,17 @@ def build_indic_splitter(lang):
 
 
 def build_sentence_splitter(lang):
-    stanza_list = {"ar", "ca", "eu", "id", "vi", "zhs", "zht"}
+    stanza_list = {"ar", "ca", "eu", "id", "zhs", "zht"}
     nltk_list = {"en", "fr", "pt", "es"}
     indic_list = {"indic-bn", "indic-gu", "indic-hi", "indic-kn", "indic-ml", "indic-mr", "indic-pa", "indic-ta", "indic-te"}
+    vi_list = {"vi"}
     
     assert len(stanza_list & nltk_list) == 0
     assert len(stanza_list & indic_list) == 0
+    assert len(stanza_list & vi_list) == 0
     assert len(indic_list & nltk_list) == 0
+    assert len(indic_list & vi_list) == 0
+    assert len(nltk_list & vi_list) == 0
 
     if lang in stanza_list:
         return build_stanza_splitter(lang)
@@ -71,6 +79,8 @@ def build_sentence_splitter(lang):
         return build_nltk_splitter(lang)
     elif lang in indic_list:
         return build_indic_splitter(lang)
+    elif lang in vi_list:
+        return build_vi_splitter(lang)
     else:
         NotImplementedError(f"Lang '{lang}' has no sentence splitter implemented.")
 

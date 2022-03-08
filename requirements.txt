@@ -8,3 +8,4 @@ stanza==1.2.0
 stanza-batch
 nltk
 indic-nlp-library
+underthesea
