@@ -24,61 +24,18 @@ DATASET_ID=$SLURM_ARRAY_TASK_ID
 DATASET_TRAINING_CSV=$CATALOGUE_DATA_REPO/training.csv
 readarray -t DATASET_PATH_AND_FUNCTIONS < <(python -c "
 import pandas as pd
-
-language_to_short_filter_document = {
-    \"ar\": 1000,
-    \"ca\": 7000,
-    \"code\": 7000,
-    \"en\": 7000,
-    \"es\": 7000,
-    \"eu\": 0,
-    \"fr\": 7000,
-    \"id\": 500,
-    \"indic-as\": 0,
-    \"indic-bn\": 1000,
-    \"indic-gu\": 500,
-    \"indic-hi\": 1000,
-    \"indic-kn\": 500,
-    \"indic-ml\": 500,
-    \"indic-mr\": 500,
-    \"indic-ne\": 500,
-    \"indic-or\": 0,
-    \"indic-pa\": 500,
-    \"indic-ta\": 500,
-    \"indic-te\": 500,
-    \"indic-ur\": 500,
-    \"nigercongo\": 0,
-    \"nigercongo-fon\": 0,
-    \"nigercongo-ig\": 0,
-    \"nigercongo-lg\": 0,
-    \"nigercongo-rw\": 0,
-    \"nigercongo-sw\": 0,
-    \"nigercongo-wo\": 0,
-    \"nigercongo-xh\": 0,
-    \"nigercongo-yo\": 0,
-    \"nigercongo-zu\": 0,
-    \"pt\": 1000,
-    \"vi\": 500,
-    \"zh\": 7000,
-    \"zht\": 7000,
-}
-
-import re
-
-r = re.compile(r\"(?:/gpfswork/rech/six/uty16tp/dataset/tokenization/)?bigscience-catalogue-lm-data/lm_(.[^_]*)_*\")
+import numpy as np
 
 data = pd.read_csv(\"${DATASET_TRAINING_CSV}\")
 dataset = data.iloc[$DATASET_ID]
-
+dataset = dataset.replace(np.nan, \"\", regex=True)
 print(dataset[\"dataset_name\"])
-print(\" \".join([f\"filter_small_docs_bytes_{i}\" for i in [500, 1000, 7000]]))
 
-# language = r.match(dataset[\"dataset_name\"]).group(1)
-# filter_min_length = language_to_short_filter_document[language]
-# if filter_min_length > 0:
-#     print(f\"filter_small_docs_bytes_{filter_min_length}\")
-# else:
-#     print()
+print(
+    dataset[\"--dedups\"] + " " +
+    dataset[\"--maps-and-filters argument\"] + " " +
+    "filter_small_docs_bytes_500 filter_small_docs_bytes_1000 filter_small_docs_bytes_7000"
+)
 
 if pd.notnull(dataset[\"--preprocessings\"]):
     print(dataset[\"--preprocessings\"])
