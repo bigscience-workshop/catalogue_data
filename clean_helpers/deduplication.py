@@ -62,7 +62,6 @@ def build_dedup_document(batch_normalizer: Callable[[Dict], List[str]]):
             num_proc=num_proc,
             batched=True,
             batch_size=batch_size,
-            load_from_cache_file=False
         )
 
         hashes = set()
