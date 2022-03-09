@@ -16,7 +16,7 @@ from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, fi
     en_wiktionary_stripper, build_small_docs_bytes_filter, build_dedup_document, filter_remove_empty_docs,\
     build_reference_remover, build_sentence_splitter, sentence_split_langs
 from clean_helpers.deduplication import document_batch_normalizer, url_host_and_path_batch_normalizer, \
-    url_lm_es_pseudocrawl_filtered_341_es_cointelegraph_com
+    url_lm_es_pseudocrawl_filtered_341_es_cointelegraph_com, url_lm_en_pseudocrawl_filtered_619_www_qut_edu_au
 from clean_helpers.stopwords import stopwords
 
 set_verbosity_info()
@@ -62,6 +62,9 @@ DEDUPS = {
     "dedup_document_on_url": build_dedup_document(url_host_and_path_batch_normalizer),
     "dedup_document_on_url_lm_es_pseudocrawl-filtered_341_es_cointelegraph_com": build_dedup_document(
         url_lm_es_pseudocrawl_filtered_341_es_cointelegraph_com
+    ),
+    "dedup_document_on_url_lm_en_pseudocrawl_filtered_619_www_qut_edu_au": build_dedup_document(
+        url_lm_en_pseudocrawl_filtered_619_www_qut_edu_au
     )
 }
 
