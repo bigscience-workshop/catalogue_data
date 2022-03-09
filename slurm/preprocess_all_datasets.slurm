@@ -21,7 +21,7 @@ pushd $CATALOGUE_DATA_REPO
 # =======  GET DATASET AND FUNCTIONS ======
 
 DATASET_ID=$SLURM_ARRAY_TASK_ID
-DATASET_TRAINING_CSV=$CATALOGUE_DATA_REPO/training.csv
+DATASET_TRAINING_CSV=$CATALOGUE_DATA_REPO/training_v2.csv
 readarray -t DATASET_PATH_AND_FUNCTIONS < <(python -c "
 import pandas as pd
 
@@ -58,7 +58,7 @@ fi
 
 # ====== RUN PYTHON SCRIPT =======
 
-BASE_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/clean/$DATASET_NAME
+BASE_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/clean_v2/$DATASET_NAME
 SAVE_PATH=$BASE_PATH/final
 CHECKS_SAVE_PATH=$BASE_PATH/checks
 LOGS_PATH=$BASE_PATH/logs.txt
