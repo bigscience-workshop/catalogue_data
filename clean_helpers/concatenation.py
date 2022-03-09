@@ -7,7 +7,7 @@ def concatenate_lm_fr_ester(ds: Dataset, num_proc: int, batch_size: int) -> Data
     new_meta = []
     for id_source in ids:
         ds_tmp = ds.filter(
-            lambda exs: [id_source == meta["id"] for meta in exs["meta"]], 
+            lambda exs: [meta["id"].startswith(f"{id_source}_id_") for meta in exs["meta"]], 
             batched=True, 
             num_proc=num_proc, 
             batch_size=batch_size

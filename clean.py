@@ -14,7 +14,7 @@ from numpy.random import default_rng
 from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, filter_wiki_user_titles, \
     replace_newline_with_space, build_dedup_template, build_line_with_substring_remover, \
     en_wiktionary_stripper, build_small_docs_bytes_filter, build_dedup_document, filter_remove_empty_docs,\
-    build_reference_remover, build_sentence_splitter, sentence_split_langs
+    build_reference_remover, concatenate_lm_fr_ester, build_sentence_splitter, sentence_split_langs
 from clean_helpers.deduplication import document_batch_normalizer, url_host_and_path_batch_normalizer, \
     url_lm_es_pseudocrawl_filtered_341_es_cointelegraph_com, url_lm_en_pseudocrawl_filtered_619_www_qut_edu_au
 from clean_helpers.stopwords import stopwords
@@ -48,25 +48,25 @@ FILTERS = {
         f"filter_small_docs_bytes_{i}": build_small_docs_bytes_filter(min_bytes=i) for i in [300, 1024]
     },
 }
-# Deduplication functions: function(ds: Dataset, num_proc: int, batch_size: int) -> Dataset
+# Deduplication functions and boolean to save a sample of the modifications: function(ds: Dataset, num_proc: int, batch_size: int) -> Dataset
 DEDUPS = {
-    "dedup_template_soft": build_dedup_template(
+    "dedup_template_soft": (build_dedup_template(
         min_template_line_size=15,
         min_template_line_occurence=10,
-    ),
-    "dedup_pseudocrawl_newspapers": build_dedup_template(
+    ), True),
+    "dedup_pseudocrawl_newspapers": (build_dedup_template(
         min_template_line_size=0,
         min_template_line_occurence=2,
-    ),
-    "dedup_document": build_dedup_document(document_batch_normalizer),
-    "dedup_document_on_url": build_dedup_document(url_host_and_path_batch_normalizer),
-    "dedup_document_on_url_lm_es_pseudocrawl-filtered_341_es_cointelegraph_com": build_dedup_document(
+    ), True),
+    "dedup_document": (build_dedup_document(document_batch_normalizer), True),
+    "dedup_document_on_url": (build_dedup_document(url_host_and_path_batch_normalizer), True),
+    "dedup_document_on_url_lm_es_pseudocrawl-filtered_341_es_cointelegraph_com": (build_dedup_document(
         url_lm_es_pseudocrawl_filtered_341_es_cointelegraph_com
-    ),
-    "dedup_document_on_url_lm_en_pseudocrawl_filtered_619_www_qut_edu_au": build_dedup_document(
+    ), True),
+    "dedup_document_on_url_lm_en_pseudocrawl_filtered_619_www_qut_edu_au": (build_dedup_document(
         url_lm_en_pseudocrawl_filtered_619_www_qut_edu_au
-    ),
-    "concatenate_lm_fr_ester": concatenate_lm_fr_ester
+    ), True),
+    "concatenate_lm_fr_ester": (concatenate_lm_fr_ester, False)
 }
 
 MAPS_KEYS = set(MAPS.keys())
@@ -249,12 +249,12 @@ def apply_function(function_name: str, ds: Dataset, args) -> Tuple[Dataset, Opti
         else:
             return filtered_ds, None
     elif function_name in DEDUPS:
-        dedup_function = DEDUPS[function_name]
+        dedup_function, dedup_check = DEDUPS[function_name]
         deduplicated_ds = dedup_function(ds, num_proc=args.num_proc, batch_size=args.batch_size)
         log_stats(f"Applied deduplication function: {function_name}",  ds,  deduplicated_ds,  operation_type="Deduplicated", args=args)
 
         # Some deduplication do not preserve the number of samples, so alignement is lost. For example "dedup_document"
-        if args.checks_save_path is not None:
+        if args.checks_save_path is not None and dedup_check:
             deduped_diff_ds = get_modified_documents(ds, deduplicated_ds, args.num_proc, args.batch_size, args.sampling_size_map_checks)
             return deduplicated_ds, deduped_diff_ds
         else:
