@@ -6,3 +6,4 @@ from .map_remove_references import build_reference_remover
 from .clean_lines import build_line_with_substring_remover
 from .deduplication import build_dedup_template, build_dedup_document
 from .sentence_splitter import build_sentence_splitter, sentence_split_langs
+from .concatenation import concatenate_lm_fr_ester
