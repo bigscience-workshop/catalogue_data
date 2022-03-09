@@ -1,7 +1,9 @@
 import argparse
 import json
 import multiprocessing
+from functools import partial
 
+import datasets
 from datasets import load_dataset
 from tqdm import tqdm
 
@@ -12,15 +14,18 @@ def get_size_per_example(texts):
 
 def get_size(name_dataset, args):
     try:
-        dataset = load_dataset(name_dataset, use_auth_token=True, ignore_verifications=True, split="train")
+        if args.load_from_disk:
+            dataset = load_dataset(name_dataset, use_auth_token=True, ignore_verifications=True, split="train")
+        else:
+            dataset = datasets.load_from_disk(name_dataset)
 
         dataset = dataset.map(
-            partial(get_size_per_example),
+            partial(get_size_per_example,
             batched=True, 
-            num_proc=num_proc,
-            batch_size=batch_size,
+            num_proc=args.num_proc,
+            batch_size=args.batch_size,
             input_columns=["text"],
-            remove_columns=dataset.column_names
+            remove_columns=dataset.column_names)
         )
         len_bytes = sum(dataset["bytes_len"][:])
         print("Done for dataset:", name_dataset)
@@ -33,6 +38,7 @@ def get_size(name_dataset, args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Load a dataset.')
     parser.add_argument('--dataset_list', type=str, default=None)
+    parser.add_argument('--load_from_disk', action="store_true")
     parser.add_argument('--reuse_previous', action="store_true")
     parser.add_argument("--num-proc", type=int, default=1)
     parser.add_argument("--batch-size", type=int)
