@@ -190,7 +190,7 @@ def get_modified_documents(
     ds = ds.rename_column("text", "old_text")
 
     assert len(mapped_ds) == len(ds), f"Mapping function are batched, but they should not alter the size of the batch."
-    mapped_diff_ds = concatenate_datasets([mapped_ds, ds], axis=1).filter(
+    mapped_diff_ds = concatenate_datasets([mapped_ds.flatten_indices(), ds.flatten_indices()], axis=1).filter(
         partial(filter_diff_text, in_text_col="old_text", out_text_col="text"),
         batched=True,
         num_proc=num_proc,
@@ -214,11 +214,11 @@ def apply_function(function_name: str, ds: Dataset, args) -> Tuple[Dataset, Opti
     if function_name in MAPS:
         map_function = MAPS[function_name]
         mapped_ds = ds.map(
-                map_function,
-                batched=True,
-                num_proc=args.num_proc,
-                batch_size=args.batch_size
-            )
+            map_function,
+            batched=True,
+            num_proc=args.num_proc,
+            batch_size=args.batch_size
+        )
         log_stats(f"Applied map function: {function_name}", ds, mapped_ds, operation_type="Modified", args=args)
         if args.checks_save_path is not None:
             mapped_diff_ds = get_modified_documents(ds, mapped_ds, args.num_proc, args.batch_size, args.sampling_size_map_checks)
