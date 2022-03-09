@@ -65,7 +65,8 @@ DEDUPS = {
     ),
     "dedup_document_on_url_lm_en_pseudocrawl_filtered_619_www_qut_edu_au": build_dedup_document(
         url_lm_en_pseudocrawl_filtered_619_www_qut_edu_au
-    )
+    ),
+    "concatenate_lm_fr_ester": concatenate_lm_fr_ester
 }
 
 MAPS_KEYS = set(MAPS.keys())
