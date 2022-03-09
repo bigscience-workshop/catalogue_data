@@ -227,7 +227,13 @@ def apply_function(function_name: str, ds: Dataset, args) -> Tuple[Dataset, Opti
             return mapped_ds, None
     elif function_name in FILTERS:
         filter_function = FILTERS[function_name]
-        filtered_ds = ds.map(partial(convert_filter_to_map, filter_function=filter_function), batched=True, num_proc=args.num_proc, batch_size=args.batch_size)
+        filtered_ds = ds.map(
+            partial(convert_filter_to_map, filter_function=filter_function),
+            batched=True,
+            num_proc=args.num_proc,
+            batch_size=args.batch_size,
+            remove_columns=ds.column_names
+        )
         log_stats(f"Applied filter: {function_name}", ds, filtered_ds, operation_type="Removed", args=args)
         if args.checks_save_path is not None:
             return filtered_ds, get_filtered_out_documents(ds, filter_function, args.num_proc, args.batch_size, args.sampling_size_filter_checks)
