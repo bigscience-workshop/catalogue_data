@@ -158,3 +158,7 @@ def strict_url_batch_normalizer(batch: Dict) -> List[str]:
 url_host_and_path_regex = re.compile(r"^(.[^?]*)")
 def url_host_and_path_batch_normalizer(batch: Dict) -> List[str]:
     return [url_host_and_path_regex.match(parse_meta(meta)["url"]).group(1) for meta in batch["meta"]]
+
+lm_es_pseudocrawl_filtered_401_www_elperiodicodemexico_com_regex = re.compile(r"^((?:(?!/amp)/?(?:[^?/]*))+)(?:/amp)?")
+def url_lm_es_pseudocrawl_filtered_401_www_elperiodicodemexico_com_batch_normalizer(batch: Dict) -> List[str]:
+    return [lm_es_pseudocrawl_filtered_401_www_elperiodicodemexico_com_regex.match(parse_meta(meta)["url"]).group(1) for meta in batch["meta"]]
