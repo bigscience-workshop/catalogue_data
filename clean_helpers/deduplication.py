@@ -1,6 +1,6 @@
 from collections import defaultdict
 from functools import partial
-from typing import List, Set, Tuple, Dict
+from typing import List, Set, Tuple, Dict, Callable
 import hashlib
 import re
 import string
@@ -54,86 +54,44 @@ def build_dedup_template(min_template_line_size: int, min_template_line_occurenc
     return dedup_template
 
 
-def dedup_document(ds: Dataset, num_proc: int, batch_size: int) -> Dataset:
-    hashed_documents = ds.map(
-        lambda batch: {**batch, "hash": get_hash_stripped(batch["text"])},
-        num_proc=num_proc,
-        batched=True,
-        batch_size=batch_size,
-    )
+def build_dedup_document(batch_normalizer: Callable[[Dict], List[str]]):
+    def dedup_document(ds: Dataset, num_proc: int, batch_size: int) -> Dataset:
+        hashed_documents = ds.map(
+            lambda batch: {**batch, "hash": get_hash(batch_normalizer(batch))},
+            num_proc=num_proc,
+            batched=True,
+            batch_size=batch_size,
+        )
 
-    hashes = set()
+        hashes = set()
 
-    return hashed_documents.map(
-        partial(delete_text_from_duplicates, hashes=hashes),
-        num_proc=1,  # VERY IMPORTANT: hashes will be updated, and is not thread safe.
-        batched=True,
-        batch_size=batch_size,
-        remove_columns=hashed_documents.column_names
-    )
+        return hashed_documents.map(
+            partial(delete_text_from_duplicates, hashes=hashes),
+            num_proc=1,  # VERY IMPORTANT: hashes will be updated, and is not thread safe.
+            batched=True,
+            batch_size=batch_size,
+            remove_columns=hashed_documents.column_names
+        )
 
-    # # TODO: This version is memory efficient and runs faster, but we lose alignment
-    # return hashed_documents.filter(
-    #     lambda hashes_: [is_new_hash(hash_, hashes) for hash_ in hashes_],
-    #     num_proc=1,  # VERY IMPORTANT: hashes will be updated, and is not thread safe.
-    #     input_columns=["hash"],
-    #     batched=True,
-    #     batch_size=batch_size,
-    # ).remove_columns("hash")
-
-url_regex = re.compile(r"^(.[^?]*)")
-def dedup_document_on_url(ds: Dataset, num_proc: int, batch_size: int) -> Dataset:
-    """Deduplication on meta['url']"""
-    hashed_documents = ds.map(
-        lambda batch: {
-            **batch,
-            "hash": get_hash([
-                url_regex.match(parse_meta(meta)["url"]).group(1)
-                for meta in batch["meta"]
-            ])}
-        ,
-        num_proc=num_proc,
-        batched=True,
-        batch_size=batch_size,
-    )
-
-    hashes = set()
-
-    return hashed_documents.map(
-        partial(delete_text_from_duplicates, hashes=hashes),
-        num_proc=1,  # VERY IMPORTANT: hashes will be updated, and is not thread safe.
-        batched=True,
-        batch_size=batch_size,
-        remove_columns=hashed_documents.column_names
-    )
-
-    # return hashed_documents.filter(
-    #     lambda hashes_: [is_new_hash(hash_, hashes) for hash_ in hashes_],
-    #     num_proc=1,  # VERY IMPORTANT: hashes will be updated, and is not thread safe.
-    #     input_columns=["hash"],
-    #     batched=True,
-    #     batch_size=batch_size,
-    # ).remove_columns("hash")
+        # # TODO: This version is memory efficient and runs faster, but we lose alignment
+        # return hashed_documents.filter(
+        #     lambda hashes_: [is_new_hash(hash_, hashes) for hash_ in hashes_],
+        #     num_proc=1,  # VERY IMPORTANT: hashes will be updated, and is not thread safe.
+        #     input_columns=["hash"],
+        #     batched=True,
+        #     batch_size=batch_size,
+        # ).remove_columns("hash")
+    return dedup_document
 
 
 # =========== HELPERS ===============
 
-# this only keeps letter characters
-remove_non_character_regex = re.compile(f'\s+|\d+|[{re.escape(string.punctuation)}]')
-def get_hash_stripped(texts: List[str]) -> List[str]:
-    """Get hash of content field."""
-    stripped_texts = [remove_non_character_regex.sub('', text) for text in texts]
-    return [hashlib.md5(text.encode("utf-8")).hexdigest() for text in stripped_texts]
-
-# this doesn't, it just strips the whitespace
 def get_hash(texts: List[str]) -> List[str]:
     """Get hash of content field."""
     return [hashlib.md5(text.strip().encode("utf-8")).hexdigest() for text in texts]
 
-
 def split_text_in_lines(text: str) -> List[str]:
     return [line.strip() for line in text.split("\n")]
-
 
 def split_text_to_lines_and_hash(batch: Dict[str, List]):
     lines_per_texts = [split_text_in_lines(text) for text in batch["text"]]
@@ -182,3 +140,21 @@ def delete_text_from_duplicates(batch: Dict[str, List], hashes: Set[str]) -> Dic
         **{k: v for k, v in batch.items() if k != "hash"},
         "text": [text if is_new_hash(hash_, hashes) else "" for text, hash_ in zip(batch["text"], batch["hash"])]
     }
+
+
+# =========== BATCH NORMALISER ===============
+
+
+# this only keeps letter characters
+remove_non_character_regex = re.compile(f'\s+|\d+|[{re.escape(string.punctuation)}]')
+def document_batch_normalizer(batch: Dict) -> List[str]:
+    return [remove_non_character_regex.sub('', text) for text in batch["text"]]
+
+
+def strict_url_batch_normalizer(batch: Dict) -> List[str]:
+    return [parse_meta(meta)["url"] for meta in batch["meta"]]
+
+
+url_host_and_path_regex = re.compile(r"^(.[^?]*)")
+def url_host_and_path_batch_normalizer(batch: Dict) -> List[str]:
+    return [url_host_and_path_regex.match(parse_meta(meta)["url"]).group(1) for meta in batch["meta"]]
