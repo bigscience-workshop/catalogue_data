@@ -229,12 +229,13 @@ def run_pii(text, lang):
   text = text.encode().decode()
   matches = detect_pii(text, lang, high_risk_tags)
   print(matches)
+  match_set = (text, {})
   if len(matches) > 0:
     # !!! REDACTION HAPPENS HERE !!!
     redacted_str, metadata = redact_pii(text, matches)
-    match_set = (redacted_str, text, metadata)
-    return match_set
-  return (text, text, [])
+    metadata_out = {"regex metadata":metadata, "original": text, "redacted": redacted_str}
+    match_set = (redacted_str, metadata_out)
+  return match_set
 
 if __name__ == '__main__':
   print("hi?")
