@@ -62,7 +62,7 @@ And the lang_subset.jsonl file will appear in your MyDrive.
 
 
 #@title Define highest risk PII
-high_risk_tags = {'ID', 'KEY', 'EMAIL', 'USER', 'IP_ADDRESS', 'PHONE', 'LICENSE_PLATE'}
+high_risk_tags = {'ID', 'KEY', 'EMAIL', 'USER', 'IP_ADDRESS', 'NUMBER'}
 
 """# Regexes"""
 
@@ -112,6 +112,7 @@ user_regex = regex.compile(user_pattern) #, re.MULTILINE)
 phone_regex = regex.compile(phone_pattern) #, re.MULTILINE)
 # TODO: license
 
+
 #sasha_regexes = copy.deepcopy(regex_rulebase)
 mst_regexes = [{tag:{'default':[]}} for tag in high_risk_tags]
 mst_regexes = mst_regexes[0]
@@ -131,7 +132,7 @@ for tag in high_risk_tags:
     mst_regexes['EMAIL'] = {'default':[( email_regex, None, None),]}
   elif tag == 'USER':
     mst_regexes['USER'] = {'default':[( user_regex, None, None),]}
-  elif tag == 'PHONE':
+  elif tag == 'NUMBER':
     mst_regexes['NUMBER'] = {'default':[( phone_regex, None, None),]}
   else:
     print('Dont have tag regex pattern for %s =(' % tag)
@@ -183,7 +184,7 @@ def detect_pii(text, lang, tag_types):
         # Why does this happen?
         matched_str = matched_str[0]
         if matched_str:
-          if tag in ["ID", "IP_ADDRESS", "PHONE"]:
+          if tag in ["ID", "IP_ADDRESS", "NUMBER"]:
             # Filter out date false positives
             if matches_date_pattern(matched_str):
               continue
@@ -195,7 +196,7 @@ def detect_pii(text, lang, tag_types):
             # TODO: implement
             if is_website(matched_str):
               continue
-          matches += [(matched_str, match.span(), label_pattern, tag, lang)]
+          matches += [(matched_str, match.span(), str(label_pattern), tag, lang)]
   return matches
 
 
@@ -207,9 +208,6 @@ def redact_pii(text, matches):
   for match in matches:
     matched_str = match[0]
     tag = match[3]
-    # Hack for a decision made later; can remove once the colab is rerun from the start.
-    if tag == "PHONE":
-      tag = "NUMBER"
     redact_tag = "PI:" + tag
     redacted_str = redacted_str.replace(matched_str, redact_tag)
     # Create the "metadata" as all of the information we had before redaction
@@ -217,8 +215,7 @@ def redact_pii(text, matches):
   return (redacted_str, metadata)
 
 #@title General function to run the PII detection and redact it, saving everything else to metadata, is defined here.
-
-def run_pii(text, lang, make_LLM_input=True):
+def run_pii(text, lang):
   """
   Runs the given set of regexes on the data "lines" and pulls out the
   tagged items.
@@ -231,14 +228,13 @@ def run_pii(text, lang, make_LLM_input=True):
   # What is this for...?
   text = text.encode().decode()
   matches = detect_pii(text, lang, high_risk_tags)
+  print(matches)
   if len(matches) > 0:
-    for match in matches:
-      tag = match[3]
-      if tag not in high_risk_tags:
-        print("\nWarning: PII Detection function finding tag %s that has not been asked for. Including it.\n" % tag)
-        # Add the unexpected tag to our found tags (why not?)
     # !!! REDACTION HAPPENS HERE !!!
     redacted_str, metadata = redact_pii(text, matches)
     match_set = (redacted_str, text, metadata)
-    if make_LLM_input:
-      yield match_set
+    return match_set
+  return (text, text, [])
+
+if __name__ == '__main__':
+  print("hi?")
