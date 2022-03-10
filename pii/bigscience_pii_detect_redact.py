@@ -69,7 +69,6 @@ high_risk_tags = {'ID', 'KEY', 'EMAIL', 'USER', 'IP_ADDRESS', 'PHONE', 'LICENSE_
 #@title Get the less sophisticated MST regexes for High Risk scenarios (baseline comparison). Not language-specific; all are general.
 
 import regex
-import validators
 # These are ordered so that we can return upon a match; no need to search for a substring.
 year_patterns = [
   (regex.compile(r"(?:^|[\b\s@?,!;:\'\")(.\p{Han}])([1-2][0-9]{3}[\p{Pd}/][1-2][0-9]{3})(?:$|[\s@,?!;:\'\"(.\p{Han}])"), None, None), # yyyy-yyyy or yyyy/yyyy
@@ -155,7 +154,6 @@ def ip_has_digit(matched_str):
 
 def matches_date_pattern(matched_str):
   # Screen out date false positives
-  #print(matched_str)
   for year_regex_tuple in year_patterns:
     year_regex = year_regex_tuple[0]
     if year_regex.match(matched_str):
@@ -163,65 +161,51 @@ def matches_date_pattern(matched_str):
   return False
 
 def is_website(matched_str):
-  return validators.url(matched_str)
+  # TODO
+  return False
 
-def detect_pii(text, lang, regex_lang="default", tag_type={'ID', 'KEY', 'USER', 'EMAIL', 'IP_ADDRESS', 'PHONE'}, all_regex=[]):
+def detect_pii(text, lang, tag_types):
   matches = []
-  for tag in tag_type:
-    if tag in all_regex:
-      regex_patterns = all_regex[tag]
-      if all_regex[tag][regex_lang]:
-        #print("Matching tag: %s" % tag)
-        label_pattern = all_regex[tag][regex_lang][0][0]
-        #print("Grabbed the follow pattern for %s:" % tag)
-        #print(label_pattern)
-        #print(text)
-        # !! regex.match happens here!!
-        matches_tmp = label_pattern.finditer(text)
-        for match in matches_tmp:
-          #print(match)
-          #print(match.groups())
-          # TODO: Why does this happen?
-          if match.groups():
-            if len(match.groups()) > 1 and match.groups()[1]:
-              print("Warning: Found substring matches in the main match.")
-              print(tag)
-              print(text)
-              print(match.groups())
-            matched_str = match.groups()
-            # print(matched_str)
-            # Why does this happen?
-            matched_str = matched_str[0]
-            if matched_str:
-              if tag in ["ID", "IP_ADDRESS", "PHONE"]:
-                # Filter out date false positives
-                if matches_date_pattern(matched_str):
-                  continue
-              elif tag in ["IP_ADDRESS"]:
-                #Filter out false positive IPs
-                if not ip_has_digit(matched_str):
-                  continue
-              elif tag in ["KEY"]:
-                # TODO: implement
-                if is_website(matched_str):
-                  continue
-              matches += [(matched_str, match.span(), label_pattern, tag, lang)]
-      else:
-        continue
-    else:
-      continue
+  for tag in tag_types:
+    label_pattern = mst_regexes[tag]["default"][0][0]
+    # !! regex.match happens here!!
+    matches_tmp = label_pattern.finditer(text)
+    for match in matches_tmp:
+      # TODO: Why does this happen?
+      if match.groups():
+        if len(match.groups()) > 1 and match.groups()[1]:
+          print("Warning: Found substring matches in the main match.")
+          print(tag)
+          print(text)
+          print(match.groups())
+        matched_str = match.groups()
+        # print(matched_str)
+        # Why does this happen?
+        matched_str = matched_str[0]
+        if matched_str:
+          if tag in ["ID", "IP_ADDRESS", "PHONE"]:
+            # Filter out date false positives
+            if matches_date_pattern(matched_str):
+              continue
+          elif tag in ["IP_ADDRESS"]:
+            # Filter out false positive IPs
+            if not ip_has_digit(matched_str):
+              continue
+          elif tag in ["KEY"]:
+            # TODO: implement
+            if is_website(matched_str):
+              continue
+          matches += [(matched_str, match.span(), label_pattern, tag, lang)]
   return matches
 
-#@title Redaction function defined here. @Sasha -- I haven't checked this function, but it would be something like this.
+
+#@title Redaction function defined here.
 def redact_pii(text, matches):
   """Takes a match as defined in the detect_pii function and redacts it from the full string, returning a <redacted text, metadata> tuple."""
   redacted_str = text
   metadata = []
-  span_offset = 0
   for match in matches:
     matched_str = match[0]
-    matched_span = match[1]
-    label_pattern = match[2]
     tag = match[3]
     # Hack for a decision made later; can remove once the colab is rerun from the start.
     if tag == "PHONE":
@@ -233,14 +217,8 @@ def redact_pii(text, matches):
   return (redacted_str, metadata)
 
 #@title General function to run the PII detection and redact it, saving everything else to metadata, is defined here.
-from tqdm import tqdm
-import time
-import pandas
-text = ""
-lang = ""
 
-
-def run_pi_detection(lines, make_LLM_input=False, regex_rulesets=[], data_file=None, tag_type={'ID'}):
+def run_pii(text, lang, make_LLM_input=True):
   """
   Runs the given set of regexes on the data "lines" and pulls out the
   tagged items.
@@ -250,113 +228,17 @@ def run_pi_detection(lines, make_LLM_input=False, regex_rulesets=[], data_file=N
   """
 
   print('Detecting....')
-  # For each regex set....
-  all_dfs = {}
-  # TODO: Now that we've removed the Muliwai stuff, this iterates only 1 thing. No longer necessary.
-  for annotator, regex_set in regex_rulesets:
-    print("\n# " + annotator + " regexes")
-    print("regex set:")
-    print(regex_set)
-    tag_counts = {}
-    # Get the intersection of the tags we want and the tags the set has patterns for.
-    new_tag_types = []
-    for tag in tag_type:
-      print("Get pattern for tag %s " % tag)
-      if tag not in regex_set:
-        print("Missing regex pattern for tag: %s " % tag)
-      else:
-        new_tag_types += [tag]
-        tag_counts[tag] = 0
-    start = time.time()
-    index = 0
-    lang_2_matches = {}
-    num_matches = 0
-    # For each instance....
-    for dat in tqdm(lines):
-        text = dat["text"]
-        lang = dat["lang"]
-        regex_matches = lang_2_matches[lang] = lang_2_matches.get(lang, {"index": [], "text": [], "matches": []})
-        # What is this for...?
-        text = text.encode().decode()
-        matches = detect_pii(text, lang, all_regex=regex_set, tag_type=tag_type)
-        if len(matches) > 0:
-          regex_matches["index"].append(index)
-          regex_matches["text"].append(text)
-          match_set = []
-          for match in matches:
-            # lang = match[4]
-            tag = match[3]
-            # Hack to handle some oddities from Muliwai finding tags we didn't ask for...
-            if tag not in regex_set and tag not in tag_type and tag not in tag_counts:
-              print("\nWarning: PII Detection function finding tag %s that has not been asked for. Including it.\n" % tag)
-              # Add the unexpected tag to our found tags (why not?)
-              tag_counts[tag] = 1
-            tag_counts[tag] += 1
-            num_matches += 1
-          # !!! REDACTION HAPPENS HERE !!!
-          redacted_str, metadata = redact_pii(text, matches)
-          match_set += [(redacted_str, text, metadata)]
-          regex_matches["matches"].append(match_set)
-          if make_LLM_input:
-            yield match_set
-        index += 1
-    # Timing
-    end = time.time()
-    print("\nTime:")
-    print(end-start)
-    print('\nNum matches: %s' % num_matches)
-    for tag, count in tag_counts.items():
-      print("\t%s: %s" % (tag, count))
-    if not make_LLM_input:
-      # Write out results
-      for lang, regex_matches in lang_2_matches.items():
-        df = pandas.DataFrame(data=regex_matches)
-        df.to_csv(f"/content/{annotator}_{lang}_subset_regex_matches.csv")
-        all_dfs[f'{annotator}_{lang}'] = df
-      return all_dfs, tag_counts
-
-"""# Data Handling begins here!"""
-
-#@title Read the data in
-# Our priority PII types are below.
-# IDs [general]: This is anything that is a sequence of 6 or more digits, as is common in identifiers for people internationally (national IDs, tax IDs, passport numbers, etc.), credit card numbers, IBAN codes, etc.
-# Keys [general]: This is anything that is a sequence of digits and letters in the same string. Common for API keys, etc.
-# Email address, User name: Strings using @
-# IP address: Digits with periods in them
-# Phone number
-# License plate
-
-import ast
-
-def read_data(src_lang=None, data_file=None, tag_type={'ID'}):
-  """
-  Runs the given set of regexes on the multilingual data.
-  Uses regexes for the specified tags.
-  """
-
-  print('Reading in data....')
-  all_dfs = {}
-  # Read in the data
-  lines = [ast.literal_eval(l) for l in open(data_file, "r").readlines()]
-  if src_lang is not None:
-    print('Pulling out just instances for %s' % src_lang)
-    lines = [l for l in lines if l['lang']==src_lang]
-  print('Finished loading data.')
-  return lines
-
-#lines = read_data(data_file="lang_subset.jsonl", tag_type=high_risk_tags)
-# tag_type={'IP_ADDRESS', 'ID', 'PHONE', 'USER', 'URL', 'DATE'}) # we could ignore DATEs as we won't be anonymizing (unless it's an AGE - TBD)
-
-#@title Run MST PI detection, save to data frames
-#all_dfs_mst, tag_counts_mst = run_pi_detection(lines, regex_rulesets=[('mst', mst_regexes)], data_file="/content/drive/MyDrive/lang_subset.jsonl", tag_type=high_risk_tags)
-
-if __name__ == '__main__':
-    lines = read_data(data_file="lang_subset.jsonl", tag_type=high_risk_tags)
-    #run_pi_detection(lines, make_LLM_input=False, regex_rulesets=[('mst', mst_regexes)], data_file="lang_subset.jsonl", tag_type=high_risk_tags)
-    pi_line_iterator = run_pi_detection(lines, make_LLM_input=True, regex_rulesets=[('mst', mst_regexes)], data_file="lang_subset.jsonl", tag_type=high_risk_tags)
-    print(pi_line_iterator)
-    for line in pi_line_iterator:
-        for redacted_str, original_str, metadata in line:
-            print("Redacted str: %s" % redacted_str)
-            print("Original str: %s" % original_str)
-            print("Metadata: %s\n\n" % metadata)
+  # What is this for...?
+  text = text.encode().decode()
+  matches = detect_pii(text, lang, high_risk_tags)
+  if len(matches) > 0:
+    for match in matches:
+      tag = match[3]
+      if tag not in high_risk_tags:
+        print("\nWarning: PII Detection function finding tag %s that has not been asked for. Including it.\n" % tag)
+        # Add the unexpected tag to our found tags (why not?)
+    # !!! REDACTION HAPPENS HERE !!!
+    redacted_str, metadata = redact_pii(text, matches)
+    match_set = (redacted_str, text, metadata)
+    if make_LLM_input:
+      yield match_set
