@@ -11,7 +11,11 @@ from datasets import load_from_disk
 
 DATASET_DIR_PATH_BEFORE_CLEAN_SELECT = "/home/lucile/data"
 CLEANING_VERSIONS = ["clean_v2", "clean_v1"]
-OPERATION_TYPES =  ["Applied filter","Applied deduplication function","Applied map function"]
+OPERATION_TYPES = [
+    "Applied filter",
+    "Applied deduplication function",
+    "Applied map function",
+]
 
 
 def get_ds(ds_path):
@@ -33,6 +37,7 @@ def on_ds_change(ds_path):
     st.session_state["ds"] = get_ds(ds_path)
     st.session_state["idx"] = 0
     st.session_state["ds_name"] = ds_path
+
 
 def get_log_stats_df(raw_log):
     data = OrderedDict(
@@ -106,14 +111,12 @@ def get_log_stats_df(raw_log):
         * 100
     )
     df["Size (GB) % removed"] = (
-        (
-            df["Initial size (GB)"].astype(float)
-            - df["Final size (GB)"].astype(float)
-        )
+        (df["Initial size (GB)"].astype(float) - df["Final size (GB)"].astype(float))
         / df["Initial size (GB)"].astype(float)
         * 100
     )
     return df
+
 
 def get_logs_stats(log_path):
     with open(log_path) as f:
