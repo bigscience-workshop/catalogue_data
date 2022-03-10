@@ -13,10 +13,6 @@ CLEANING_VERSIONS = [
     "clean_v2",
     "clean_v1"
 ]
-st.set_page_config(page_title="Dataset explorer", layout="wide")
-
-st.write("The purpose of this application is to sequentially view the changes made to a dataset.")
-
 
 
 def get_ds(ds_path):
@@ -95,15 +91,16 @@ def get_logs_stats(log_path):
         subcontent = [line for line in content.split("\n") if "INFO - __main__" in line and "Examples of" not in line and "Examples n°" not in line]
         st.write(subcontent)
 
-
+# Streamlit page
+st.set_page_config(page_title="Dataset explorer", layout="wide")
+st.write("The purpose of this application is to sequentially view the changes made to a dataset.")
 col_option_clean, col_option_ds = st.columns(2)
 
-with col_option_clean:
-    option_clean = st.selectbox(
-        'Select the cleaning version',
-        CLEANING_VERSIONS,
-    )
-    DATASET_DIR_PATH = os.path.join(DATASET_DIR_PATH_BEFORE_CLEAN_SELECT, option_clean)
+option_clean = col_option_clean.selectbox(
+    'Select the cleaning version',
+    CLEANING_VERSIONS,
+)
+DATASET_DIR_PATH = os.path.join(DATASET_DIR_PATH_BEFORE_CLEAN_SELECT, option_clean)
 
 dataset_names = sorted(list(os.listdir(DATASET_DIR_PATH)))
 with col_option_ds:
