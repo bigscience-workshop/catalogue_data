@@ -24,24 +24,24 @@ def get_ds(ds_path):
     return ds
 
 
-def idx_plus(idx: int):
+def next_idx(idx: int):
     idx += 1
     return idx % len(st.session_state["ds"])
 
 
-def idx_minus(idx: int):
+def previous_idx(idx: int):
     idx -= 1
     return idx % len(st.session_state["ds"])
 
 
 def on_click_next():
-    st.session_state["idx_1"] = idx_plus(st.session_state["idx_1"])
-    st.session_state["idx_2"] = idx_plus(st.session_state["idx_2"])
+    st.session_state["idx_1"] = next_idx(st.session_state["idx_1"])
+    st.session_state["idx_2"] = next_idx(st.session_state["idx_2"])
 
 
 def on_click_previous():
-    st.session_state["idx_1"] = idx_minus(st.session_state["idx_1"])
-    st.session_state["idx_2"] = idx_minus(st.session_state["idx_2"])
+    st.session_state["idx_1"] = previous_idx(st.session_state["idx_1"])
+    st.session_state["idx_2"] = previous_idx(st.session_state["idx_2"])
 
 
 def on_ds_change(ds_path):
