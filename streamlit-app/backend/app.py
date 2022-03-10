@@ -1,22 +1,19 @@
-import json
 import os
 import pprint as pp
 from collections import OrderedDict, defaultdict
-from functools import partial
 
 import diff_viewer
 import pandas as pd
 import streamlit as st
 from datasets import load_from_disk
 
-DATASET_DIR_PATH_BEFORE_CLEAN_SELECT = "/home/lucile/data"
-CLEANING_VERSIONS = ["clean_v2", "clean_v1"]
+DATASET_DIR_PATH_BEFORE_CLEAN_SELECT = os.getenv("DATASET_DIR_PATH_BEFORE_CLEAN_SELECT") #  "/home/lucile/data"
 OPERATION_TYPES = [
     "Applied filter",
     "Applied deduplication function",
     "Applied map function",
 ]
-MAX_LEN_DS_CHECKS = 1000
+MAX_LEN_DS_CHECKS = os.getenv("MAX_LEN_DS_CHECKS")
 
 
 def get_ds(ds_path):
@@ -257,6 +254,7 @@ st.write(
 )
 col_option_clean, col_option_ds = st.columns(2)
 
+CLEANING_VERSIONS = sorted(list(os.listdir(DATASET_DIR_PATH_BEFORE_CLEAN_SELECT)), reverse=True)
 option_clean = col_option_clean.selectbox(
     "Select the cleaning version", CLEANING_VERSIONS
 )
