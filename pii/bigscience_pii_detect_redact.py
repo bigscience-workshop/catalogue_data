@@ -101,15 +101,14 @@ user_pattern = r'(?:^|[\s@,?!;:\'\")(\p{Han}])(@[^\s@,?!;:\'\")(]{3,})'
 #                 (?:^|[\s\'\"(\p{Han}])((?:\+\p{Nd}+[ \/.\p{Pd}]*)?(?:(?:\(\+?\p{Nd}+\))?(?:[ \/.\p{Pd}]*\p{Nd})){7,}(?:[\t\f #]*\p{Nd}+)?)(?:$|[\s@,?!;:\'\"(.\p{Han}])
 phone_pattern = r'(?:^|[\s\'\"(\p{Han}])((?:\+\p{Nd}+[ \/.\p{Pd}]*)?(?:(?:\(\+?\p{Nd}+\))?(?:[ \/.\p{Pd}]*\p{Nd})){7,}(?:[\t\f #]*\p{Nd}+)?)(?:$|[\s@,?!;:\'\"(.\p{Han}])'
 
-# TODO: set global or multline?
-id_regex = regex.compile(id_pattern) #, re.MULTILINE)
-key_regex = regex.compile(key_pattern) #, re.MULTILINE)
+id_regex = regex.compile(id_pattern, flags=regex.MULTILINE) #, re.MULTILINE)
+key_regex = regex.compile(key_pattern, flags=regex.MULTILINE) #, re.MULTILINE)
 ipv4_regex = regex.compile(ipv4_pattern)
 ipv6_regex = regex.compile(ipv6_pattern)
-ip_regex = regex.compile(ip_pattern) #, re.MULTILINE)
-email_regex = regex.compile(email_pattern) #, re.MULTILINE)
-user_regex = regex.compile(user_pattern) #, re.MULTILINE)
-phone_regex = regex.compile(phone_pattern) #, re.MULTILINE)
+ip_regex = regex.compile(ip_pattern, flags=regex.MULTILINE) #, re.MULTILINE)
+email_regex = regex.compile(email_pattern, flags=regex.MULTILINE) #, re.MULTILINE)
+user_regex = regex.compile(user_pattern, flags=regex.MULTILINE) #, re.MULTILINE)
+phone_regex = regex.compile(phone_pattern, flags=regex.MULTILINE) #, re.MULTILINE)
 # TODO: license
 
 
