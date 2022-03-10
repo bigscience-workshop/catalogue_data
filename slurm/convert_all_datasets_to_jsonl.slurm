@@ -18,30 +18,21 @@ conda activate thomas_data_tooling # Debug deepspeed temporarily
 CATALOGUE_DATA_REPO=$WORK/code/big_science/catalogue_data
 pushd $CATALOGUE_DATA_REPO
 
-# DATASET_PATH=${DATASETS_NAMES[$SLURM_ARRAY_TASK_ID]}
-DATASET_PATH=$(python get_dataset_path.py --dataset-ratios-file training_dataset_ratios.json --index $SLURM_ARRAY_TASK_ID)
-echo "Converting $DATASET_PATH to json"
+# ===== GET DATASET ======
 
-if [[ $DATASET_PATH == /gpfswork/rech/six/uty16tp/dataset/tokenization/* ]]
-then
-    if [[ $DATASET_PATH == */data ]]
-    then
-        DATASET_NAME=${DATASET_PATH:48:-5}
-    else
-        DATASET_NAME=${DATASET_PATH:48}
-    fi
-else
-    DATASET_NAME=$DATASET_PATH
-fi
+DATASET_ID=$SLURM_ARRAY_TASK_ID
+DATASET_NAME=$(python get_dataset_name.py --dataset-csv-path training.csv --index $DATASET_ID)
+
+echo "Converting $DATASET_NAME to json"
 
 NUM_SHARDS=8
 
-SAVE_PREFIX=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/jsonl_"$NUM_SHARDS"_shards/$DATASET_NAME/data
+DATASET_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/clean/$DATASET_NAME/final
+SAVE_PREFIX=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/cleaned_jsonl_"$NUM_SHARDS"_shards/$DATASET_NAME/data
 mkdir -p $(dirname $SAVE_PREFIX)
 
 echo "Downloading ${DATASET_NAME}"
 export HF_DATASETS_OFFLINE=1
-
 
 module load git-lfs
 module load unrar
@@ -49,7 +40,7 @@ python -c "
 from datasets import load_dataset
 from pathlib import Path
 
-ds = load_dataset(\"$DATASET_PATH\", use_auth_token=True, split=\"train\")
+ds = load_from_disk(\"$DATASET_PATH\", split=\"train\")
 
 for shard_id in range($NUM_SHARDS):
     filepath = Path(f\"${SAVE_PREFIX}_{shard_id}_$NUM_SHARDS.jsonl\")

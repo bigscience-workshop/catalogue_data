@@ -7,7 +7,7 @@
 #SBATCH --partition=cpu_p1
 #SBATCH --time 20:00:00              # maximum execution time (HH:MM:SS)
 #SBATCH --output=logs/preprocess_all_catalogue_datasets/%x-%j.out           # output file name
-#SBATCH --array=0-509   # TODO: modify according to the number of models you want to evaluated
+#SBATCH --array=0-516   # TODO: modify according to the number of models you want to evaluated
 #SBATCH --account=six@cpu
 
 set -x -e
@@ -21,22 +21,22 @@ pushd $CATALOGUE_DATA_REPO
 # =======  GET DATASET AND FUNCTIONS ======
 
 DATASET_ID=$SLURM_ARRAY_TASK_ID
-DATASET_TRAINING_CSV=$CATALOGUE_DATA_REPO/training.csv
+DATASET_TRAINING_CSV=$CATALOGUE_DATA_REPO/training_v2.csv
 readarray -t DATASET_PATH_AND_FUNCTIONS < <(python -c "
 import pandas as pd
 
 data = pd.read_csv(\"${DATASET_TRAINING_CSV}\")
 dataset = data.iloc[$DATASET_ID]
 print(dataset[\"dataset_name\"])
-if pd.notnull(dataset[\"--maps-and-filters argument\"]):
-    print(dataset[\"--maps-and-filters argument\"])
+if pd.notnull(dataset[\"--preprocessings\"]):
+    print(dataset[\"--preprocessings\"])
 else:
     print()
 ")
 DATASET_PATH=${DATASET_PATH_AND_FUNCTIONS[0]}
-MAPS_AND_FILTERS=${DATASET_PATH_AND_FUNCTIONS[1]}
+PREPROCESSINGS=${DATASET_PATH_AND_FUNCTIONS[1]}
 
-if [[ $MAPS_AND_FILTERS == KILL ]]
+if [[ $PREPROCESSINGS == KILL ]]
 then
     echo "Not supposed to preprocess $DATASET_PATH"
     exit 0
@@ -58,7 +58,7 @@ fi
 
 # ====== RUN PYTHON SCRIPT =======
 
-BASE_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/clean/$DATASET_NAME
+BASE_PATH=$six_ALL_CCFRSCRATCH/bigscience-datasets/catalogue/clean_v2/$DATASET_NAME
 SAVE_PATH=$BASE_PATH/final
 CHECKS_SAVE_PATH=$BASE_PATH/checks
 LOGS_PATH=$BASE_PATH/logs.txt
@@ -70,7 +70,7 @@ export HF_DATASETS_OFFLINE=1
 
 python clean.py \
     --dataset-path $DATASET_PATH \
-    --maps-and-filters $MAPS_AND_FILTERS \
+    --preprocessings $PREPROCESSINGS \
     --save-path $SAVE_PATH \
     --checks-save-path $CHECKS_SAVE_PATH \
     --num-proc 10 \

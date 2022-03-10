@@ -7,14 +7,16 @@ from functools import partial
 import torch
 from datasets import Dataset, load_dataset, load_from_disk, concatenate_datasets, set_caching_enabled
 from pathlib import Path
-from typing import Tuple, Optional, Callable
+from typing import Tuple, Optional, Callable, List, Dict
 from datasets.utils.logging import set_verbosity_info
 from numpy.random import default_rng
 
 from clean_helpers import build_small_docs_filter, filter_wiki_non_text_type, filter_wiki_user_titles, \
-    replace_newline_with_space, build_dedup_template, dedup_document, build_line_with_substring_remover, \
-    en_wiktionary_stripper, build_small_docs_bytes_filter, dedup_document_on_url, filter_remove_empty_docs,\
-    build_reference_remover, build_sentence_splitter, sentence_split_langs
+    replace_newline_with_space, build_dedup_template, build_line_with_substring_remover, \
+    en_wiktionary_stripper, build_small_docs_bytes_filter, build_dedup_document, filter_remove_empty_docs,\
+    build_reference_remover, concatenate_lm_fr_ester, build_sentence_splitter, sentence_split_langs
+from clean_helpers.deduplication import document_batch_normalizer, url_host_and_path_batch_normalizer, \
+    url_lm_es_pseudocrawl_filtered_341_es_cointelegraph_com, url_lm_en_pseudocrawl_filtered_619_www_qut_edu_au
 from clean_helpers.stopwords import stopwords
 
 set_verbosity_info()
@@ -32,7 +34,7 @@ MAPS = {
     "remove_wiki_mojibake": build_line_with_substring_remover(["À À"]),
     "strip_substrings_en_wiktionary": en_wiktionary_stripper,
     ** {
-    f"remove_references_{lang}": build_reference_remover(lang) for lang in set(stopwords.keys())
+        f"remove_references_{lang}": build_reference_remover(lang) for lang in set(stopwords.keys())
     },
     ** {f"split_sentences_{lang}": build_sentence_splitter(lang) for lang in sentence_split_langs}
 }
@@ -43,21 +45,28 @@ FILTERS = {
     "filter_wiki_non_text_type": filter_wiki_non_text_type,
     "filter_small_docs": build_small_docs_filter(min_word=15),
     ** {
-        f"filter_small_docs_bytes_{i}": build_small_docs_bytes_filter(min_bytes=i) for i in [500, 1000, 7000]
+        f"filter_small_docs_bytes_{i}": build_small_docs_bytes_filter(min_bytes=i) for i in [300, 1024]
     },
 }
-# Deduplication functions: function(ds: Dataset, num_proc: int, batch_size: int) -> Dataset
+# Deduplication functions and boolean to save a sample of the modifications: function(ds: Dataset, num_proc: int, batch_size: int) -> Dataset
 DEDUPS = {
-    "dedup_template_soft": build_dedup_template(
+    "dedup_template_soft": (build_dedup_template(
         min_template_line_size=15,
-        min_template_line_occurence=5,
-    ),
-    "dedup_pseudocrawl_newspapers": build_dedup_template(
+        min_template_line_occurence=10,
+    ), True),
+    "dedup_pseudocrawl_newspapers": (build_dedup_template(
         min_template_line_size=0,
         min_template_line_occurence=2,
-    ),
-    "dedup_document": dedup_document,
-    "dedup_document_on_url": dedup_document_on_url
+    ), True),
+    "dedup_document": (build_dedup_document(document_batch_normalizer), True),
+    "dedup_document_on_url": (build_dedup_document(url_host_and_path_batch_normalizer), True),
+    "dedup_document_on_url_lm_es_pseudocrawl-filtered_341_es_cointelegraph_com": (build_dedup_document(
+        url_lm_es_pseudocrawl_filtered_341_es_cointelegraph_com
+    ), True),
+    "dedup_document_on_url_lm_en_pseudocrawl_filtered_619_www_qut_edu_au": (build_dedup_document(
+        url_lm_en_pseudocrawl_filtered_619_www_qut_edu_au
+    ), True),
+    "concatenate_lm_fr_ester": (concatenate_lm_fr_ester, False)
 }
 
 MAPS_KEYS = set(MAPS.keys())
@@ -66,15 +75,19 @@ DEDUPS_KEYS = set(DEDUPS.keys())
 assert MAPS_KEYS.isdisjoint(FILTERS_KEYS)
 assert (MAPS_KEYS | FILTERS_KEYS).isdisjoint(DEDUPS_KEYS)
 
-def get_size_per_example(texts):
+def get_size_per_example(texts: List[str]) -> Dict:
     size_values = [len(text.encode()) for text in texts]
     examples = {"bytes_len": size_values}
     return examples
 
-def quick_size_estimation(ds, 
+def quick_size_estimation(
+    ds: Dataset,
     num_proc: int,
     batch_size: int,
-    content_key:str ="text"):
+    content_key:str ="text"
+) -> int:
+    if len(ds) == 0:
+        return 0
     rng = default_rng(1991)
     subset_size = min(10000, len(ds))
     indices = rng.choice(len(ds), size=subset_size, replace=False, shuffle=False)
@@ -96,13 +109,20 @@ def revert_bool_output(examples, filter_function):
     booleans = filter_function(examples)
     return [not boolean for boolean in booleans]
 
+def convert_filter_to_map(batch: Dict, filter_function: Callable[[Dict], List[bool]]) -> Dict:
+    samples_to_keep = filter_function(batch)
+    return {
+        key: [elt for to_keep, elt in zip(samples_to_keep, value) if to_keep]
+        for key, value in batch.items()
+    }
+
 def filter_diff_text(examples, in_text_col, out_text_col):
     return [text_in != text_out for text_in, text_out in zip(examples[in_text_col], examples[out_text_col])]
 
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset-path", type=str, required=True, help="Dataset path we load the dataset from.")
-    parser.add_argument("--maps-and-filters", nargs="*", type=str, required=True,
+    parser.add_argument("--preprocessings", nargs="*", type=str, required=True,
                         choices=(MAPS_KEYS | FILTERS_KEYS | DEDUPS_KEYS),
                         help="List of dataset modification we apply in sequence.")
     parser.add_argument("--save-path", type=Path, required=True,
@@ -179,7 +199,7 @@ def get_modified_documents(
     ds = ds.rename_column("text", "old_text")
 
     assert len(mapped_ds) == len(ds), f"Mapping function are batched, but they should not alter the size of the batch."
-    mapped_diff_ds = concatenate_datasets([mapped_ds, ds], axis=1).filter(
+    mapped_diff_ds = concatenate_datasets([mapped_ds.flatten_indices(), ds.flatten_indices()], axis=1).filter(
         partial(filter_diff_text, in_text_col="old_text", out_text_col="text"),
         batched=True,
         num_proc=num_proc,
@@ -199,14 +219,15 @@ def get_modified_documents(
 
 
 def apply_function(function_name: str, ds: Dataset, args) -> Tuple[Dataset, Optional[Dataset]]:
+    logger.info(f"Applying: {function_name}")
     if function_name in MAPS:
         map_function = MAPS[function_name]
         mapped_ds = ds.map(
-                map_function,
-                batched=True,
-                num_proc=args.num_proc,
-                batch_size=args.batch_size
-            )
+            map_function,
+            batched=True,
+            num_proc=args.num_proc,
+            batch_size=args.batch_size
+        )
         log_stats(f"Applied map function: {function_name}", ds, mapped_ds, operation_type="Modified", args=args)
         if args.checks_save_path is not None:
             mapped_diff_ds = get_modified_documents(ds, mapped_ds, args.num_proc, args.batch_size, args.sampling_size_map_checks)
@@ -215,19 +236,25 @@ def apply_function(function_name: str, ds: Dataset, args) -> Tuple[Dataset, Opti
             return mapped_ds, None
     elif function_name in FILTERS:
         filter_function = FILTERS[function_name]
-        filtered_ds = ds.filter(filter_function, batched=True, num_proc=args.num_proc, batch_size=args.batch_size)
+        filtered_ds = ds.map(
+            partial(convert_filter_to_map, filter_function=filter_function),
+            batched=True,
+            num_proc=args.num_proc,
+            batch_size=args.batch_size,
+            remove_columns=ds.column_names
+        )
         log_stats(f"Applied filter: {function_name}", ds, filtered_ds, operation_type="Removed", args=args)
         if args.checks_save_path is not None:
             return filtered_ds, get_filtered_out_documents(ds, filter_function, args.num_proc, args.batch_size, args.sampling_size_filter_checks)
         else:
             return filtered_ds, None
     elif function_name in DEDUPS:
-        dedup_function = DEDUPS[function_name]
-        deduplicated_ds = dedup_function(ds, num_proc=args.num_proc, batch_size=args.batch_size, args=args)
-        log_stats(f"Applied deduplication function: {function_name}",  ds,  deduplicated_ds,  operation_type="Deduplicated")
+        dedup_function, dedup_check = DEDUPS[function_name]
+        deduplicated_ds = dedup_function(ds, num_proc=args.num_proc, batch_size=args.batch_size)
+        log_stats(f"Applied deduplication function: {function_name}",  ds,  deduplicated_ds,  operation_type="Deduplicated", args=args)
 
         # Some deduplication do not preserve the number of samples, so alignement is lost. For example "dedup_document"
-        if args.checks_save_path is not None:
+        if args.checks_save_path is not None and dedup_check:
             deduped_diff_ds = get_modified_documents(ds, deduplicated_ds, args.num_proc, args.batch_size, args.sampling_size_map_checks)
             return deduplicated_ds, deduped_diff_ds
         else:
@@ -257,14 +284,14 @@ def main():
 
     # Apply series of maps and filters
     logger.info(f" ===== Applying transformations =====")
-    for idx, map_or_filter in enumerate(args.maps_and_filters):
-        ds, ds_diff = apply_function(map_or_filter, ds, args)
+    for idx, preprocessing in enumerate(args.preprocessings):
+        ds, ds_diff = apply_function(preprocessing, ds, args)
         if ds_diff is not None and len(ds_diff) != 0:
-            saving_path = args.checks_save_path / f"{idx}_{map_or_filter}_checks"
+            saving_path = args.checks_save_path / f"{idx}_{preprocessing}_checks"
             if not args.from_scratch and saving_path.exists():
                 continue
             tmp_save_path = Path(saving_path.parent, f"tmp-{saving_path.name}")
-            logger.info(f" ===== Saving examples to check after {map_or_filter}  =====")
+            logger.info(f" ===== Saving examples to check after {preprocessing}  =====")
             ds_diff.save_to_disk(tmp_save_path)
             tmp_save_path.rename(saving_path)
 
@@ -285,6 +312,8 @@ def main():
         else:
             ds.save_to_disk(tmp_save_path)
         tmp_save_path.rename(args.save_path)
+    else:
+        logging.info(f"Dataset was already saved at {args.save_path}")
 
 
 if __name__ == "__main__":

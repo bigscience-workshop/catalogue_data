@@ -7,7 +7,7 @@
 #SBATCH --partition=cpu_p1
 #SBATCH --time 20:00:00              # maximum execution time (HH:MM:SS)
 #SBATCH --output=logs/deduplicate_all_catalogue_datasets/%x-%j.out           # output file name
-#SBATCH --array=0-509   # TODO: modify according to the number of models you want to evaluated
+#SBATCH --array=0-516   # TODO: modify according to the number of models you want to evaluated
 #SBATCH --account=six@cpu
 
 set -x -e
@@ -35,16 +35,16 @@ else:
     list_of_dedups=[\"dedup_document\", \"dedup_template_soft\", \"filter_remove_empty_docs\"]
 print(\" \".join(list_of_dedups))
 
-if pd.notnull(dataset[\"--maps-and-filters argument\"]):
-    print(dataset[\"--maps-and-filters argument\"])
+if pd.notnull(dataset[\"--preprocessings\"]):
+    print(dataset[\"--preprocessings\"])
 else:
     print()
 ")
 DATASET_PATH=${DATASET_PATH_AND_FUNCTIONS[0]}
-MAPS_AND_FILTERS=${DATASET_PATH_AND_FUNCTIONS[1]}
-OFFICIAL_MAPS_AND_FILERS=${DATASET_PATH_AND_FUNCTIONS[2]}
+PREPROCESSINGS=${DATASET_PATH_AND_FUNCTIONS[1]}
+OFFICIAL_PREPROCESSINGS=${DATASET_PATH_AND_FUNCTIONS[2]}
 
-if [[ $OFFICIAL_MAPS_AND_FILERS == KILL ]]
+if [[ $OFFICIAL_PREPROCESSINGS == KILL ]]
 then
     echo "Not supposed to preprocess $DATASET_PATH"
     exit 0
@@ -78,7 +78,7 @@ export HF_DATASETS_OFFLINE=1
 
 python clean.py \
     --dataset-path $DATASET_PATH \
-    --maps-and-filters $MAPS_AND_FILTERS \
+    --preprocessings $PREPROCESSINGS \
     --save-path $SAVE_PATH \
     --checks-save-path $CHECKS_SAVE_PATH \
     --num-proc 10 \
