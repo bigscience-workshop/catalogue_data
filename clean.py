@@ -223,8 +223,8 @@ def apply_function(function_name: str, ds: Dataset, args) -> Tuple[Dataset, Opti
             return filtered_ds, None
     elif function_name in DEDUPS:
         dedup_function = DEDUPS[function_name]
-        deduplicated_ds = dedup_function(ds, num_proc=args.num_proc, batch_size=args.batch_size)
-        log_stats(f"Applied deduplication function: {function_name}",  ds,  deduplicated_ds,  operation_type="Deduplicated", args=args)
+        deduplicated_ds = dedup_function(ds, num_proc=args.num_proc, batch_size=args.batch_size, args=args)
+        log_stats(f"Applied deduplication function: {function_name}",  ds,  deduplicated_ds,  operation_type="Deduplicated")
 
         # Some deduplication do not preserve the number of samples, so alignement is lost. For example "dedup_document"
         if args.checks_save_path is not None:
