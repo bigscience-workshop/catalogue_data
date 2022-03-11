@@ -45,11 +45,12 @@ def main():
 
 
     def func_map(examples):
-        for example in examples:
-            example["text"], metadata_out = run_pii(example["text"], lang=lang)
+        examples_pii = examples * 1
+        for i, text in enumerate(examples["text"]):
+            examples_pii["text"][i], metadata_out = run_pii(text, lang=lang)
             if len(list_metadata_out) < metadata_num_docs_to_write:
                 list_metadata_out.append(metadata_out)
-        return examples
+        return examples_pii
 
 
     def save_json(path_json_save, data):
@@ -57,7 +58,7 @@ def main():
             json.dump(data, f)
 
 
-    dataset = load_dataset('json', data_files=path_dataset_jsonl)
+    dataset = load_dataset('json', data_files=path_dataset_jsonl, split="train")
     dataset = dataset.map(func_map, batched=True, num_proc=cpu_count())
     dataset.to_json(path_save_dataset_jsonl)
     save_json(path_metadata_out_write, list_metadata_out)
