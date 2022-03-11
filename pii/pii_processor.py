@@ -23,7 +23,8 @@ def func_pii_multiprocessing(line, lang, save_path, metadata_save_path):
     with open(metadata_save_path, "a") as fi:
         fi.write(f"{json.dumps(metadata)}\n")
 
-p = multiprocessing.Pool(processes=multiprocessing.cpu_count()-1)
-async_result = p.map_async(partial(func_pii_multiprocessing, lang=lang, save_path=save_path, metadata_save_path=metadata_save_path), jsonlines)
-p.close()
-p.join()
+if __name__ == '__main__':
+    p = multiprocessing.Pool(processes=multiprocessing.cpu_count()-1)
+    async_result = p.map_async(partial(func_pii_multiprocessing, lang=lang, save_path=save_path, metadata_save_path=metadata_save_path), jsonlines)
+    p.close()
+    p.join()
