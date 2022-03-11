@@ -49,7 +49,8 @@ Languages assumed are ["ar", "as", "bn", "ca", "en", "es", "eu", "fr", "gu", "hi
 
 
 #@title Define highest risk PII. TODO: License plate
-high_risk_tags = {'ID', 'KEY', 'EMAIL', 'USER', 'IP_ADDRESS', 'NUMBER'}
+# NUMBER removed last minute due to false positives. See https://huggingface.slack.com/archives/C0307KE5UNT/p1647011702716159
+high_risk_tags = {'ID', 'KEY', 'EMAIL', 'USER', 'IP_ADDRESS'} # , 'NUMBER'}
 
 """# Regexes"""
 
@@ -81,7 +82,7 @@ user_pattern = r'(?:^|[\s@,?!;:\'\")(\p{Han}])(@[^\s@,?!;:\'\")(]{3,})'
 # Examples from https://regexpattern.com/phone-number/
 # https://regex101.com/r/lZZ0XP/4
 # Also matches MLS numbers
-phone_pattern = r'(?:^|[\s\'\"(\p{Han}])((?:\+\p{Nd}+[ \/.\p{Pd}]*)?(?:(?:\(\+?\p{Nd}+\))?(?:[ \/.\p{Pd}]*\p{Nd})){7,}(?:[\t\f #]*\p{Nd}+)?)(?:$|[\s@,?!;:\'\"(.\p{Han}])'
+# phone_pattern = r'(?:^|[\s\'\"(\p{Han}])((?:\+\p{Nd}+[ \/.\p{Pd}]*)?(?:(?:\(\+?\p{Nd}+\))?(?:[ \/.\p{Pd}]*\p{Nd})){7,}(?:[\t\f #]*\p{Nd}+)?)(?:$|[\s@,?!;:\'\"(.\p{Han}])'
 
 id_regex = regex.compile(id_pattern, flags=regex.MULTILINE) #, re.MULTILINE)
 key_regex = regex.compile(key_pattern, flags=regex.MULTILINE) #, re.MULTILINE)
@@ -90,7 +91,7 @@ ipv6_regex = regex.compile(ipv6_pattern)
 ip_regex = regex.compile(ip_pattern, flags=regex.MULTILINE) #, re.MULTILINE)
 email_regex = regex.compile(email_pattern, flags=regex.MULTILINE) #, re.MULTILINE)
 user_regex = regex.compile(user_pattern, flags=regex.MULTILINE) #, re.MULTILINE)
-phone_regex = regex.compile(phone_pattern, flags=regex.MULTILINE) #, re.MULTILINE)
+# phone_regex = regex.compile(phone_pattern, flags=regex.MULTILINE) #, re.MULTILINE)
 # TODO: license
 
 
@@ -112,10 +113,10 @@ for tag in high_risk_tags:
     mst_regexes['EMAIL'] = email_regex
   elif tag == 'USER':
     mst_regexes['USER'] = user_regex
-  elif tag == 'NUMBER':
-    mst_regexes['NUMBER'] = phone_regex
+#  elif tag == 'NUMBER':
+#    mst_regexes['NUMBER'] = phone_regex
   else:
-    print('Dont have tag regex pattern for %s =(' % tag)
+    sys.stderr.write('Dont have tag regex pattern for %s =(' % tag)
 
 #print("MST regexes under examination are:")
 #for tag, regx in mst_regexes.items():
@@ -167,7 +168,7 @@ def detect_pii(text, lang, tag_types):
             # Filter out false positive IPs
             if not ip_has_digit(matched_str):
               continue
-          if tag in ["ID", "IP_ADDRESS", "NUMBER"]:
+          if tag in ["ID", "IP_ADDRESS"]: #, "NUMBER"]:
             # Filter out date false positives
             if matches_date_pattern(matched_str):
               continue
