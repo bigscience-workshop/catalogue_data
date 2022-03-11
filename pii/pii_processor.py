@@ -14,7 +14,6 @@ with open(path_jsonl, "r") as fi:
 
 def func_pii_multiprocessing(line, lang, save_path, metadata_save_path):
     line = json.loads(line)
-
     match_set = run_pii(line["text"], lang)
     redacted_str, metadata = match_set
     line["text"] = redacted_str
