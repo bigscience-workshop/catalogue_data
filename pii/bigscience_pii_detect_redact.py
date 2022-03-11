@@ -117,10 +117,10 @@ for tag in high_risk_tags:
   else:
     print('Dont have tag regex pattern for %s =(' % tag)
 
-print("MST regexes under examination are:")
-for tag, regx in mst_regexes.items():
-  print(tag, end=":\t")
-  print(regx)
+#print("MST regexes under examination are:")
+#for tag, regx in mst_regexes.items():
+  #print(tag, end=":\t")
+  #print(regx)
 
 """# PI Detection and Redaction functions are defined here! """
 
@@ -155,9 +155,9 @@ def detect_pii(text, lang, tag_types):
       if match.groups():
         if len(match.groups()) > 1 and match.groups()[1]:
           print("Warning: Found substring matches in the main match.")
-          print(tag)
-          print(text)
-          print(match.groups())
+          #print(tag)
+          #print(text)
+          #print(match.groups())
         matched_str = match.groups()
         # print(matched_str)
         # Why does this happen?
@@ -203,11 +203,11 @@ def run_pii(text, lang):
   only "default"/non-language-specific regexes.
   """
 
-  print('Detecting....')
+  #print('Detecting....')
   # What is this for...?
   text = text.encode().decode()
   matches = detect_pii(text, lang, high_risk_tags)
-  print(matches)
+  #print(matches)
   match_set = (text, {})
   if len(matches) > 0:
     # !!! REDACTION HAPPENS HERE !!!
