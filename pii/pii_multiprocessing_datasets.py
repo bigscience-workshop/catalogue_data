@@ -6,7 +6,7 @@ import json
 
 
 def parseArgs():
-    parser = argparse.ArgumentParser(description="Filtering.")
+    parser = argparse.ArgumentParser(description="PII")
     parser.add_argument(
         "path_dataset_jsonl",
         type=str,
