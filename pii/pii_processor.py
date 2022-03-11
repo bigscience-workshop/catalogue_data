@@ -12,7 +12,7 @@ lang = path_jsonl.split("/")[-1].replace("indic-", "").replace("lm_", "")[:2]
 with open(path_jsonl, "r") as fi:
     jsonlines = fi.readlines()
 
-def func_pii_multiprocessing(line, lang, save_path):
+def func_pii_multiprocessing(line, lang, save_path, metadata_save_path):
     line = json.loads(line)
 
     match_set = run_pii(line["text"], lang)
@@ -24,6 +24,6 @@ def func_pii_multiprocessing(line, lang, save_path):
         fi.write(f"{json.dumps(metadata)}\n")
 
 p = multiprocessing.Pool(processes=multiprocessing.cpu_count()-1)
-async_result = p.map_async(partial(func_pii_multiprocessing, lang=lang, save_path=save_path), jsonlines)
+async_result = p.map_async(partial(func_pii_multiprocessing, lang=lang, save_path=save_path, metadata_save_path=metadata_save_path), jsonlines)
 p.close()
 p.join()
