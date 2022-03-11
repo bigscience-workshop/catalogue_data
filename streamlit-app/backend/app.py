@@ -204,8 +204,11 @@ def filter_page():
 
 
 def dedup_or_cleaning_page():
-    col_button_previous, col_title, col_button_next = st.columns(3)
-    col_title.markdown(
+    col_button_previous, col_to_idx, col_button_next = st.columns((1,6,1))
+
+    st.session_state["idx_1"] = col_to_idx.slider('Current idx', 0, len(st.session_state["ds"]), st.session_state["idx_1"])
+
+    st.markdown(
         f"<h1 style='text-align: center'>Example n°{st.session_state['idx_1']}</h1>",
         unsafe_allow_html=True,
     )
