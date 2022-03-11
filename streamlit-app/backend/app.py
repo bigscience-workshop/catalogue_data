@@ -1,13 +1,14 @@
 import os
 import pprint as pp
 from collections import OrderedDict, defaultdict
-
+from pathlib import Path
 import diff_viewer
 import pandas as pd
 import streamlit as st
-from datasets import load_from_disk
+from datasets import load_from_disk, load_dataset
 
 DATASET_DIR_PATH_BEFORE_CLEAN_SELECT = os.getenv("DATASET_DIR_PATH_BEFORE_CLEAN_SELECT") #  "/home/lucile/data"
+DATASET_DIR_PATH_PII = os.getenv("DATASET_DIR_PATH_PII")
 OPERATION_TYPES = [
     "Applied filter",
     "Applied deduplication function",
@@ -17,7 +18,11 @@ MAX_LEN_DS_CHECKS = os.getenv("MAX_LEN_DS_CHECKS")
 
 
 def get_ds(ds_path):
-    ds = load_from_disk(ds_path)
+    if ds_path.endswith(".jsonl"):
+        ds_path = Path(ds_path)
+        ds = load_dataset(str(ds_path.parent), data_files=[str(ds_path.name)], split="train")
+    else:
+        ds = load_from_disk(ds_path)
     return ds
 
 
@@ -246,41 +251,70 @@ def dedup_or_cleaning_page():
             st.subheader("New text")
             st.markdown(f"<div>{text_show}</div>", unsafe_allow_html=True)
 
+def page_cleaning_pipeline():
+    st.write(
+        "The purpose of this application is to sequentially view the changes made to a dataset."
+    )
+    col_option_clean, col_option_ds = st.columns(2)
+
+    CLEANING_VERSIONS = sorted(list(os.listdir(DATASET_DIR_PATH_BEFORE_CLEAN_SELECT)), reverse=True)
+    option_clean = col_option_clean.selectbox(
+        "Select the cleaning version", CLEANING_VERSIONS
+    )
+
+    DATASET_DIR_PATH = os.path.join(DATASET_DIR_PATH_BEFORE_CLEAN_SELECT, option_clean)
+    dataset_names = sorted(list(os.listdir(DATASET_DIR_PATH)))
+    option_ds = col_option_ds.selectbox("Select the dataset", dataset_names)
+
+    checks_path = os.path.join(DATASET_DIR_PATH, option_ds, "checks")
+    checks_names = sorted(list(os.listdir(checks_path)))
+
+    log_path = os.path.join(DATASET_DIR_PATH, option_ds, "logs.txt")
+    get_logs_stats(log_path=log_path)
+
+    option_check = st.selectbox("Select the operation applied to inspect", checks_names)
+    ds_path = os.path.join(checks_path, option_check)
+
+    if "ds" not in st.session_state or ds_path != st.session_state["ds_name"]:
+        on_ds_change(ds_path)
+
+    if len(st.session_state["ds"]) == MAX_LEN_DS_CHECKS:
+        st.warning(
+            f"Note: only a subset of size {MAX_LEN_DS_CHECKS} of the modified / filtered examples can be shown in this application"
+        )
+    with st.expander("See details of the available checks"):
+        st.write(st.session_state["ds"])
+
+
+    _ = filter_page() if "_filter_" in option_check else dedup_or_cleaning_page()
+
+def page_pii():
+    DATASET_DIR_PATH = DATASET_DIR_PATH_PII
+    dataset_names = sorted(list(os.listdir(DATASET_DIR_PATH)))
+    option_ds = st.selectbox("Select the dataset", dataset_names)
+    ds_path = os.path.join(DATASET_DIR_PATH, option_ds)
+
+    if "ds" not in st.session_state or ds_path != st.session_state["ds_name"]:
+        on_ds_change(ds_path)
+
+    if len(st.session_state["ds"]) == MAX_LEN_DS_CHECKS:
+        st.warning(
+            f"Note: only a subset of size {MAX_LEN_DS_CHECKS} of the modified / filtered examples can be shown in this application"
+        )
+    with st.expander("See details of the available checks"):
+        st.write(st.session_state["ds"])
+
+
+    dedup_or_cleaning_page()
 
 # Streamlit page
 st.set_page_config(page_title="Dataset explorer", page_icon=":hugging_face:", layout="wide")
-st.write(
-    "The purpose of this application is to sequentially view the changes made to a dataset."
-)
-col_option_clean, col_option_ds = st.columns(2)
 
-CLEANING_VERSIONS = sorted(list(os.listdir(DATASET_DIR_PATH_BEFORE_CLEAN_SELECT)), reverse=True)
-option_clean = col_option_clean.selectbox(
-    "Select the cleaning version", CLEANING_VERSIONS
-)
+PAGES = ["none", "cleaning pipeline", "PII"]
 
-DATASET_DIR_PATH = os.path.join(DATASET_DIR_PATH_BEFORE_CLEAN_SELECT, option_clean)
-dataset_names = sorted(list(os.listdir(DATASET_DIR_PATH)))
-option_ds = col_option_ds.selectbox("Select the dataset", dataset_names)
+option_page = st.selectbox("Which logs do you want to see", PAGES)
 
-checks_path = os.path.join(DATASET_DIR_PATH, option_ds, "checks")
-checks_names = sorted(list(os.listdir(checks_path)))
-
-log_path = os.path.join(DATASET_DIR_PATH, option_ds, "logs.txt")
-get_logs_stats(log_path=log_path)
-
-option_check = st.selectbox("Select the operation applied to inspect", checks_names)
-ds_path = os.path.join(checks_path, option_check)
-
-if "ds" not in st.session_state or ds_path != st.session_state["ds_name"]:
-    on_ds_change(ds_path)
-
-if len(st.session_state["ds"]) == MAX_LEN_DS_CHECKS:
-    st.warning(
-        f"Note: only a subset of size {MAX_LEN_DS_CHECKS} of the modified / filtered examples can be shown in this application"
-    )
-with st.expander("See details of the available checks"):
-    st.write(st.session_state["ds"])
-
-
-_ = filter_page() if "_filter_" in option_check else dedup_or_cleaning_page()
+if option_page == "cleaning pipeline":
+    page_cleaning_pipeline()
+elif option_page == "PII":
+    page_pii()
