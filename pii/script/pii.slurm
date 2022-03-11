@@ -7,7 +7,7 @@
 #SBATCH --partition=cpu_p1
 #SBATCH --time 20:00:00              # maximum execution time (HH:MM:SS)
 #SBATCH --output=/gpfsdswork/projects/rech/six/uue59kq/logs/pii/%x-%j.out           # output file name
-#SBATCH --array=12
+#SBATCH --array=0-11
 #SBATCH --account=six@cpu
 
 # ===== GET DATASET ======
