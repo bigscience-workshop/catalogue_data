@@ -248,7 +248,7 @@ def dedup_or_cleaning_page():
 
 
 # Streamlit page
-st.set_page_config(page_title="Dataset explorer", layout="wide")
+st.set_page_config(page_title="Dataset explorer", page_icon=":hugging_face:", layout="wide")
 st.write(
     "The purpose of this application is to sequentially view the changes made to a dataset."
 )
