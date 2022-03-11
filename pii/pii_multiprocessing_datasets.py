@@ -25,7 +25,7 @@ def parseArgs():
     parser.add_argument(
         "--metadata_num_docs_to_write",
         type=int,
-        default=100000,
+        default=1000,
         help="Number of documents to save for the metadata",
     )
     parser.add_argument(
@@ -58,6 +58,11 @@ def main():
     metadata_num_docs_to_write = args.metadata_num_docs_to_write
 
 
+    def save_json(path_json_save, data):
+        with open(path_json_save, 'w') as f:
+            json.dump(data, f)
+
+
     def func_map(examples):
         examples_pii = examples
         for i, text in enumerate(examples["text"]):
@@ -65,18 +70,14 @@ def main():
             if len(list_metadata_out) < metadata_num_docs_to_write:
                 if metadata_out:
                     list_metadata_out.append(metadata_out)
+            if len(list_metadata_out) == metadata_num_docs_to_write:
+                save_json(path_metadata_out_write, list_metadata_out)
         return examples_pii
-
-
-    def save_json(path_json_save, data):
-        with open(path_json_save, 'w') as f:
-            json.dump(data, f)
 
 
     dataset = load_dataset('json', data_files=path_dataset_jsonl, split="train")
     dataset = dataset.map(func_map, batched=True, batch_size=args.batch_size, num_proc=args.num_proc)
     dataset.to_json(path_save_dataset_jsonl)
-    save_json(path_metadata_out_write, list_metadata_out)
 
 
 if __name__ == "__main__":
