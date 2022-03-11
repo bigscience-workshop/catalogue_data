@@ -12,6 +12,10 @@
 
 # ===== GET DATASET ======
 
+set -x -e
+
+source $six_ALL_CCFRWORK/start-prod
+
 DATASET_ID=$SLURM_ARRAY_TASK_ID
 LIST_DATASET=("lm_indic-bn_oscar.jsonl" "lm_pt_oscar.jsonl" "lm_indic-ur_oscar.jsonl" "lm_zhs_oscar.jsonl" "lm_indic-hi_oscar.jsonl" "lm_ar_oscar.jsonl" "lm_ca_oscar.jsonl" "lm_es_oscar.jsonl" "lm_en_oscar.jsonl" "lm_id_oscar.jsonl" "lm_fr_oscar.jsonl" "lm_vi_oscar.jsonl" "lm_eu_oscar.jsonl")
 DATASET_NAME=${LIST_DATASET[$SLURM_ARRAY_TASK_ID]}
@@ -22,6 +26,8 @@ SAVE_DATASET_DIR="/gpfsscratch/rech/six/commun/bigscience-datasets/pii/post/"$DA
 SAVE_CHECKS_DATASET_DIR="/gpfsscratch/rech/six/commun/bigscience-datasets/pii/post_checks/"$DATASET_NAME
 
 
+export HF_DATASETS_OFFLINE=1
+export HF_DATASETS_CACHE=$SCRATCH/to_delete
 
 conda activate lucile-pii
 
