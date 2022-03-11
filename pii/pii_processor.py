@@ -61,7 +61,7 @@ if __name__ == '__main__':
         ds = load_dataset(str(args.dataset_path), data_files=[f"*{args.dataset_name}"], split="train")
     
     lang = str(args.dataset_path).split("/")[-1].replace("indic-", "").replace("lm_", "")[:2]
-
+    logger.info(f"ds info: {ds}")
     logger.info(f" ===== Applying PII =====")
     ds = ds.map(
         partial(run_pii_batch, lang=lang),
@@ -75,6 +75,7 @@ if __name__ == '__main__':
         "old_text",
         "modified"
     ])
+    logger.info(f"ds_final info: {ds_final}")
     
     logger.info(f" ===== Saving Final dataset =====")
     logger.info(f"Saving to final dataset at {args.save_path}.")
