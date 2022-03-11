@@ -54,7 +54,7 @@ high_risk_tags = {'ID', 'KEY', 'EMAIL', 'USER', 'IP_ADDRESS', 'NUMBER'}
 """# Regexes"""
 
 #@title Get the less sophisticated MST regexes for High Risk scenarios (baseline comparison). Not language-specific; all are general.
-
+import sys
 import regex
 # These are ordered so that we can return upon a match; no need to search for a substring.
 year_patterns = [
@@ -154,7 +154,7 @@ def detect_pii(text, lang, tag_types):
       # TODO: Why does this happen?
       if match.groups():
         if len(match.groups()) > 1 and match.groups()[1]:
-          print("Warning: Found substring matches in the main match.")
+          sys.stderr.write("Warning: Found substring matches in the main match.")
           #print(tag)
           #print(text)
           #print(match.groups())
@@ -163,18 +163,19 @@ def detect_pii(text, lang, tag_types):
         # Why does this happen?
         matched_str = matched_str[0]
         if matched_str:
+          if tag in ["IP_ADDRESS"]:
+            # Filter out false positive IPs
+            if not ip_has_digit(matched_str):
+              continue
           if tag in ["ID", "IP_ADDRESS", "NUMBER"]:
             # Filter out date false positives
             if matches_date_pattern(matched_str):
               continue
-          elif tag in ["IP_ADDRESS"]:
-            # Filter out false positive IPs
-            if not ip_has_digit(matched_str):
-              continue
-          elif tag in ["KEY"]:
-            # TODO: implement
-            if is_website(matched_str):
-              continue
+          # TODO: Implement
+          # if tag in ["KEY"]:
+          #  # TODO: implement
+          #  if is_website(matched_str):
+          #    continue
           matches += [(matched_str, match.span(), str(label_pattern), tag, lang)]
   return matches
 
