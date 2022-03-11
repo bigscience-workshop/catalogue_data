@@ -18,12 +18,12 @@ DATASET_NAME=${LIST_DATASET[$SLURM_ARRAY_TASK_ID]}
 echo $DATASET_NAME
 
 DATASET_DIR="/gpfsscratch/rech/six/commun/bigscience-datasets/pii/pre"
-SAVE_DATASET_DIR="/gpfsscratch/rech/six/commun/bigscience-datasets/pii/post/"$DATASET_NAME".jsonl"
-SAVE_CHECKS_DATASET_DIR="/gpfsscratch/rech/six/commun/bigscience-datasets/pii/post_checks/"$DATASET_NAME".jsonl"
+SAVE_DATASET_DIR="/gpfsscratch/rech/six/commun/bigscience-datasets/pii/post/"$DATASET_NAME
+SAVE_CHECKS_DATASET_DIR="/gpfsscratch/rech/six/commun/bigscience-datasets/pii/post_checks/"$DATASET_NAME
 
 
 
-conda activate pii
+conda activate lucile-pii
 
 CATALOGUE_DATA_REPO="/gpfsdswork/projects/rech/six/uue59kq/repos/catalogue_data"
 
