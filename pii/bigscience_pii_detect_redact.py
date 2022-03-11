@@ -216,3 +216,40 @@ def run_pii(text, lang):
     metadata_out = {"regex metadata":metadata, "original": text, "redacted": redacted_str}
     match_set = (redacted_str, metadata_out)
   return match_set
+
+
+def run_pii_batch(exs, lang):
+    """
+    Runs the given set of regexes on the data "lines" and pulls out the
+    tagged items.
+    The lines structure stores the language type(s). This can be used for
+    language-specific regexes, although we're dropping that for now and using
+    only "default"/non-language-specific regexes.
+    """
+    regex_metadata = []
+    old_text = []
+    new_text = []
+    modified = []
+    for text in exs["text"]:
+        # What is this for...?
+        text = text.encode().decode()
+        matches = detect_pii(text, lang, high_risk_tags)
+        if len(matches) > 0:
+            # !!! REDACTION HAPPENS HERE !!!
+            redacted_str, metadata = redact_pii(text, matches)
+            regex_metadata.append(repr(metadata))
+            old_text.append(text)
+            new_text.append(redacted_str)
+            modified.append(True)
+        else:
+            regex_metadata.append("")
+            old_text.append(text)
+            new_text.append(text)
+            modified.append(False)
+    result = {
+        "regex_metadata": regex_metadata,
+        "old_text": old_text,
+        "text": new_text,
+        "modified": modified
+    }
+    return result
