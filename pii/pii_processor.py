@@ -39,7 +39,7 @@ def get_check_ds(ds, args):
         )
     else:
         ds_checks = ds
-    idx_samples = random.sample(range(len(ds)), min(len(ds), args.check_sampling_size))
+    idx_samples = random.sample(range(len(ds_checks)), min(len(ds_checks), args.check_sampling_size))
     ds_checks = ds_checks.select(idx_samples)
 
     return ds_checks
