@@ -50,7 +50,7 @@ Languages assumed are ["ar", "as", "bn", "ca", "en", "es", "eu", "fr", "gu", "hi
 
 #@title Define highest risk PII. TODO: License plate
 # NUMBER removed last minute due to false positives. See https://huggingface.slack.com/archives/C0307KE5UNT/p1647011702716159
-high_risk_tags = {'ID', 'KEY', 'EMAIL', 'USER', 'IP_ADDRESS'} # , 'NUMBER'}
+high_risk_tags = {'KEY', 'EMAIL', 'USER', 'IP_ADDRESS'} # , 'NUMBER', "ID"}
 
 """# Regexes"""
 
