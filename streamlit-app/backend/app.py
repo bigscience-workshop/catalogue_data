@@ -7,7 +7,7 @@ import pandas as pd
 import streamlit as st
 from datasets import load_from_disk
 
-DATASET_DIR_PATH_BEFORE_CLEAN_SELECT = os.getenv("DATASET_DIR_PATH_BEFORE_CLEAN_SELECT") #  "/home/lucile/data"
+DATASET_DIR_PATH_BEFORE_CLEAN_SELECT = os.getenv("DATASET_DIR_PATH_BEFORE_CLEAN_SELECT")
 OPERATION_TYPES = [
     "Applied filter",
     "Applied deduplication function",
