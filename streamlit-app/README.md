@@ -23,7 +23,7 @@ streamlit run app.py --server.port 8081 --server.fileWatcherType none
 If you have launched the app on a remote host you will need to create a tunnel to connect. For example for the Bigscience project we used something like:
 
 ```bash
-gcloud compute <VM-NAME> --project=<PROJECT-NAME> -- -L 8081:localhost:8081
+gcloud compute ssh <VM-NAME> --project=<PROJECT-NAME> -- -L 8081:localhost:8081
 ```
 
 Then you can access it on your browser. On the previous example `localhost:8081`
