@@ -4,7 +4,7 @@ This a a PoC developed on the road to have a look at the operations done by the 
 
 ## Launch the app
 
-You will first need to update the `backend/.streamlit/config.toml` file. The `DATASET_DIR_PATH_BEFORE_CLEAN_SELECT` variable must indicate the path to the folder containing the artifacts created by the `checks-save-path`` argument of clean.py. 
+You will first need to update the `backend/.streamlit/config.toml` file. The `DATASET_DIR_PATH_BEFORE_CLEAN_SELECT` variable must indicate the path to the folder containing the artifacts created by the `checks-save-path` argument of clean.py. 
 
 For example you should put `DATASET_DIR_PATH_BEFORE_CLEAN_SELECT = "/home/user/data"` for:
 ```bash
@@ -23,7 +23,7 @@ streamlit run app.py --server.port 8081 --server.fileWatcherType none
 If you have launched the app on a remote host you will need to create a tunnel to connect. For example for the Bigscience project we used something like:
 
 ```bash
-gcloud compute <VM-NAME> --project=<PROJECT-NAME> -- -L 8081:localhost:8081
+gcloud compute ssh <VM-NAME> --project=<PROJECT-NAME> -- -L 8081:localhost:8081
 ```
 
 Then you can access it on your browser. On the previous example `localhost:8081`
